@@ -1,0 +1,51 @@
+# DECISIONS.md
+
+Log of the decisions that needed Moeid's approval. The IDs are the same D-numbers used in `CLAUDE.md` and `ARCHITECTURE.md`. A new decision gets the next free number and is added here in the same patch that records it.
+
+Last updated: 2026-10-20
+
+## Approved
+
+All of these were approved on 2026-10-20, in the planning conversation, unless a different date is given.
+
+| ID | Decision | Notes |
+|---|---|---|
+| D1 | Django + PostgreSQL, server-rendered pages, Tailwind CSS in RTL, a little vanilla JS or HTMX. No single-page app. | Moeid knows Python best and will maintain the site alone. At 50 to 200 products nothing heavier is needed. |
+| D2 | Django admin for occasional edits, plus one custom mobile stock page for Habibollah (search plus one available/unavailable toggle per product). | Habibollah is not technical and works from his phone. |
+| D5 | One shared number for the call and message buttons: 09112747628 (international form 989112747628). | Stored once in site settings. Telegram and Rubika links usually need a username, see the pending list below. |
+| D6 | Manufacturer, importer and country of origin are plain text fields on each product. | Simplest to enter. Drawback: the same company can be typed in slightly different ways. |
+| D7 | One set of production and expiry dates per product. If no dates are entered, no date line is shown and the product is not hidden. With two batches in stock, enter the earlier expiry. | The batch rule still needs the client's confirmation. |
+| D8 | Crop/pest tags will exist for products. Until they are filled in, search works on type filter plus free text. | Moeid will ask his father to prepare them. |
+| D9 | Farm-visit fee: a show/hide switch and a free-text field in site settings, hidden by default. | What to show is still open. Moeid will ask his father. |
+| D10 | Map: a static location image plus "open in maps" links (Google Maps and one Iranian map app). No embed. | Embeds can load slowly or fail from Iran. |
+| D11 | Articles: model, admin and templates are built, the section stays hidden from navigation until the first article is published. | |
+| D12 | Spam protection: honeypot, per-IP rate limiting, phone and length validation. No Google reCAPTCHA. | A self-hosted challenge only if spam appears. |
+| D13 | Dates are stored as Gregorian and displayed in the Jalali calendar. | |
+| D14 | Text logo placeholder during development, Moeid's SVG before launch. | |
+| D15 | All four consultation options: call button, ask-an-expert form, farm-visit form, message buttons. | |
+| D16 | Count taps on call and message buttons to measure the goal (more sales). | The mechanism is still open. |
+| D17 | Daily backups of database and media, stored somewhere other than the web server. One restore tested before launch. | |
+| D18 | Django 5.2 LTS on Python 3.13. Move to newer versions when they arrive. | Django 5.2 is supported until April 2028. Python 3.15 was considered and left for later: Django 5.2 does not support it, and the first Django version that does (6.1) is not an LTS. Availability of ready-made builds of Pillow and the PostgreSQL driver for 3.15 was not checked. The likely upgrade is the next Django LTS (6.2, due April 2027) together with a newer Python, once the packages we use support it. |
+| D19 | Dependency tooling: plain pip with `requirements/base.txt`, `dev.txt` and `prod.txt`. | Nothing extra to learn, works the same inside Docker later. |
+| D20 | Persian text is written directly in templates and model labels. No gettext. | The site is Persian only. Django's admin already ships a Persian translation. |
+| D21 | Local workflow: Django runs on Moeid's machine in a virtualenv, only PostgreSQL runs in Docker Compose. The full container setup (Nginx, Gunicorn) waits for the deployment phase. | |
+| D22 | The Tailwind build tooling is decided at the start of phase 2, not phase 1. | Nothing in phase 1 uses it. |
+| D23 | Habibollah types production and expiry dates in Jalali in the admin. They are stored as Gregorian. The conversion is written in the project and tested, not taken from a package. | Django's admin date field is Gregorian, which would confuse a Persian-speaking, non-technical user. |
+
+## Proposed, waiting for approval
+
+| ID | Decision | Notes |
+|---|---|---|
+| D24 | Line endings: the repository is LF-only, enforced with `.gitattributes`. | Added in phase 1, task 1. Moeid's working copy had Windows (CRLF) line endings, while patches are generated with LF. Mixing the two can make a patch fail to apply. Remove `.gitattributes` if this is not wanted. |
+
+## Open (parked or waiting for information)
+
+| ID | Question | State |
+|---|---|---|
+| D3 | Which channel notifies the store of new requests: SMS, Telegram or WhatsApp. | Parked by Moeid. The notification adapter stays channel-neutral. |
+| D4 | Hosting and domain. | Parked by Moeid. Only blocks deployment. A .ir domain needs registration details of an Iranian owner, check before choosing. |
+| D7 | Which batch's dates to show when two batches are in stock. | Default above, client to confirm. |
+| D9 | Whether and how to show the farm-visit fee. | Moeid will ask his father. |
+| D16 | How the taps are counted: own database or a self-hosted analytics tool. | Decide when phase 3 starts. |
+| Usernames | Telegram and Rubika usernames for the store. | The store has none. Moeid will create the accounts. Verify the Rubika link format before building. |
+| Tags | When the product list and crop/pest tags will be ready. | Moeid will ask his father. |

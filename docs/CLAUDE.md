@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-20 (documentation phase, no application code yet)
+Last updated: 2026-10-20 (phase 1, task 1: repo basics. No application code yet)
 
 Status tags used in this file and in the other docs:
 
@@ -42,19 +42,39 @@ Habibollah is not technical. Anything he has to do in the admin must work on a p
 - **Approvals.** Any decision that needs Moeid's approval gets a D-number and is flagged in the reply. Once code starts, approved decisions are also recorded in `docs/DECISIONS.md`.
 - **Language.** Moeid writes in English and Persian. Documentation is in English. Everything customers see is Persian. The guide for Habibollah is in Persian.
 - **Style.** Moeid prefers natural-sounding writing over anything that reads like generated text.
+- **Where things live.** All documentation is in `docs/`, including this file. The repository is LF-only (`.gitattributes`, D24), and patches are generated with LF line endings. Moeid's working copy may show CRLF on Windows, so each delivery says how to check it applies (`git apply --check`).
 - **Keep this file honest.** When something changes, move it between the CONFIRMED, PLANNED and OPEN lists. Do not leave stale statements.
 
 ## 4. Progress
 
 | Phase | Content | Status |
 |---|---|---|
-| 0 | Documentation: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md` | Delivered as a patch, waiting for Moeid to merge |
-| 1 | Project skeleton, settings, data model, Django admin | Not started |
+| 0 | Documentation: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md` | Merged into `main` (now under `docs/`) |
+| 1 | Project skeleton, settings, data model, Django admin | In progress, see the task list below |
 | 2 | Catalog: product list, product page, filters, search | Not started |
 | 3 | Consultation flows, contact buttons, notifications | Not started |
 | 4 | Staff stock page, remaining pages, design polish | Not started |
 | 5 | Tests, performance pass, staging trial with Habibollah | Not started |
 | 6 | Deployment, backups, handover guide | Not started (blocked by D4, hosting) |
+
+### Phase 1 tasks (approved)
+
+One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJECT_STRUCTURE.md`.
+
+| # | Branch | Content | Status |
+|---|---|---|---|
+| 1 | `phase1/01-repo-basics` | `.gitignore`, `.gitattributes`, README stub, CHANGELOG, `docs/DECISIONS.md`, docs updated for D18 to D24 | Delivered as a patch, waiting for Moeid to merge |
+| 2 | `phase1/02-django-skeleton` | `manage.py`, `config/` with split settings, `.env.example`, `requirements/`, empty `apps/` package | Not started |
+| 3 | `phase1/03-dev-database` | `compose.yml` with PostgreSQL for local development, README run steps | Not started |
+| 4 | `phase1/04-persian-text` | pytest-django setup, `apps/core/text.py` (Persian normalization) with tests | Not started |
+| 5 | `phase1/05-site-settings` | `SiteSettings` model, admin, context processor | Not started |
+| 6 | `phase1/06-catalog-reference` | `ProductType`, `Crop`, `Pest`, admin, tests | Not started |
+| 7 | `phase1/07-product-model` | `Product` model, admin, tests | Not started |
+| 8 | `phase1/08-jalali-dates` | Jalali entry and display of production and expiry dates in the admin (D23), with tests | Not started |
+| 9 | `phase1/09-image-uploads` | Upload validation, resize, WebP conversion for the product photo | Not started |
+| 10 | `phase1/10-pages-models` | `Expert` and `FaqItem` models, admin | Not started |
+| 11 | `phase1/11-consultations-model` | `ConsultationRequest` model, admin inbox with a "mark handled" action | Not started |
+| 12 | `phase1/12-articles-and-seed-data` | `Article` model, admin, and a management command that loads clearly fake sample data | Not started |
 
 ## 5. Confirmed requirements
 
@@ -96,6 +116,12 @@ IDs come from the approved technical plan.
 | D15 | All four consultation options: call button, ask-an-expert form, farm-visit form, message buttons. |
 | D16 | Measure the site's goal by counting taps on call and message buttons. Mechanism is open, see section 8. |
 | D17 | Daily backups of database and media, stored somewhere other than the web server. Restore tested once before launch. |
+| D18 | Django 5.2 LTS on Python 3.13. Move to newer versions (for example the next Django LTS and a newer Python) when they are ready. |
+| D19 | Dependency tooling: plain pip with `requirements/base.txt`, `dev.txt` and `prod.txt`. |
+| D20 | Persian text is written directly in templates and model labels. No gettext. |
+| D21 | Local workflow: Django in a virtualenv on Moeid's machine, only PostgreSQL in Docker Compose. Full containers wait for deployment. |
+| D22 | The Tailwind build tooling is decided at the start of phase 2. |
+| D23 | Production and expiry dates are typed in Jalali in the admin and stored as Gregorian. The conversion is written and tested in the project. |
 
 Other agreed technical points: self-hosted Vazirmatn font and no third-party scripts, images converted to WebP on upload, Docker Compose with Nginx, Gunicorn and PostgreSQL, a staging copy for Habibollah's trial, notification adapter with one implementation per channel.
 
@@ -121,7 +147,8 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits and ZWNJ so products a
 | Logo | When Moeid's logo SVG will be ready. | Placeholder until then (D14). |
 | Map | The store's exact location, and which Iranian map app to link. | Location comes from the client. |
 | FAQ | Customers' common pre-purchase questions. | Optional. Without them there is no FAQ page. |
-| Setup | Python and Django versions, dependency tooling, Tailwind build tooling, and whether Persian strings live in templates or go through Django's translation system. | Small implementation choices. Settle at the start of phase 1 and record them in `docs/DECISIONS.md`. |
+| D22 | Which tool builds the Tailwind CSS. | Decide at the start of phase 2. |
+| D24 | Line endings: LF-only repository, enforced with `.gitattributes`. | Proposed in phase 1, task 1. Moeid's working copy had CRLF. Counts as approved once the patch is merged, unless he asks to drop it. |
 
 ## 9. Content still to collect
 
@@ -133,13 +160,13 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits and ZWNJ so products a
 
 ## 10. Next steps
 
-1. Moeid applies the documentation patch on its own branch, commits it and merges to `main`.
-2. Propose the phase 1 task breakdown (skeleton, settings, models, admin) for Moeid's approval, with one patch per task.
-3. Settle the small setup questions in section 8 at the start of phase 1.
-4. Moeid talks to his father about the fee, the usernames, and the product list and tags.
+1. Moeid applies the task 1 patch on its own branch, commits it and merges to `main`.
+2. Task 2: Django skeleton and settings (see the phase 1 task list in section 4).
+3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 
 ## 11. Where the detail lives
 
-- `ARCHITECTURE.md`: stack, components, data model, key flows, security, deployment.
-- `PROJECT_STRUCTURE.md`: what every planned file and directory is for.
-- The five requirements documents from rounds 1 to 3 live outside this repository, with Moeid.
+- `docs/ARCHITECTURE.md`: stack, components, data model, key flows, security, deployment.
+- `docs/PROJECT_STRUCTURE.md`: what every planned file and directory is for.
+- `docs/DECISIONS.md`: the log of approved decisions, with notes and open items.
+- `docs/AGRICULTURAL_PHARMACY_REQUIREMENTS.md` (round 1) and `docs/REQUIREMENTS_ROUND_3_UPDATE.md` (round 3) are in the repository. The round 2 update and the follow-up question files live outside it, with Moeid.
