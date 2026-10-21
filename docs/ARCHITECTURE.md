@@ -40,10 +40,11 @@ Who uses it:
 | Images | Resized and converted to WebP on upload | CONFIRMED |
 | Web server | Nginx in front of Gunicorn | PLANNED |
 | Packaging | Docker Compose (Nginx, Django/Gunicorn, PostgreSQL) | PLANNED |
-| Python and Django versions | Not chosen | OPEN, settle in phase 1 |
-| Dependency tooling | Not chosen | OPEN, settle in phase 1 |
-| Tailwind build tooling | Not chosen | OPEN, settle in phase 1 |
-| Persian strings: inline in templates or Django translation | Not chosen | OPEN, settle in phase 1 |
+| Python and Django versions | Python 3.13, Django 5.2 LTS. Move to newer versions when they are ready | CONFIRMED (D18) |
+| Dependency tooling | pip with `requirements/` files | CONFIRMED (D19) |
+| Local development | Django in a virtualenv, PostgreSQL in Docker Compose | CONFIRMED (D21) |
+| Persian strings | Written directly in templates and model labels, no gettext | CONFIRMED (D20) |
+| Tailwind build tooling | Not chosen | OPEN (D22), settle at the start of phase 2 |
 | Hosting and domain | Not chosen | OPEN (D4), only blocks deployment |
 
 Why this stack: Moeid knows Python best and will maintain the site alone. Django's admin, forms, migrations and auth cover most of what is needed. With 50 to 200 products there is no reason for anything heavier, and server-rendered pages stay light on slow mobile connections and work well for Persian search engines.
@@ -162,7 +163,7 @@ Not in the model, on purpose: price, quantity, customer accounts, orders, batch 
 
 **Habibollah handles a request.** Opens the inbox, reads the request, calls the customer, marks it handled.
 
-**A new shipment arrives.** Habibollah edits the product's production and expiry dates in the admin (D7).
+**A new shipment arrives.** Habibollah edits the product's production and expiry dates in the admin (D7). He types them in Jalali and they are stored as Gregorian (D13, D23).
 
 ## 7. Frontend and design
 
@@ -257,6 +258,13 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 | D15 | All four consultation options | CONFIRMED |
 | D16 | Count taps on call and message buttons | CONFIRMED; mechanism OPEN |
 | D17 | Daily off-server backups | CONFIRMED |
+| D18 | Django 5.2 LTS on Python 3.13, upgrade later | CONFIRMED |
+| D19 | pip with `requirements/` files | CONFIRMED |
+| D20 | Persian written directly in templates, no gettext | CONFIRMED |
+| D21 | Local workflow: virtualenv plus PostgreSQL in Docker Compose | CONFIRMED |
+| D22 | Tailwind build tooling | OPEN, decide at the start of phase 2 |
+| D23 | Dates typed in Jalali in the admin, stored as Gregorian | CONFIRMED |
+| D24 | LF-only repository (`.gitattributes`) | PROPOSED in phase 1, task 1 |
 
 ## 15. Out of scope and future ideas
 

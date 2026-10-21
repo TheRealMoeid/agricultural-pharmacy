@@ -1,0 +1,9 @@
+# Same line endings on every machine, so patches always apply cleanly.
+* text=auto eol=lf
+
+# Files Git should never touch.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.woff2 binary

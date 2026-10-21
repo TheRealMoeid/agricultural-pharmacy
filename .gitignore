@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+
+# Tests and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+playwright-report/
+test-results/
+
+# Node (only if the Tailwind tooling ends up needing it, see D22)
+node_modules/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Patch files waiting to be applied
+*.patch

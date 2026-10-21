@@ -4,7 +4,7 @@ What each file and directory in the repository is for.
 
 Last updated: 2026-10-20
 
-**Current state:** the repository contains only the three documentation files at the root (`CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`). Everything else below is the **planned** layout. Nothing else has been created yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md` and `CHANGELOG.md` at the root, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. Nothing else has been created yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -14,12 +14,10 @@ Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), *
 
 ```
 pharmacy-site/
-├─ CLAUDE.md                     EXISTS
-├─ ARCHITECTURE.md               EXISTS
-├─ PROJECT_STRUCTURE.md          EXISTS
-├─ README.md                     PLANNED
-├─ CHANGELOG.md                  PLANNED
-├─ .gitignore                    PLANNED
+├─ README.md                     EXISTS
+├─ CHANGELOG.md                  EXISTS
+├─ .gitignore                    EXISTS
+├─ .gitattributes                EXISTS
 ├─ .env.example                  PLANNED
 ├─ manage.py                     PLANNED
 ├─ requirements/                 PLANNED (tooling OPEN)
@@ -37,19 +35,17 @@ pharmacy-site/
 ├─ tests/                        PLANNED
 ├─ docker/                       PLANNED
 ├─ scripts/                      PLANNED
-└─ docs/                         PLANNED
+└─ docs/                         EXISTS (details in section 12)
 ```
 
 ## 2. Root files
 
 | Path | Purpose |
 |---|---|
-| `CLAUDE.md` | Current state, decisions, constraints, open questions and next steps. The first thing to read in any new conversation. Updated with every task. |
-| `ARCHITECTURE.md` | Stack, components, data model, flows, security, deployment, and which parts are confirmed, planned or open. |
-| `PROJECT_STRUCTURE.md` | This file. |
-| `README.md` | How to set up the project locally, run it, run the tests. Short. |
+| `README.md` | What the project is, where the documentation is. Later: how to set up the project locally, run it and run the tests. Short. |
 | `CHANGELOG.md` | What changed in each merged task. |
-| `.gitignore` | Keeps out virtual environments, `.env`, `media/`, built static output, caches, and local databases. |
+| `.gitignore` | Keeps out virtual environments, `.env`, `media/`, built static output, caches, local databases, and `*.patch` files waiting to be applied. |
+| `.gitattributes` | Forces LF line endings on every machine so patches apply cleanly (D24, proposed). |
 | `.env.example` | The list of environment variables with safe example values. The real `.env` is never committed. |
 | `manage.py` | Django's command-line entry point. |
 
@@ -179,13 +175,18 @@ Written alongside the code, not before it.
 
 | Path | Purpose |
 |---|---|
-| `docs/DECISIONS.md` | Log of approved decisions (D-numbers) and their outcome. Starts in phase 1. |
+| `docs/CLAUDE.md` | EXISTS. Current state, decisions, constraints, open questions and next steps. The first thing to read in any new conversation. Updated with every task. |
+| `docs/ARCHITECTURE.md` | EXISTS. Stack, components, data model, flows, security, deployment, and which parts are confirmed, planned or open. |
+| `docs/PROJECT_STRUCTURE.md` | EXISTS. This file. |
+| `docs/DECISIONS.md` | EXISTS. Log of approved decisions (D-numbers) and their outcome. |
+| `docs/AGRICULTURAL_PHARMACY_REQUIREMENTS.md` | EXISTS. Round 1 requirements: the questions and the father's answers, matched. |
+| `docs/REQUIREMENTS_ROUND_3_UPDATE.md` | EXISTS. Round 3 requirements. The newest round wins where they differ. |
 | `docs/DATA_MODEL.md` | Final field-by-field model, once the models exist. |
 | `docs/DEPLOYMENT.md` | Server setup, deploy, rollback, backup and restore. |
 | `docs/ADMIN_GUIDE_FA.md` | Persian guide with screenshots for Habibollah: stock toggle, adding a product, handling requests. |
 | `docs/CONTENT_GUIDE.md` | Field-by-field rules for entering products, and photo tips. |
 
-`ARCHITECTURE.md`, `PROJECT_STRUCTURE.md` and `CLAUDE.md` stay at the repository root rather than in `docs/`, so they are the first things anyone sees.
+The three project documents (`CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`) were first delivered at the repository root. Moeid moved them into `docs/`, and that is where they live now.
 
 ## 13. Changes from the approved plan
 
@@ -194,7 +195,7 @@ Small refinements made while writing these documents. None changes the agreed sc
 - The `requests` app is named `consultations`, so it is not confused with the well-known `requests` HTTP library.
 - The `staff` app is named `staff_panel`, so it is not confused with Django's `is_staff` flag.
 - A `core` app was added to hold site settings, Persian text helpers, the Jalali filter and button counting. In the plan these had no home.
-- `ARCHITECTURE.md` lives at the root instead of `docs/`.
+- `CLAUDE.md`, `ARCHITECTURE.md` and `PROJECT_STRUCTURE.md` live in `docs/`, together with `DECISIONS.md` and the requirements documents.
 - The `locale/` folder from the plan is left out until we decide whether Persian strings sit in templates or go through Django's translation system.
 
 ## 14. Rules for keeping this file accurate
