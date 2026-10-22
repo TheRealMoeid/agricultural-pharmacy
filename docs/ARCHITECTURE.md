@@ -75,13 +75,20 @@ It is one Django project (a monolith) split into small apps. Everything runs in 
 
 ## 4. Components and what each one is responsible for
 
-All are **PLANNED**. App names refine the approved structure slightly (see PROJECT_STRUCTURE.md).
+All are **PLANNED** unless a section says part of it exists. App names refine the approved structure slightly (see PROJECT_STRUCTURE.md).
 
 ### `core`
-Things used everywhere.
-- `SiteSettings`: a single row holding the shared phone number, the messaging links, the notification channel, address, hours, map links, and the farm-visit fee text with its show/hide switch.
+Things used everywhere. **Built so far (phase 1, tasks 4 to 5):** the text helpers, the phone helpers, `SiteSettings` with its admin, and the context processor. The rest is PLANNED.
+- `SiteSettings`: a single row. It starts with the details the client confirmed (store name, address, hours, the shared number) and holds:
+  - the shared phone number (D5), stored as 09XXXXXXXXX whatever way it was typed. The `tel:` link, the WhatsApp link (`wa.me`) and the display form are derived from it;
+  - the Telegram username (the link is built from it) and the Rubika link, pasted as Rubika gives it, because its link format has not been verified. A button is shown only while its field is filled in;
+  - the Google Maps link, and the name and link of one Iranian map app (D10). The static map image field comes with image handling;
+  - the notification channel (D3, default "none", meaning the staff inbox only);
+  - the farm-visit fee text with its show/hide switch, off by default (D9).
+- The admin shows the settings as one page: the list view redirects straight to the single row, and it cannot be deleted or duplicated.
 - A context processor that makes those settings available in every template, so the sticky call bar always has the number.
-- Persian text normalization helpers, used by search and by form validation.
+- Persian text normalization helpers (`text.py`), used by search and by form validation.
+- Iranian mobile number helpers (`phone.py`): accept any common way of typing a number, give back one canonical form, and derive the international and display forms.
 - Jalali date display filter (D13).
 - Click counting for call and message buttons (D16). Mechanism OPEN.
 

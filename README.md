@@ -25,7 +25,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-The admin is then at http://localhost:8000/admin/ (the path comes from `DJANGO_ADMIN_URL`).
+The admin is then at http://localhost:8000/admin/ (the path comes from `DJANGO_ADMIN_URL`). The first thing in it is "تنظیمات سایت" (site settings), already filled in with the store's details.
 
 No `.env` file is needed for local work: the defaults in `config/settings/dev.py` match `compose.yml`. Copy `.env.example` to `.env` only if you want to change something.
 
@@ -48,7 +48,7 @@ With the virtualenv active, run this from the repository root:
 pytest
 ```
 
-The Persian text tests need no database. Tests that touch the database (from task 5 on) need `docker compose up -d db` to be running, and pytest-django creates and removes its own test database, so your development data is not touched.
+The text and phone tests need no database. The rest (site settings, admin) need `docker compose up -d db` to be running. pytest-django creates and removes its own test database, so your development data is not touched.
 
 ## Documentation
 
