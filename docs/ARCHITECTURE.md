@@ -31,7 +31,7 @@ Who uses it:
 | Layer | Choice | Status |
 |---|---|---|
 | Language and framework | Python, Django | CONFIRMED (D1) |
-| Database | PostgreSQL. Version 17 in local development | CONFIRMED (D1). The version is PROPOSED (D26) |
+| Database | PostgreSQL 17, in development and in production | CONFIRMED (D1, D26). The production version depends on hosting (D4) |
 | Rendering | Server-rendered Django templates, no single-page app | CONFIRMED (D1) |
 | Styling | Tailwind CSS, RTL, mobile first | CONFIRMED (D1) |
 | Interactivity | Small amount of vanilla JS or HTMX | CONFIRMED (D1) |
@@ -43,6 +43,7 @@ Who uses it:
 | Python and Django versions | Python 3.13, Django 5.2 LTS. Move to newer versions when they are ready | CONFIRMED (D18) |
 | Dependency tooling | pip with `requirements/` files | CONFIRMED (D19) |
 | Local development | Django in a virtualenv, PostgreSQL in Docker Compose | CONFIRMED (D21) |
+| Testing | pytest with pytest-django. Browser smoke tests with Playwright come later | CONFIRMED (pytest is in place) |
 | Settings and secrets | Environment variables read with django-environ, optional local `.env` file | CONFIRMED (D25) |
 | Persian strings | Written directly in templates and model labels, no gettext | CONFIRMED (D20) |
 | Tailwind build tooling | Not chosen | OPEN (D22), settle at the start of phase 2 |
@@ -182,7 +183,13 @@ Not in the model, on purpose: price, quantity, customer accounts, orders, batch 
 
 **[PLANNED]** Postgres is enough at this size. The detail that matters is Persian text.
 
-- Normalize both what is stored and what is typed: Arabic ی/ي and ک/ك to the Persian forms, Persian and Arabic digits to one form, and ZWNJ and extra whitespace handled.
+- Normalize both what is stored and what is typed, with `apps/core/text.py` (built and tested in phase 1, task 4). The comparison key is made by `normalize_for_search()`:
+  - Arabic ي/ى and ك become the Persian ی and ک. Kashida and vowel marks are removed.
+  - Persian and Arabic-Indic digits become ASCII digits.
+  - ZWNJ is removed, so "قارچ‌کش" and "قارچکش" give the same key. A real space is kept, so the search code must split the query into words and look for each word on its own. This is how "قارچ کش" still finds "قارچکش".
+  - Latin letters are case-folded, so "Mancozeb" matches "mancozeb".
+  - أ, إ and ة are deliberately not folded into ا and ه, because that can change a word's meaning.
+- The key is only for comparing. Text shown on the site is never replaced by it. Whether the key is stored in a column or computed per query is decided when the product model is written. **[PLANNED]**
 - Match against trade name, generic name, usage text, and the names and alternate spellings of crops and pests.
 - Until crop/pest tags exist for the products, search works on names and usage text only (D8).
 - This is the most important thing to test (see section 11).
@@ -267,7 +274,7 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 | D23 | Dates typed in Jalali in the admin, stored as Gregorian | CONFIRMED |
 | D24 | LF-only repository (`.gitattributes`) | CONFIRMED |
 | D25 | Settings and secrets from environment variables via django-environ | CONFIRMED |
-| D26 | PostgreSQL 17 | PROPOSED in phase 1, task 3 |
+| D26 | PostgreSQL 17 in development and production | CONFIRMED |
 
 ## 15. Out of scope and future ideas
 

@@ -40,6 +40,16 @@ Useful commands:
 
 If port 5432 is already used on your machine (for example by a local PostgreSQL), change the first number in the `ports` line of `compose.yml` to another port, such as 5433, and set `DATABASE_URL` in `.env` with the same port.
 
+## Running the tests
+
+With the virtualenv active, run this from the repository root:
+
+```
+pytest
+```
+
+The Persian text tests need no database. Tests that touch the database (from task 5 on) need `docker compose up -d db` to be running, and pytest-django creates and removes its own test database, so your development data is not touched.
+
 ## Documentation
 
 Everything lives in `docs/`. Start with `docs/CLAUDE.md`, which holds the current state, decisions and next steps.
