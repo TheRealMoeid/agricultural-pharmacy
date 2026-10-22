@@ -4,7 +4,7 @@ What each file and directory in the repository is for.
 
 Last updated: 2026-10-22
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py` and `compose.yml` at the root, the Django skeleton (`config/`, `requirements/` and an empty `apps/` package), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No app, model, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/` and an `apps/` package that so far holds only `core/text.py` and its tests), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No Django app, model, view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -21,10 +21,11 @@ pharmacy-site/
 ├─ .env.example                  EXISTS
 ├─ manage.py                     EXISTS
 ├─ compose.yml                   EXISTS
+├─ pytest.ini                    EXISTS
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
-├─ apps/                         EXISTS (empty package; the apps inside are PLANNED)
-│  ├─ core/                      PLANNED
+├─ apps/                         EXISTS (the apps inside are PLANNED, except core/text.py)
+│  ├─ core/                      EXISTS (text.py and its tests; the rest PLANNED)
 │  ├─ catalog/                   PLANNED
 │  ├─ consultations/             PLANNED
 │  ├─ pages/                     PLANNED
@@ -48,6 +49,7 @@ pharmacy-site/
 | `.gitignore` | Keeps out virtual environments, `.env`, `media/`, built static output, caches, local databases, and `*.patch` files waiting to be applied. |
 | `.gitattributes` | Forces LF line endings on every machine so patches apply cleanly (D24, proposed). |
 | `.env.example` | The list of environment variables with safe example values. The real `.env` is never committed. |
+| `pytest.ini` | pytest configuration: uses the dev settings, looks for tests under `apps/`, and rejects unknown markers. |
 | `manage.py` | Django's command-line entry point. |
 
 ## 3. `requirements/`
@@ -57,7 +59,7 @@ Plain pip requirements files (D19).
 | Path | Purpose |
 |---|---|
 | `requirements/base.txt` | EXISTS. Needed everywhere: Django 5.2, django-environ, the PostgreSQL driver. Pillow is added with the first image field. |
-| `requirements/dev.txt` | EXISTS. Includes `base.txt`. Test tools are added in phase 1, task 4. |
+| `requirements/dev.txt` | EXISTS. Includes `base.txt` and adds pytest and pytest-django. |
 | `requirements/prod.txt` | PLANNED. Production extras such as Gunicorn, added with the deployment work (phase 6). |
 
 ## 4. `config/`
@@ -76,15 +78,16 @@ Project-level Django configuration. No business logic. All of it exists since ph
 
 ## 5. `apps/`
 
-Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned.
+Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except the text helper inside `core`.
 
 Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.py`, `apps.py`, `migrations/`, and `tests/`.
 
 ### `apps/core/`
-Shared things used by the whole site.
+Shared things used by the whole site. For now it is a plain Python package holding the text helper. Task 5 turns it into a Django app (`apps.py`, models, an entry in `INSTALLED_APPS`).
 - `models.py`: `SiteSettings` (single row) and, if D16 ends up as an own-database counter, `ClickEvent`.
 - `context_processors.py`: puts the site settings into every template so the call bar always has the number.
-- `text.py`: Persian text normalization (ی/ي, ک/ك, digits, ZWNJ, whitespace). Used by search and form validation.
+- `text.py`: EXISTS. Persian text normalization at three levels: `normalize_letters()` (yeh, kaf, kashida, vowel marks), `normalize_text()` (also whitespace and invisible characters) and `normalize_for_search()` (also ASCII digits, no ZWNJ, case-folded), plus `normalize_digits()`. Used by search and form validation.
+- `tests/test_text.py`: EXISTS. Unit tests for those helpers.
 - `templatetags/`: the Jalali date filter and small display helpers.
 - A small view that receives call and message button taps (OPEN, depends on D16).
 
@@ -150,7 +153,7 @@ Files uploaded through the admin: product photos, expert photos, article images.
 
 ## 9. `tests/`
 
-Most tests live next to their app in `apps/<app>/tests/`. This top-level folder is for tests that cross apps.
+Most tests live next to their app in `apps/<app>/tests/`. This top-level folder is for tests that cross apps. Run everything with `pytest` from the repository root. `pytest.ini` points it at `apps/` for now, and `tests/` is added to `testpaths` when it exists.
 
 | Path | Purpose |
 |---|---|

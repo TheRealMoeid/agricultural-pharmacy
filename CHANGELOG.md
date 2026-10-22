@@ -4,6 +4,12 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-22 — Phase 1, task 4: Persian text helper
+
+- Added pytest and pytest-django (`requirements/dev.txt`, `pytest.ini`).
+- Added `apps/core/text.py`: `normalize_letters`, `normalize_text`, `normalize_digits` and `normalize_for_search`, with 66 tests in `apps/core/tests/test_text.py`.
+- Recorded D26 (PostgreSQL 17 in development and production) as approved, and fixed the wording in `ARCHITECTURE.md` that made it sound development-only.
+
 ### 2026-10-22 — Phase 1, task 3: dev database
 
 - Added `compose.yml` with PostgreSQL 17 for local development (bound to localhost, with a health check and a named volume).
