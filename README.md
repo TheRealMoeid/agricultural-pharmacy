@@ -6,7 +6,7 @@ The site shows the store's products and experts and makes it easy to call or mes
 
 ## Status
 
-Planning. The documentation is in place and there is no application code yet. Setup and run instructions will be added when the project skeleton and the local database setup land (phase 1, tasks 2 and 3).
+Early development. The documentation and the Django skeleton are in place, but there are no models or pages yet. Setup and run instructions will be added with the local database setup (phase 1, task 3).
 
 ## Documentation
 

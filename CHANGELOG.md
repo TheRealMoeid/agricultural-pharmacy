@@ -4,6 +4,13 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-21 — Phase 1, task 2: Django skeleton
+
+- Added `manage.py`, `config/` (settings split into base, dev and prod, URLs, WSGI and ASGI entry points), an empty `apps/` package, `requirements/base.txt` and `dev.txt`, and `.env.example`.
+- Settings read from environment variables through django-environ (D25). Dev works with no `.env`; prod refuses to start without its required variables.
+- Persian language, Asia/Tehran time zone, configurable admin path.
+- Recorded D24 as approved and D25 as proposed. Updated the docs and the phase 1 task list.
+
 ### 2026-10-20 — Phase 1, task 1: repo basics
 
 - Added `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md` and `docs/DECISIONS.md`.
