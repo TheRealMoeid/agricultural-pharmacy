@@ -4,7 +4,7 @@ What each file and directory in the repository is for.
 
 Last updated: 2026-10-22
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/` and an `apps/` package that so far holds only `core/text.py` and its tests), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No Django app, model, view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -24,8 +24,8 @@ pharmacy-site/
 ├─ pytest.ini                    EXISTS
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
-├─ apps/                         EXISTS (the apps inside are PLANNED, except core/text.py)
-│  ├─ core/                      EXISTS (text.py and its tests; the rest PLANNED)
+├─ apps/                         EXISTS (only core exists so far; the other apps are PLANNED)
+│  ├─ core/                      EXISTS (helpers and SiteSettings; ClickEvent and the Jalali filter PLANNED)
 │  ├─ catalog/                   PLANNED
 │  ├─ consultations/             PLANNED
 │  ├─ pages/                     PLANNED
@@ -78,16 +78,20 @@ Project-level Django configuration. No business logic. All of it exists since ph
 
 ## 5. `apps/`
 
-Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except the text helper inside `core`.
+Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except `core`, which exists in part.
 
 Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.py`, `apps.py`, `migrations/`, and `tests/`.
 
 ### `apps/core/`
-Shared things used by the whole site. For now it is a plain Python package holding the text helper. Task 5 turns it into a Django app (`apps.py`, models, an entry in `INSTALLED_APPS`).
-- `models.py`: `SiteSettings` (single row) and, if D16 ends up as an own-database counter, `ClickEvent`.
-- `context_processors.py`: puts the site settings into every template so the call bar always has the number.
+Shared things used by the whole site. It is a Django app since task 5 and is listed in `INSTALLED_APPS`.
+- `apps.py`: EXISTS. App configuration.
+- `models.py`: `SiteSettings` EXISTS (single row, see `ARCHITECTURE.md`). `ClickEvent` is PLANNED, only if D16 ends up as an own-database counter.
+- `admin.py`: EXISTS. The settings page: one screen, no list, no add, no delete.
+- `migrations/`: EXISTS. `0001_initial.py` creates `SiteSettings`.
+- `context_processors.py`: EXISTS. Puts the settings into every template as `site`, so the call bar always has the number.
+- `phone.py`: EXISTS. Iranian mobile numbers: `normalize_iran_mobile()` (any typing to 09XXXXXXXXX), `to_international()`, `format_display()` and the form validator.
 - `text.py`: EXISTS. Persian text normalization at three levels: `normalize_letters()` (yeh, kaf, kashida, vowel marks), `normalize_text()` (also whitespace and invisible characters) and `normalize_for_search()` (also ASCII digits, no ZWNJ, alef forms folded into ا, case-folded), plus `normalize_digits()`. Used by search and form validation.
-- `tests/test_text.py`: EXISTS. Unit tests for those helpers.
+- `tests/`: EXISTS. `test_text.py` and `test_phone.py` (no database), `test_site_settings.py`, `test_admin.py` and `test_context_processor.py` (these use the database).
 - `templatetags/`: the Jalali date filter and small display helpers.
 - A small view that receives call and message button taps (OPEN, depends on D16).
 

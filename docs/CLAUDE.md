@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-22 (phase 1, task 4b: alef folding in the search key. No models or pages yet)
+Last updated: 2026-10-22 (phase 1, task 5: site settings. No catalog models or pages yet)
 
 Status tags used in this file and in the other docs:
 
@@ -67,8 +67,8 @@ One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJE
 | 2 | `phase1/02-django-skeleton` | `manage.py`, `config/` with split settings, `.env.example`, `requirements/`, empty `apps/` package | Merged into `main` |
 | 3 | `phase1/03-dev-database` | `compose.yml` with PostgreSQL for local development, README run steps | Merged into `main` |
 | 4 | `phase1/04-persian-text` | pytest-django setup, `apps/core/text.py` (Persian normalization) with tests | Merged into `main` |
-| 4b | `phase1/04b-search-alef-folding` | Small fix after task 4: the search key folds آ, أ, إ into ا, so "اب" finds "آب" | Delivered as a patch, waiting for Moeid to merge |
-| 5 | `phase1/05-site-settings` | `SiteSettings` model, admin, context processor | Not started |
+| 4b | `phase1/04b-search-alef-folding` | Small fix after task 4: the search key folds آ, أ, إ into ا, so "اب" finds "آب" | Merged into `main` |
+| 5 | `phase1/05-site-settings` | `SiteSettings` model, admin, context processor | Delivered as a patch, waiting for Moeid to merge |
 | 6 | `phase1/06-catalog-reference` | `ProductType`, `Crop`, `Pest`, admin, tests | Not started |
 | 7 | `phase1/07-product-model` | `Product` model, admin, tests | Not started |
 | 8 | `phase1/08-jalali-dates` | Jalali entry and display of production and expiry dates in the admin (D23), with tests | Not started |
@@ -144,12 +144,12 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 | D3 | Which channel notifies the store of new requests: SMS, Telegram or WhatsApp? | Moeid parked this. The adapter stays channel-neutral until he chooses. |
 | D4 | Hosting and domain. | Moeid parked this. Only blocks deployment. A .ir domain needs registration details of an Iranian owner; verify requirements before choosing. |
 | Fee | Whether to show the farm-visit fee, and what to show. | Moeid will ask his father in person. Default is hidden (D9). |
-| Usernames | Telegram and Rubika usernames for the store. | The father has none. Moeid will create the accounts. Links usually need a username, not a phone number. Verify the Rubika link format before building. |
+| Usernames | Telegram username and Rubika link for the store. | The father has none. Moeid will create the accounts. The settings page already has the two fields (Telegram username, Rubika link pasted as given by Rubika, so we don't guess its format), and each button stays hidden while its field is empty. |
 | Tags and list | When the product list and the crop/pest tags will be ready. | Moeid will ask his father to prepare them. Habibollah prepares the product information. |
 | D7 | Which batch's dates to show when two batches are in stock. | Default is the earlier expiry. Needs the client's confirmation. |
 | D16 | How to count button taps: a small counter in our own database, or a self-hosted analytics tool. | Decide when phase 3 starts. |
 | Logo | When Moeid's logo SVG will be ready. | Placeholder until then (D14). |
-| Map | The store's exact location, and which Iranian map app to link. | Location comes from the client. |
+| Map | The store's exact location, and which Iranian map app to link. | Location comes from the client. The settings page has fields for the Google Maps link, the Iranian app's name and link. The static map image field is added when image handling exists (task 9). |
 | FAQ | Customers' common pre-purchase questions. | Optional. Without them there is no FAQ page. |
 | D22 | Which tool builds the Tailwind CSS. | Decide at the start of phase 2. |
 
@@ -163,8 +163,8 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 
 ## 10. Next steps
 
-1. Moeid applies the task 4b patch on its own branch, commits it and merges to `main`.
-2. Task 5: `SiteSettings` model, its admin and the context processor. This is where `apps/core` becomes a real Django app (see the phase 1 task list in section 4).
+1. Moeid applies the task 5 patch on its own branch, commits it and merges to `main`.
+2. Task 6: `ProductType`, `Crop` and `Pest` models with admin and tests, the start of the `catalog` app (see the phase 1 task list in section 4).
 3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 
 ## 11. Where the detail lives

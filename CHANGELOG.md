@@ -4,6 +4,13 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-22 — Phase 1, task 5: site settings
+
+- `apps/core` is now a Django app. Added the single-row `SiteSettings` model (store details, shared number, Telegram username, Rubika link, map links, notification channel, farm-visit fee switch) with its first migration, a one-page admin, and the `site` context processor.
+- Added `apps/core/phone.py`: any common way of typing an Iranian mobile number becomes 09XXXXXXXXX, with the international (`989...`) and display (`0911 274 7628`) forms derived from it.
+- 48 new tests (120 in total). A test fails if a model change is missing its migration.
+- `pytest.ini` ignores one Django 6.0 upgrade notice about URL fields.
+
 ### 2026-10-22 — Phase 1, task 4b: alef folding in the search key
 
 - `normalize_for_search()` now folds آ, أ, إ and ٱ into plain ا, because people type ا for آ. Stored text is unchanged. New tests cover it.
