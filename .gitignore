@@ -33,3 +33,4 @@ Thumbs.db
 
 # Patch files waiting to be applied
 *.patch
+patch/
