@@ -63,10 +63,10 @@ class TestNormalizeLetters:
         marked = "\u0645\u064f\u0628\u064e\u0627\u0631\u0651\u064d\u0643"
         assert normalize_letters(marked) == "\u0645\u0628\u0627\u0631" + PERSIAN_KAF
 
-    def test_alef_with_madda_is_not_folded_into_plain_alef(self):
-        # "آب" (water) and "اب" are different words.
+    def test_alef_forms_keep_their_spelling_outside_the_search_key(self):
+        # Stored text must stay correctly spelled: "آب" (water) is not rewritten.
         assert normalize_letters("\u0622\u0628") == "\u0622\u0628"
-        assert normalize_letters("\u0622\u0628") != normalize_letters("\u0627\u0628")
+        assert normalize_text("\u0622\u0628") == "\u0622\u0628"
 
     def test_hamza_forms_are_left_alone(self):
         assert normalize_letters("\u0623\u062d\u0645\u062f") == "\u0623\u062d\u0645\u062f"
@@ -149,6 +149,21 @@ class TestNormalizeForSearch:
         arabic = ARABIC_KAF + "\u0634\u0627\u0648\u0631\u0632" + ARABIC_YEH
         persian = PERSIAN_KAF + "\u0634\u0627\u0648\u0631\u0632" + PERSIAN_YEH
         assert normalize_for_search(arabic) == normalize_for_search(persian)
+
+    def test_plain_alef_finds_alef_with_madda(self):
+        # People type "اب" for "آب" (water).
+        assert normalize_for_search("\u0627\u0628") == normalize_for_search("\u0622\u0628")
+
+    def test_pest_killer_typed_without_madda(self):
+        # آفت‌کش typed as "افت کش" and "افتکش" must be findable by the same key
+        # once the word-splitting search has done its part.
+        typed = "\u0627\u0641\u062a" + ZWNJ + "\u06a9\u0634"
+        stored = "\u0622\u0641\u062a" + ZWNJ + "\u06a9\u0634"
+        assert normalize_for_search(typed) == normalize_for_search(stored)
+
+    @pytest.mark.parametrize("alef", ["\u0622", "\u0623", "\u0625", "\u0671"])
+    def test_every_alef_form_becomes_plain_alef(self, alef):
+        assert normalize_for_search("a" + alef + "b") == "a\u0627b"
 
     def test_none_and_empty(self):
         assert normalize_for_search(None) == ""

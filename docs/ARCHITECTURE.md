@@ -188,8 +188,8 @@ Not in the model, on purpose: price, quantity, customer accounts, orders, batch 
   - Persian and Arabic-Indic digits become ASCII digits.
   - ZWNJ is removed, so "قارچ‌کش" and "قارچکش" give the same key. A real space is kept, so the search code must split the query into words and look for each word on its own. This is how "قارچ کش" still finds "قارچکش".
   - Latin letters are case-folded, so "Mancozeb" matches "mancozeb".
-  - أ, إ and ة are deliberately not folded into ا and ه, because that can change a word's meaning.
-- The key is only for comparing. Text shown on the site is never replaced by it. Whether the key is stored in a column or computed per query is decided when the product model is written. **[PLANNED]**
+  - آ, أ and إ become plain ا, because people often type ا for آ (the madda is awkward on phone keyboards), so "اب" finds "آب" (water). The price is that a few different words share a key, for example آفت (pest) and افت (drop), which is harmless in a catalog this small. ة is not folded into ه.
+- The key is only for comparing. Text shown or stored is never replaced by it, so "آب" stays "آب" on the page. Whether the key is stored in a column or computed per query is decided when the product model is written. **[PLANNED]**
 - Match against trade name, generic name, usage text, and the names and alternate spellings of crops and pests.
 - Until crop/pest tags exist for the products, search works on names and usage text only (D8).
 - This is the most important thing to test (see section 11).

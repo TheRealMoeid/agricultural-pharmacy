@@ -4,6 +4,10 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-22 — Phase 1, task 4b: alef folding in the search key
+
+- `normalize_for_search()` now folds آ, أ, إ and ٱ into plain ا, because people type ا for آ. Stored text is unchanged. New tests cover it.
+
 ### 2026-10-22 — Phase 1, task 4: Persian text helper
 
 - Added pytest and pytest-django (`requirements/dev.txt`, `pytest.ini`).

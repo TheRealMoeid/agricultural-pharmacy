@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-22 (phase 1, task 4: Persian text helper and pytest. No models or pages yet)
+Last updated: 2026-10-22 (phase 1, task 4b: alef folding in the search key. No models or pages yet)
 
 Status tags used in this file and in the other docs:
 
@@ -66,7 +66,8 @@ One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJE
 | 1 | `phase1/01-repo-basics` | `.gitignore`, `.gitattributes`, README stub, CHANGELOG, `docs/DECISIONS.md`, docs updated for D18 to D24 | Merged into `main` |
 | 2 | `phase1/02-django-skeleton` | `manage.py`, `config/` with split settings, `.env.example`, `requirements/`, empty `apps/` package | Merged into `main` |
 | 3 | `phase1/03-dev-database` | `compose.yml` with PostgreSQL for local development, README run steps | Merged into `main` |
-| 4 | `phase1/04-persian-text` | pytest-django setup, `apps/core/text.py` (Persian normalization) with tests | Delivered as a patch, waiting for Moeid to merge |
+| 4 | `phase1/04-persian-text` | pytest-django setup, `apps/core/text.py` (Persian normalization) with tests | Merged into `main` |
+| 4b | `phase1/04b-search-alef-folding` | Small fix after task 4: the search key folds آ, أ, إ into ا, so "اب" finds "آب" | Delivered as a patch, waiting for Moeid to merge |
 | 5 | `phase1/05-site-settings` | `SiteSettings` model, admin, context processor | Not started |
 | 6 | `phase1/06-catalog-reference` | `ProductType`, `Crop`, `Pest`, admin, tests | Not started |
 | 7 | `phase1/07-product-model` | `Product` model, admin, tests | Not started |
@@ -134,7 +135,7 @@ Public site: home, product list with type filter and search, product page with a
 
 Staff side: mobile stock page, product add and edit, crop/pest/type management, inbox of consultation requests with a "handled" mark.
 
-Search: Persian-aware. It normalizes ی/ي, ک/ك, digits and ZWNJ so products are found however someone types.
+Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of alef (آ/ا) so products are found however someone types. Stored text keeps its correct spelling.
 
 ## 8. Open questions
 
@@ -162,7 +163,7 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits and ZWNJ so products a
 
 ## 10. Next steps
 
-1. Moeid applies the task 4 patch on its own branch, commits it and merges to `main`.
+1. Moeid applies the task 4b patch on its own branch, commits it and merges to `main`.
 2. Task 5: `SiteSettings` model, its admin and the context processor. This is where `apps/core` becomes a real Django app (see the phase 1 task list in section 4).
 3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 

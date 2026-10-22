@@ -86,7 +86,7 @@ Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.
 Shared things used by the whole site. For now it is a plain Python package holding the text helper. Task 5 turns it into a Django app (`apps.py`, models, an entry in `INSTALLED_APPS`).
 - `models.py`: `SiteSettings` (single row) and, if D16 ends up as an own-database counter, `ClickEvent`.
 - `context_processors.py`: puts the site settings into every template so the call bar always has the number.
-- `text.py`: EXISTS. Persian text normalization at three levels: `normalize_letters()` (yeh, kaf, kashida, vowel marks), `normalize_text()` (also whitespace and invisible characters) and `normalize_for_search()` (also ASCII digits, no ZWNJ, case-folded), plus `normalize_digits()`. Used by search and form validation.
+- `text.py`: EXISTS. Persian text normalization at three levels: `normalize_letters()` (yeh, kaf, kashida, vowel marks), `normalize_text()` (also whitespace and invisible characters) and `normalize_for_search()` (also ASCII digits, no ZWNJ, alef forms folded into ا, case-folded), plus `normalize_digits()`. Used by search and form validation.
 - `tests/test_text.py`: EXISTS. Unit tests for those helpers.
 - `templatetags/`: the Jalali date filter and small display helpers.
 - A small view that receives call and message button taps (OPEN, depends on D16).
