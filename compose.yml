@@ -1,0 +1,29 @@
+# Local development stack: PostgreSQL only (D21).
+#
+# Django itself runs on your machine in a virtualenv. The credentials below are
+# for development only and match the default DATABASE_URL in
+# config/settings/dev.py. Nginx and Gunicorn arrive with the deployment work.
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pharmacy
+      POSTGRES_USER: pharmacy
+      POSTGRES_PASSWORD: pharmacy
+    ports:
+      # Bound to this machine only, so the weak dev password is not reachable
+      # from the network. If 5432 is taken, change the first number (for
+      # example 5433) and put the same port in DATABASE_URL.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pharmacy_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pharmacy -d pharmacy"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pharmacy_db:

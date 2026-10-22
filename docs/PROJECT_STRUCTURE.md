@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-21
+Last updated: 2026-10-22
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example` and `manage.py` at the root, the Django skeleton (`config/`, `requirements/` and an empty `apps/` package), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No app, model, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py` and `compose.yml` at the root, the Django skeleton (`config/`, `requirements/` and an empty `apps/` package), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No app, model, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -20,6 +20,7 @@ pharmacy-site/
 ├─ .gitattributes                EXISTS
 ├─ .env.example                  EXISTS
 ├─ manage.py                     EXISTS
+├─ compose.yml                   EXISTS
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
 ├─ apps/                         EXISTS (empty package; the apps inside are PLANNED)
@@ -161,7 +162,7 @@ Most tests live next to their app in `apps/<app>/tests/`. This top-level folder 
 |---|---|
 | `docker/Dockerfile` | Builds the Django image. |
 | `docker/nginx/` | Nginx configuration. |
-| `compose.yml` | Local development stack. |
+| `compose.yml` | EXISTS, at the repository root. Local development stack: PostgreSQL 17 only (D21, D26), bound to localhost with a health check and a named data volume. Django runs outside it. |
 | `compose.prod.yml` | Production and staging stack. |
 
 Hosting is undecided (D4), so production details here wait for that decision.
