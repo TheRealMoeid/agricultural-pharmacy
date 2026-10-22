@@ -4,6 +4,13 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-22 — Phase 1, task 3: dev database
+
+- Added `compose.yml` with PostgreSQL 17 for local development (bound to localhost, with a health check and a named volume).
+- Added the local run steps to `README.md`.
+- Checked the settings against a real PostgreSQL: `migrate` runs and the admin login page renders in Persian and RTL.
+- Recorded D25 as approved and proposed D26 (PostgreSQL 17).
+
 ### 2026-10-21 — Phase 1, task 2: Django skeleton
 
 - Added `manage.py`, `config/` (settings split into base, dev and prod, URLs, WSGI and ASGI entry points), an empty `apps/` package, `requirements/base.txt` and `dev.txt`, and `.env.example`.

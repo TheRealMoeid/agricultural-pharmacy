@@ -6,7 +6,39 @@ The site shows the store's products and experts and makes it easy to call or mes
 
 ## Status
 
-Early development. The documentation and the Django skeleton are in place, but there are no models or pages yet. Setup and run instructions will be added with the local database setup (phase 1, task 3).
+Early development. The documentation, the Django skeleton and the local database setup are in place, but there are no models or pages yet.
+
+## Running it locally
+
+You need Python 3.13, Git, and Docker (Docker Desktop on Windows or macOS). Django runs on your machine in a virtualenv, and only PostgreSQL runs in Docker.
+
+```
+python -m venv .venv
+.venv\Scripts\activate            # Windows (PowerShell or cmd)
+source .venv/bin/activate         # macOS and Linux
+
+pip install -r requirements/dev.txt
+
+docker compose up -d db           # starts PostgreSQL in the background
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+The admin is then at http://localhost:8000/admin/ (the path comes from `DJANGO_ADMIN_URL`).
+
+No `.env` file is needed for local work: the defaults in `config/settings/dev.py` match `compose.yml`. Copy `.env.example` to `.env` only if you want to change something.
+
+Useful commands:
+
+| Command | What it does |
+|---|---|
+| `docker compose ps` | Shows whether the database is running and healthy |
+| `docker compose stop db` | Stops the database and keeps its data |
+| `docker compose down -v` | Removes the database container **and all its data**. Use it to start from scratch |
+| `docker compose logs db` | Shows the database log, useful when something fails to connect |
+
+If port 5432 is already used on your machine (for example by a local PostgreSQL), change the first number in the `ports` line of `compose.yml` to another port, such as 5433, and set `DATABASE_URL` in `.env` with the same port.
 
 ## Documentation
 

@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. Nothing here is built yet. This document describes what was agreed in the technical plan, and it says clearly which parts are settled, which are planned detail, and which are still open.
 
-Last updated: 2026-10-21
+Last updated: 2026-10-22
 
 Status tags:
 
@@ -31,7 +31,7 @@ Who uses it:
 | Layer | Choice | Status |
 |---|---|---|
 | Language and framework | Python, Django | CONFIRMED (D1) |
-| Database | PostgreSQL | CONFIRMED (D1) |
+| Database | PostgreSQL. Version 17 in local development | CONFIRMED (D1). The version is PROPOSED (D26) |
 | Rendering | Server-rendered Django templates, no single-page app | CONFIRMED (D1) |
 | Styling | Tailwind CSS, RTL, mobile first | CONFIRMED (D1) |
 | Interactivity | Small amount of vanilla JS or HTMX | CONFIRMED (D1) |
@@ -43,7 +43,7 @@ Who uses it:
 | Python and Django versions | Python 3.13, Django 5.2 LTS. Move to newer versions when they are ready | CONFIRMED (D18) |
 | Dependency tooling | pip with `requirements/` files | CONFIRMED (D19) |
 | Local development | Django in a virtualenv, PostgreSQL in Docker Compose | CONFIRMED (D21) |
-| Settings and secrets | Environment variables read with django-environ, optional local `.env` file | PROPOSED (D25) |
+| Settings and secrets | Environment variables read with django-environ, optional local `.env` file | CONFIRMED (D25) |
 | Persian strings | Written directly in templates and model labels, no gettext | CONFIRMED (D20) |
 | Tailwind build tooling | Not chosen | OPEN (D22), settle at the start of phase 2 |
 | Hosting and domain | Not chosen | OPEN (D4), only blocks deployment |
@@ -266,7 +266,8 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 | D22 | Tailwind build tooling | OPEN, decide at the start of phase 2 |
 | D23 | Dates typed in Jalali in the admin, stored as Gregorian | CONFIRMED |
 | D24 | LF-only repository (`.gitattributes`) | CONFIRMED |
-| D25 | Settings and secrets from environment variables via django-environ | PROPOSED in phase 1, task 2 |
+| D25 | Settings and secrets from environment variables via django-environ | CONFIRMED |
+| D26 | PostgreSQL 17 | PROPOSED in phase 1, task 3 |
 
 ## 15. Out of scope and future ideas
 
