@@ -13,8 +13,12 @@ Three levels, from gentle to aggressive:
   ZWNJ and digits as typed, so the result is still fine to show or store.
 - normalize_for_search(): builds a comparison key. Not meant for display.
 
-What is deliberately NOT done: folding أ/إ into ا, or ة into ه. Those can
-change the meaning of a word, and they are rare in everyday Persian.
+Stored and displayed text keeps its correct spelling: only the search key folds
+the different forms of alef (آ, أ, إ) into plain ا, because people routinely
+type ا for آ (the madda is awkward on phone keyboards), so "اب" has to find
+"آب" (water). The price is that a few different words share a key, for
+example آفت (pest) and افت (drop), which does no harm in a catalog this small.
+ة is not folded into ه, since it is rare in everyday Persian.
 """
 import re
 import unicodedata
@@ -27,6 +31,16 @@ _LETTER_MAP = str.maketrans(
         "\u064a": "\u06cc",  # ARABIC LETTER YEH       -> ARABIC LETTER FARSI YEH
         "\u0649": "\u06cc",  # ARABIC LETTER ALEF MAKSURA -> ARABIC LETTER FARSI YEH
         "\u0643": "\u06a9",  # ARABIC LETTER KAF       -> ARABIC LETTER KEHEH
+    }
+)
+
+# Forms of alef folded into plain alef, in the search key only.
+_ALEF_MAP = str.maketrans(
+    {
+        "\u0622": "\u0627",  # ARABIC LETTER ALEF WITH MADDA ABOVE
+        "\u0623": "\u0627",  # ARABIC LETTER ALEF WITH HAMZA ABOVE
+        "\u0625": "\u0627",  # ARABIC LETTER ALEF WITH HAMZA BELOW
+        "\u0671": "\u0627",  # ARABIC LETTER ALEF WASLA
     }
 )
 
@@ -93,12 +107,14 @@ def normalize_for_search(text: str | None) -> str:
     """Build the key that search compares on, for both stored and typed text.
 
     On top of normalize_text(): digits become ASCII, ZWNJ is removed (so
-    "قارچ‌کش" and "قارچکش" give the same key), and Latin letters are
-    case-folded (so "Mancozeb" matches "mancozeb").
+    "قارچ‌کش" and "قارچکش" give the same key), the forms of alef (آ, أ, إ)
+    become plain ا (so "اب" matches "آب"), and Latin letters are case-folded
+    (so "Mancozeb" matches "mancozeb").
 
     A normal space is NOT removed, so "قارچ کش" gives a different key from
     "قارچکش". The search code is expected to split the query into words and
     check each word on its own.
     """
     text = normalize_digits(normalize_text(text))
+    text = text.translate(_ALEF_MAP)
     return text.replace(ZWNJ, "").casefold()
