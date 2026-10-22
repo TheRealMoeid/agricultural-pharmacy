@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-20
+Last updated: 2026-10-21
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md` and `CHANGELOG.md` at the root, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. Nothing else has been created yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example` and `manage.py` at the root, the Django skeleton (`config/`, `requirements/` and an empty `apps/` package), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No app, model, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -18,11 +18,11 @@ pharmacy-site/
 ├─ CHANGELOG.md                  EXISTS
 ├─ .gitignore                    EXISTS
 ├─ .gitattributes                EXISTS
-├─ .env.example                  PLANNED
-├─ manage.py                     PLANNED
-├─ requirements/                 PLANNED (tooling OPEN)
-├─ config/                       PLANNED
-├─ apps/
+├─ .env.example                  EXISTS
+├─ manage.py                     EXISTS
+├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
+├─ config/                       EXISTS
+├─ apps/                         EXISTS (empty package; the apps inside are PLANNED)
 │  ├─ core/                      PLANNED
 │  ├─ catalog/                   PLANNED
 │  ├─ consultations/             PLANNED
@@ -49,26 +49,33 @@ pharmacy-site/
 | `.env.example` | The list of environment variables with safe example values. The real `.env` is never committed. |
 | `manage.py` | Django's command-line entry point. |
 
-## 3. `requirements/` (tooling OPEN)
+## 3. `requirements/`
 
-Dependency lists. The default plan is plain pip requirements files, split into `base.txt` (needed everywhere), `dev.txt` (testing and development tools) and `prod.txt` (production extras). This changes if Moeid prefers another dependency tool, which is one of the small setup questions to settle in phase 1.
-
-## 4. `config/`
-
-Project-level Django configuration. No business logic.
+Plain pip requirements files (D19).
 
 | Path | Purpose |
 |---|---|
-| `config/settings/base.py` | Settings shared by all environments: installed apps, middleware, templates, static and media, Persian locale, time zone. |
-| `config/settings/dev.py` | Local development: debug on, relaxed security, local database. |
-| `config/settings/prod.py` | Production: debug off, HTTPS-only cookies, HSTS, secrets from environment variables. |
+| `requirements/base.txt` | EXISTS. Needed everywhere: Django 5.2, django-environ, the PostgreSQL driver. Pillow is added with the first image field. |
+| `requirements/dev.txt` | EXISTS. Includes `base.txt`. Test tools are added in phase 1, task 4. |
+| `requirements/prod.txt` | PLANNED. Production extras such as Gunicorn, added with the deployment work (phase 6). |
+
+## 4. `config/`
+
+Project-level Django configuration. No business logic. All of it exists since phase 1, task 2.
+
+| Path | Purpose |
+|---|---|
+| `config/settings/base.py` | Settings shared by all environments: installed apps, middleware, templates, static and media, Persian locale, time zone, the configurable admin path. Reads a local `.env` through django-environ (D25). |
+| `config/settings/dev.py` | Local development: debug on, a throwaway secret key, local PostgreSQL by default. Works with no `.env`. |
+| `config/settings/prod.py` | Production: debug off, HTTPS-only cookies, HSTS, and every secret or host setting required from the environment (it refuses to start if one is missing). |
 | `config/urls.py` | Top-level URL routing. Includes each app's URLs and the non-default admin URL. |
-| `config/wsgi.py` | Entry point for Gunicorn. |
+| `config/__init__.py`, `config/settings/__init__.py` | Empty. They make the folders Python packages. |
+| `config/wsgi.py` | Entry point for Gunicorn. Defaults to the prod settings. |
 | `config/asgi.py` | Standard Django file, kept for completeness. |
 
 ## 5. `apps/`
 
-Each app follows the usual Django layout. Files that an app does not need are not created.
+Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned.
 
 Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.py`, `apps.py`, `migrations/`, and `tests/`.
 

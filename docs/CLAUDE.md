@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-20 (phase 1, task 1: repo basics. No application code yet)
+Last updated: 2026-10-21 (phase 1, task 2: Django skeleton. No models or pages yet)
 
 Status tags used in this file and in the other docs:
 
@@ -63,8 +63,8 @@ One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJE
 
 | # | Branch | Content | Status |
 |---|---|---|---|
-| 1 | `phase1/01-repo-basics` | `.gitignore`, `.gitattributes`, README stub, CHANGELOG, `docs/DECISIONS.md`, docs updated for D18 to D24 | Delivered as a patch, waiting for Moeid to merge |
-| 2 | `phase1/02-django-skeleton` | `manage.py`, `config/` with split settings, `.env.example`, `requirements/`, empty `apps/` package | Not started |
+| 1 | `phase1/01-repo-basics` | `.gitignore`, `.gitattributes`, README stub, CHANGELOG, `docs/DECISIONS.md`, docs updated for D18 to D24 | Merged into `main` |
+| 2 | `phase1/02-django-skeleton` | `manage.py`, `config/` with split settings, `.env.example`, `requirements/`, empty `apps/` package | Delivered as a patch, waiting for Moeid to merge |
 | 3 | `phase1/03-dev-database` | `compose.yml` with PostgreSQL for local development, README run steps | Not started |
 | 4 | `phase1/04-persian-text` | pytest-django setup, `apps/core/text.py` (Persian normalization) with tests | Not started |
 | 5 | `phase1/05-site-settings` | `SiteSettings` model, admin, context processor | Not started |
@@ -122,6 +122,7 @@ IDs come from the approved technical plan.
 | D21 | Local workflow: Django in a virtualenv on Moeid's machine, only PostgreSQL in Docker Compose. Full containers wait for deployment. |
 | D22 | The Tailwind build tooling is decided at the start of phase 2. |
 | D23 | Production and expiry dates are typed in Jalali in the admin and stored as Gregorian. The conversion is written and tested in the project. |
+| D24 | The repository is LF-only, enforced with `.gitattributes`, so patches apply cleanly. |
 
 Other agreed technical points: self-hosted Vazirmatn font and no third-party scripts, images converted to WebP on upload, Docker Compose with Nginx, Gunicorn and PostgreSQL, a staging copy for Habibollah's trial, notification adapter with one implementation per channel.
 
@@ -148,7 +149,7 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits and ZWNJ so products a
 | Map | The store's exact location, and which Iranian map app to link. | Location comes from the client. |
 | FAQ | Customers' common pre-purchase questions. | Optional. Without them there is no FAQ page. |
 | D22 | Which tool builds the Tailwind CSS. | Decide at the start of phase 2. |
-| D24 | Line endings: LF-only repository, enforced with `.gitattributes`. | Proposed in phase 1, task 1. Moeid's working copy had CRLF. Counts as approved once the patch is merged, unless he asks to drop it. |
+| D25 | Settings and secrets come from environment variables, read with the `django-environ` package, plus an optional local `.env` file. | Proposed in phase 1, task 2. The alternative is reading `os.environ` by hand, which saves one dependency but means writing the list and database-URL parsing ourselves. Counts as approved once the patch is merged, unless Moeid asks to change it. |
 
 ## 9. Content still to collect
 
@@ -160,8 +161,8 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits and ZWNJ so products a
 
 ## 10. Next steps
 
-1. Moeid applies the task 1 patch on its own branch, commits it and merges to `main`.
-2. Task 2: Django skeleton and settings (see the phase 1 task list in section 4).
+1. Moeid applies the task 2 patch on its own branch, commits it and merges to `main`.
+2. Task 3: PostgreSQL in Docker Compose for local development, and the README run steps (see the phase 1 task list in section 4).
 3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 
 ## 11. Where the detail lives

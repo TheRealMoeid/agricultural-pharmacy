@@ -2,7 +2,7 @@
 
 Log of the decisions that needed Moeid's approval. The IDs are the same D-numbers used in `CLAUDE.md` and `ARCHITECTURE.md`. A new decision gets the next free number and is added here in the same patch that records it.
 
-Last updated: 2026-10-20
+Last updated: 2026-10-21
 
 ## Approved
 
@@ -31,12 +31,13 @@ All of these were approved on 2026-10-20, in the planning conversation, unless a
 | D21 | Local workflow: Django runs on Moeid's machine in a virtualenv, only PostgreSQL runs in Docker Compose. The full container setup (Nginx, Gunicorn) waits for the deployment phase. | |
 | D22 | The Tailwind build tooling is decided at the start of phase 2, not phase 1. | Nothing in phase 1 uses it. |
 | D23 | Habibollah types production and expiry dates in Jalali in the admin. They are stored as Gregorian. The conversion is written in the project and tested, not taken from a package. | Django's admin date field is Gregorian, which would confuse a Persian-speaking, non-technical user. |
+| D24 | Line endings: the repository is LF-only, enforced with `.gitattributes`. | Approved 2026-10-21 by merging phase 1, task 1. Moeid's working copy had Windows (CRLF) line endings, while patches are generated with LF. Mixing the two can make a patch fail to apply. |
 
 ## Proposed, waiting for approval
 
 | ID | Decision | Notes |
 |---|---|---|
-| D24 | Line endings: the repository is LF-only, enforced with `.gitattributes`. | Added in phase 1, task 1. Moeid's working copy had Windows (CRLF) line endings, while patches are generated with LF. Mixing the two can make a patch fail to apply. Remove `.gitattributes` if this is not wanted. |
+| D25 | Settings and secrets come from environment variables, read with the `django-environ` package, with an optional local `.env` file. | Added in phase 1, task 2. The alternative is reading `os.environ` by hand, which saves one dependency but means writing the list and database-URL parsing ourselves. Replace it if this is not wanted. |
 
 ## Open (parked or waiting for information)
 
