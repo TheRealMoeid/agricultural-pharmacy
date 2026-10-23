@@ -6,7 +6,7 @@ The site shows the store's products and experts and makes it easy to call or mes
 
 ## Status
 
-Early development. The documentation, the Django skeleton and the local database setup are in place, but there are no models or pages yet.
+Early development. The documentation, the Django skeleton, the local database setup, the site settings and the catalog's reference lists (product types, crops, pests) are in place, but there are no products or public pages yet.
 
 ## Running it locally
 
@@ -48,7 +48,7 @@ With the virtualenv active, run this from the repository root:
 pytest
 ```
 
-The text and phone tests need no database. The rest (site settings, admin) need `docker compose up -d db` to be running. pytest-django creates and removes its own test database, so your development data is not touched.
+The text and phone tests need no database. The rest (site settings, catalog, admin) need `docker compose up -d db` to be running. pytest-django creates and removes its own test database, so your development data is not touched.
 
 ## Documentation
 

@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-22
+Last updated: 2026-10-23
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), the start of `apps/catalog` (`ProductType`, `Crop`, `Pest` with admin), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -24,9 +24,9 @@ pharmacy-site/
 ├─ pytest.ini                    EXISTS
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
-├─ apps/                         EXISTS (only core exists so far; the other apps are PLANNED)
+├─ apps/                         EXISTS (core and part of catalog exist so far; the other apps are PLANNED)
 │  ├─ core/                      EXISTS (helpers and SiteSettings; ClickEvent and the Jalali filter PLANNED)
-│  ├─ catalog/                   PLANNED
+│  ├─ catalog/                   EXISTS (reference models and admin; Product, search and views PLANNED)
 │  ├─ consultations/             PLANNED
 │  ├─ pages/                     PLANNED
 │  ├─ articles/                  PLANNED
@@ -47,7 +47,7 @@ pharmacy-site/
 | `README.md` | What the project is, where the documentation is. Later: how to set up the project locally, run it and run the tests. Short. |
 | `CHANGELOG.md` | What changed in each merged task. |
 | `.gitignore` | Keeps out virtual environments, `.env`, `media/`, built static output, caches, local databases, and `*.patch` files waiting to be applied. |
-| `.gitattributes` | Forces LF line endings on every machine so patches apply cleanly (D24, proposed). |
+| `.gitattributes` | Forces LF line endings on every machine so patches apply cleanly (D24). |
 | `.env.example` | The list of environment variables with safe example values. The real `.env` is never committed. |
 | `pytest.ini` | pytest configuration: uses the dev settings, looks for tests under `apps/`, and rejects unknown markers. |
 | `manage.py` | Django's command-line entry point. |
@@ -78,7 +78,7 @@ Project-level Django configuration. No business logic. All of it exists since ph
 
 ## 5. `apps/`
 
-Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except `core`, which exists in part.
+Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except `core` and `catalog`, which exist in part.
 
 Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.py`, `apps.py`, `migrations/`, and `tests/`.
 
@@ -96,11 +96,14 @@ Shared things used by the whole site. It is a Django app since task 5 and is lis
 - A small view that receives call and message button taps (OPEN, depends on D16).
 
 ### `apps/catalog/`
-Products and how people find them.
-- `models.py`: `Product`, `ProductType`, `Crop`, `Pest`.
-- `search.py`: the search logic. Kept separate from views so it can be tested on its own.
-- `views.py` and `urls.py`: product list, product detail.
-- `admin.py`: product management in the Django admin.
+Products and how people find them. It is a Django app since task 6 and is listed in `INSTALLED_APPS`.
+- `apps.py`: EXISTS. App configuration.
+- `models.py`: `ProductType`, `Crop` and `Pest` EXIST, built on two shared abstract bases (`ReferenceItem`, `SearchTag`). `Product` is PLANNED.
+- `admin.py`: EXISTS for the three reference lists, with a search box that ignores typing style. Product management is PLANNED.
+- `migrations/`: EXISTS. `0001_initial.py` creates the three reference tables.
+- `tests/`: EXISTS. `test_models.py` and `test_admin.py` (both use the database).
+- `search.py`: PLANNED. The search logic. Kept separate from views so it can be tested on its own.
+- `views.py` and `urls.py`: PLANNED. Product list, product detail.
 
 ### `apps/consultations/`
 Customer requests and how the store is told about them.
