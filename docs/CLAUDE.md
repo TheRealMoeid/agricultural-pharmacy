@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-22 (phase 1, task 5: site settings. No catalog models or pages yet)
+Last updated: 2026-10-23 (phase 1, task 6: catalog reference models. No Product model or pages yet)
 
 Status tags used in this file and in the other docs:
 
@@ -68,8 +68,8 @@ One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJE
 | 3 | `phase1/03-dev-database` | `compose.yml` with PostgreSQL for local development, README run steps | Merged into `main` |
 | 4 | `phase1/04-persian-text` | pytest-django setup, `apps/core/text.py` (Persian normalization) with tests | Merged into `main` |
 | 4b | `phase1/04b-search-alef-folding` | Small fix after task 4: the search key folds آ, أ, إ into ا, so "اب" finds "آب" | Merged into `main` |
-| 5 | `phase1/05-site-settings` | `SiteSettings` model, admin, context processor | Delivered as a patch, waiting for Moeid to merge |
-| 6 | `phase1/06-catalog-reference` | `ProductType`, `Crop`, `Pest`, admin, tests | Not started |
+| 5 | `phase1/05-site-settings` | `SiteSettings` model, admin, context processor | Merged into `main` |
+| 6 | `phase1/06-catalog-reference` | `ProductType`, `Crop`, `Pest`, admin, tests | Delivered as a patch, waiting for Moeid to merge |
 | 7 | `phase1/07-product-model` | `Product` model, admin, tests | Not started |
 | 8 | `phase1/08-jalali-dates` | Jalali entry and display of production and expiry dates in the admin (D23), with tests | Not started |
 | 9 | `phase1/09-image-uploads` | Upload validation, resize, WebP conversion for the product photo | Not started |
@@ -126,6 +126,7 @@ IDs come from the approved technical plan.
 | D24 | The repository is LF-only, enforced with `.gitattributes`, so patches apply cleanly. |
 | D25 | Settings and secrets come from environment variables, read with the `django-environ` package, plus an optional local `.env` file. |
 | D26 | PostgreSQL 17, in local development and on the server. If hosting (D4) forces a different version on the server, this gets revisited. |
+| D27 | Reference lists (product types, crops, pests): names cleaned on save, a stored unique comparison key blocks spelling variants, slugs made once and kept, alternate names as free text one per line, `Pest` covers pests, diseases and weeds. **Proposed in task 6, counts as approved once merged.** Details in `docs/DECISIONS.md`. |
 
 Other agreed technical points: self-hosted Vazirmatn font and no third-party scripts, images converted to WebP on upload, Docker Compose with Nginx, Gunicorn and PostgreSQL, a staging copy for Habibollah's trial, notification adapter with one implementation per channel.
 
@@ -163,8 +164,8 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 
 ## 10. Next steps
 
-1. Moeid applies the task 5 patch on its own branch, commits it and merges to `main`.
-2. Task 6: `ProductType`, `Crop` and `Pest` models with admin and tests, the start of the `catalog` app (see the phase 1 task list in section 4).
+1. Moeid applies the task 6 patch on its own branch, commits it and merges to `main`. Merging approves D27.
+2. Task 7: the `Product` model with admin and tests (see the phase 1 task list in section 4).
 3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 
 ## 11. Where the detail lives

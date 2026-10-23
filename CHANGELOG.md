@@ -4,6 +4,14 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-23 — Phase 1, task 6: catalog reference models
+
+- Started the `catalog` app with `ProductType`, `Crop` and `Pest`, their first migration, and admin pages.
+- Names are cleaned on save (Arabic yeh/kaf, spacing) and checked against a stored comparison key, so "قارچ‌کش" and "قارچکش", or a name typed on an Arabic keyboard, cannot be added twice. Slugs are made once from the name (Persian letters kept) and do not change when a name is fixed later.
+- Crops and pests have a list of alternate names (one per line) and a `search_keys()` method for the search work in phase 2. Product types have an `order` field, editable straight from the list.
+- The admin search box for the three lists ignores typing style, half spaces and آ/ا, and checks alternate names too.
+- 108 new tests. Proposed D27.
+
 ### 2026-10-22 — Phase 1, task 5: site settings
 
 - `apps/core` is now a Django app. Added the single-row `SiteSettings` model (store details, shared number, Telegram username, Rubika link, map links, notification channel, farm-visit fee switch) with its first migration, a one-page admin, and the `site` context processor.

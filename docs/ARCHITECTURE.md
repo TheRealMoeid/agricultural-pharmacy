@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. Nothing here is built yet. This document describes what was agreed in the technical plan, and it says clearly which parts are settled, which are planned detail, and which are still open.
 
-Last updated: 2026-10-22
+Last updated: 2026-10-23
 
 Status tags:
 
@@ -93,8 +93,10 @@ Things used everywhere. **Built so far (phase 1, tasks 4 to 5):** the text helpe
 - Click counting for call and message buttons (D16). Mechanism OPEN.
 
 ### `catalog`
-Products and how people find them.
+Products and how people find them. **Built so far (phase 1, task 6):** `ProductType`, `Crop` and `Pest` with their admin pages. `Product`, the views and search are PLANNED.
 - Models: `Product`, `ProductType`, `Crop`, `Pest`.
+- The three reference lists share one base: the name is cleaned on save, a stored comparison key (`normalize_for_search()` of the name) is unique, and the slug is made once from the name (D27). Crops and pests also have `search_keys()`, the set of keys the entry answers to, for the search work in phase 2.
+- The admin search box on these lists uses the same normalization, so Habibollah finds an entry however he types it.
 - Product list with type filter and search, product detail page.
 - Persian-aware search (section 8).
 
@@ -135,9 +137,11 @@ Planned fields. Types and constraints are finalized when the models are written 
 - Crops and pests (many-to-many)
 - Created and updated timestamps
 
-**ProductType**: name, ordering. A table rather than a fixed list, so types can be added without code changes. Expected starting types: fungicide, insecticide, herbicide, biological, booster fertilizer. The exact list comes from the client.
+**ProductType**: name, slug, order, comparison key. A table rather than a fixed list, so types can be added without code changes. Expected starting types: fungicide, insecticide, herbicide, biological, booster fertilizer. The exact list comes from the client.
 
-**Crop** and **Pest**: name, slug, alternate spellings used for search.
+**Crop** and **Pest**: name, slug, alternate names (free text, one per line, used for search), comparison key. `Pest` covers pests, diseases and weeds (D27).
+
+In all three, the comparison key is a stored column with a unique constraint, so two spellings of the same name cannot both exist. Whether `Product` stores a key too is still decided when its model is written.
 
 **ConsultationRequest**
 - Kind: question or farm visit
@@ -199,6 +203,7 @@ Not in the model, on purpose: price, quantity, customer accounts, orders, batch 
 - The key is only for comparing. Text shown or stored is never replaced by it, so "آب" stays "آب" on the page. Whether the key is stored in a column or computed per query is decided when the product model is written. **[PLANNED]**
 - Match against trade name, generic name, usage text, and the names and alternate spellings of crops and pests.
 - Until crop/pest tags exist for the products, search works on names and usage text only (D8).
+- Crops and pests keep their own comparison key in a column (built in task 6), and `search_keys()` also returns the keys of their alternate names.
 - This is the most important thing to test (see section 11).
 
 ## 9. Notifications
@@ -282,6 +287,7 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 | D24 | LF-only repository (`.gitattributes`) | CONFIRMED |
 | D25 | Settings and secrets from environment variables via django-environ | CONFIRMED |
 | D26 | PostgreSQL 17 in development and production | CONFIRMED |
+| D27 | Reference lists: unique comparison key, stable slugs, alternate names as text, `Pest` includes diseases and weeds | PROPOSED in task 6, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 

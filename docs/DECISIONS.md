@@ -2,7 +2,7 @@
 
 Log of the decisions that needed Moeid's approval. The IDs are the same D-numbers used in `CLAUDE.md` and `ARCHITECTURE.md`. A new decision gets the next free number and is added here in the same patch that records it.
 
-Last updated: 2026-10-22
+Last updated: 2026-10-23
 
 ## Approved
 
@@ -37,7 +37,9 @@ All of these were approved on 2026-10-20, in the planning conversation, unless a
 
 ## Proposed, waiting for approval
 
-Nothing at the moment.
+| ID | Decision | Notes |
+|---|---|---|
+| D27 | How the three reference lists (product types, crops, pests) store names. (1) The name is cleaned on save but keeps its correct spelling. (2) A comparison key made by `normalize_for_search()` is stored with each row and must be unique, so spelling variants (half space, Arabic kaf or yeh, ا for آ) cannot be entered twice. (3) The slug is made once from the name, keeps Persian letters, and never changes when the name is edited. Product types get a slug too, which the plan did not list. (4) Alternate names for crops and pests are free text, one per line. (5) `Pest` covers pests, diseases and weeds, because herbicides and fungicides need a target as much as insecticides do. | Proposed 2026-10-23 in phase 1, task 6. Counts as approved once the task is merged. Cost of (2): two different words that share a key, such as آفت and افت, cannot both be in the same list. The editor gets a message naming the existing entry. Cost of (3): a link keeps the old spelling after a rename. Alternative for (4): a separate table of alternate names, more flexible but more screens for Habibollah. |
 
 ## Open (parked or waiting for information)
 
