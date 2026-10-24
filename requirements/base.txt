@@ -2,3 +2,4 @@
 Django>=5.2,<5.3
 django-environ>=0.12,<1
 psycopg[binary]>=3.2,<4
+Pillow>=11,<12

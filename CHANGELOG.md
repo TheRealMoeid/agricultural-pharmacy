@@ -4,6 +4,15 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-23 — Phase 1, task 7: product model
+
+- Added the `Product` model to `apps/catalog`: trade name, generic (active-ingredient) name, type, usage, dosage, timing, photo, manufacturer, importer, country of origin, production/expiry dates, availability, crops and pests. Admin page with filters, a dual-list widget for crops and pests, and a plain search box.
+- Trade name, generic name, type, manufacturer, importer and country of origin are required, matching what the client confirmed every product names. Usage, dosage, timing, photo and both dates are optional. Dates are entered as Gregorian for now; Jalali entry is task 8.
+- A product type in use can no longer be deleted (`PROTECT`), so an in-use type cannot silently orphan products.
+- Added Pillow to `requirements/base.txt` for the new photo field (resizing and WebP conversion come in task 9; for now the field stores whatever image is uploaded, with a basic extension check).
+- The slug is made once from the trade name, the way the task 6 reference lists already work, and does not change if the name is corrected later.
+- 39 new tests (184 in total, catalog alone). Proposed D28 and D29.
+
 ### 2026-10-23 — Phase 1, task 6: catalog reference models
 
 - Started the `catalog` app with `ProductType`, `Crop` and `Pest`, their first migration, and admin pages.

@@ -13,10 +13,11 @@ so they share the same care about spelling:
   the same, so a link does not break if someone later fixes a spelling.
 """
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_image_file_extension
 from django.db import models
 from django.utils.text import slugify
 
-from apps.core.text import normalize_for_search, normalize_text
+from apps.core.text import normalize_for_search, normalize_letters, normalize_text
 
 
 class ReferenceItem(models.Model):
@@ -151,3 +152,151 @@ class Pest(SearchTag):
         ordering = ["name"]
         verbose_name = "آفت / بیماری / علف هرز"
         verbose_name_plural = "آفات، بیماری‌ها و علف‌های هرز"
+
+
+def product_photo_path(instance: "Product", filename: str) -> str:
+    # The slug is not set yet on first save (it is assigned in save(), below
+    # the file field), so uploads land in a flat folder named by id later if
+    # needed. Keeping the path simple now; task 9 adds resizing and WebP
+    # conversion and can reorganize storage at the same time.
+    return f"products/{filename}"
+
+
+class Product(models.Model):
+    """A single product in the catalog.
+
+    No price and no quantity (D7, confirmed requirements): Habibollah only
+    flips `is_available`. Production and expiry dates are optional and, if
+    both are empty, no date line is shown anywhere (D7) rather than hiding
+    the product. Dates are entered and stored as Gregorian in this task;
+    Jalali entry in the admin is task 8 (D23).
+
+    Manufacturer, importer and country of origin are required plain-text
+    fields, one per product (D6, confirmed in round 3: every product names
+    the producer and importer companies and the country of origin).
+
+    Whether products get a stored search key, the way the reference lists
+    do, is decided in phase 2 together with `catalog/search.py` and the
+    product list view, not here: a single key does not fit a search that has
+    to match several fields and two related lists at once, and building that
+    logic without the views next to it would be building ahead of use.
+    """
+
+    trade_name = models.CharField("نام تجاری", max_length=200)
+    generic_name = models.CharField(
+        "نام عمومی (ماده مؤثره)",
+        max_length=200,
+        help_text="نام ماده مؤثره، مثلاً «مانکوزب».",
+    )
+    slug = models.SlugField(
+        "شناسه در نشانی",
+        max_length=220,
+        unique=True,
+        allow_unicode=True,
+        blank=True,
+        help_text="خودکار از نام تجاری ساخته می‌شود و با تغییر نام عوض نمی‌شود.",
+    )
+
+    product_type = models.ForeignKey(
+        ProductType,
+        verbose_name="نوع محصول",
+        on_delete=models.PROTECT,
+        related_name="products",
+    )
+
+    usage = models.TextField("موارد مصرف", blank=True)
+    dosage = models.CharField("میزان مصرف", max_length=200, blank=True)
+    timing = models.CharField("زمان مصرف", max_length=200, blank=True)
+
+    photo = models.ImageField(
+        "عکس",
+        upload_to=product_photo_path,
+        blank=True,
+        validators=[validate_image_file_extension],
+        help_text="فایل باید تصویر باشد (jpg، png یا webp). تغییر اندازه و تبدیل به WebP در کار بعدی اضافه می‌شود.",
+    )
+
+    manufacturer = models.CharField("شرکت تولیدکننده", max_length=150)
+    importer = models.CharField("شرکت واردکننده", max_length=150)
+    country_of_origin = models.CharField("کشور سازنده", max_length=100)
+
+    production_date = models.DateField(
+        "تاریخ تولید",
+        null=True,
+        blank=True,
+        help_text="اگر خالی بماند، تاریخی روی صفحه محصول نمایش داده نمی‌شود.",
+    )
+    expiry_date = models.DateField(
+        "تاریخ انقضا",
+        null=True,
+        blank=True,
+        help_text="اگر خالی بماند، تاریخی روی صفحه محصول نمایش داده نمی‌شود.",
+    )
+
+    is_available = models.BooleanField("موجود است", default=True)
+
+    crops = models.ManyToManyField(Crop, verbose_name="گیاهان", blank=True, related_name="products")
+    pests = models.ManyToManyField(
+        Pest, verbose_name="آفات / بیماری‌ها / علف‌های هرز", blank=True, related_name="products"
+    )
+
+    created_at = models.DateTimeField("تاریخ ثبت", auto_now_add=True)
+    updated_at = models.DateTimeField("آخرین تغییر", auto_now=True)
+
+    class Meta:
+        ordering = ["trade_name"]
+        verbose_name = "محصول"
+        verbose_name_plural = "محصولات"
+        constraints = [
+            models.CheckConstraint(
+                # A product with only an expiry date (no production date) is an
+                # entry mistake worth catching early, not a real-world case:
+                # D7 is about both dates being absent, not one of the two.
+                condition=(
+                    models.Q(expiry_date__isnull=True)
+                    | models.Q(production_date__isnull=False)
+                ),
+                name="catalog_product_expiry_needs_production",
+                violation_error_message="اگر تاریخ انقضا وارد شده، تاریخ تولید هم باید وارد شود.",
+            ),
+        ]
+
+    def __str__(self):
+        return self.trade_name
+
+    def _normalize(self):
+        self.trade_name = normalize_text(self.trade_name)
+        self.generic_name = normalize_text(self.generic_name)
+        self.manufacturer = normalize_text(self.manufacturer)
+        self.importer = normalize_text(self.importer)
+        self.country_of_origin = normalize_text(self.country_of_origin)
+        self.dosage = normalize_text(self.dosage)
+        self.timing = normalize_text(self.timing)
+        # usage can be multi-line, so only the letters are unified; whitespace
+        # and line breaks are left as typed (normalize_text() would flatten them).
+        self.usage = normalize_letters(self.usage)
+
+    def _unique_slug(self) -> str:
+        base = slugify(self.trade_name, allow_unicode=True)[:210] or "product"
+        others = Product._default_manager.exclude(pk=self.pk)
+        slug, number = base, 1
+        while others.filter(slug=slug).exists():
+            number += 1
+            slug = f"{base}-{number}"
+        return slug
+
+    def clean(self):
+        super().clean()
+        self._normalize()
+        if self.production_date and self.expiry_date and self.expiry_date <= self.production_date:
+            raise ValidationError({"expiry_date": "تاریخ انقضا باید بعد از تاریخ تولید باشد."})
+
+    def save(self, *args, **kwargs):
+        self._normalize()
+        if not self.slug:
+            self.slug = self._unique_slug()
+        super().save(*args, **kwargs)
+
+    @property
+    def has_dates(self) -> bool:
+        return bool(self.production_date or self.expiry_date)

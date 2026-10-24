@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from apps.core.text import normalize_for_search, normalize_text
 
-from .models import Crop, Pest, ProductType
+from .models import Crop, Pest, Product, ProductType
 
 
 class ReferenceAdmin(admin.ModelAdmin):
@@ -57,3 +57,41 @@ class CropAdmin(SearchTagAdmin):
 @admin.register(Pest)
 class PestAdmin(SearchTagAdmin):
     pass
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    # Plain icontains for now: Moeid and Habibollah both read and write
+    # Persian correctly, so this box does not need the same typing-style
+    # tolerance as the public search (built with search.py in phase 2).
+    search_fields = ("trade_name", "generic_name", "manufacturer", "importer")
+    list_display = ("trade_name", "generic_name", "product_type", "is_available")
+    list_filter = ("product_type", "is_available")
+    list_editable = ("is_available",)
+    autocomplete_fields = ("product_type",)
+    filter_horizontal = ("crops", "pests")
+    readonly_fields = ("slug",)
+
+    fieldsets = (
+        (None, {"fields": ("trade_name", "generic_name", "slug", "product_type", "photo")}),
+        ("مصرف", {"fields": ("usage", "dosage", "timing")}),
+        ("تولیدکننده", {"fields": ("manufacturer", "importer", "country_of_origin")}),
+        ("تاریخ‌ها", {"fields": ("production_date", "expiry_date")}),
+        ("جست‌وجو", {"fields": ("crops", "pests")}),
+        ("وضعیت", {"fields": ("is_available",)}),
+    )
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        return fields if obj else [f for f in fields if f != "slug"]
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        if obj:
+            return fieldsets
+        # Same reasoning as get_fields(): nothing to show for a new row.
+        trimmed = []
+        for name, options in fieldsets:
+            fields = tuple(f for f in options["fields"] if f != "slug")
+            trimmed.append((name, {**options, "fields": fields}))
+        return trimmed

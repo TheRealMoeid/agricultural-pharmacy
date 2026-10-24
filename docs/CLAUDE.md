@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-23 (phase 1, task 6: catalog reference models. No Product model or pages yet)
+Last updated: 2026-10-24 (phase 1, task 7: Product model. No Jalali dates, image handling or public pages yet)
 
 Status tags used in this file and in the other docs:
 
@@ -69,8 +69,8 @@ One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJE
 | 4 | `phase1/04-persian-text` | pytest-django setup, `apps/core/text.py` (Persian normalization) with tests | Merged into `main` |
 | 4b | `phase1/04b-search-alef-folding` | Small fix after task 4: the search key folds آ, أ, إ into ا, so "اب" finds "آب" | Merged into `main` |
 | 5 | `phase1/05-site-settings` | `SiteSettings` model, admin, context processor | Merged into `main` |
-| 6 | `phase1/06-catalog-reference` | `ProductType`, `Crop`, `Pest`, admin, tests | Delivered as a patch, waiting for Moeid to merge |
-| 7 | `phase1/07-product-model` | `Product` model, admin, tests | Not started |
+| 6 | `phase1/06-catalog-reference` | `ProductType`, `Crop`, `Pest`, admin, tests | Merged into `main` |
+| 7 | `phase1/07-product-model` | `Product` model, admin, tests | Delivered as a patch, waiting for Moeid to merge |
 | 8 | `phase1/08-jalali-dates` | Jalali entry and display of production and expiry dates in the admin (D23), with tests | Not started |
 | 9 | `phase1/09-image-uploads` | Upload validation, resize, WebP conversion for the product photo | Not started |
 | 10 | `phase1/10-pages-models` | `Expert` and `FaqItem` models, admin | Not started |
@@ -126,7 +126,9 @@ IDs come from the approved technical plan.
 | D24 | The repository is LF-only, enforced with `.gitattributes`, so patches apply cleanly. |
 | D25 | Settings and secrets come from environment variables, read with the `django-environ` package, plus an optional local `.env` file. |
 | D26 | PostgreSQL 17, in local development and on the server. If hosting (D4) forces a different version on the server, this gets revisited. |
-| D27 | Reference lists (product types, crops, pests): names cleaned on save, a stored unique comparison key blocks spelling variants, slugs made once and kept, alternate names as free text one per line, `Pest` covers pests, diseases and weeds. **Proposed in task 6, counts as approved once merged.** Details in `docs/DECISIONS.md`. |
+| D27 | Reference lists (product types, crops, pests): names cleaned on save, a stored unique comparison key blocks spelling variants, slugs made once and kept, alternate names as free text one per line, `Pest` covers pests, diseases and weeds. CONFIRMED (task 6 merged). |
+| D28 | `Product`: manufacturer, importer and country of origin are required (the client confirmed every product names them); usage, dosage, timing and photo stay optional; new products default to available. **Proposed in task 7, counts as approved once merged.** |
+| D29 | `Product`: an expiry date cannot be entered without a production date (DB-enforced, friendly message); expiry must be strictly after production when both are given. **Proposed in task 7, counts as approved once merged.** |
 
 Other agreed technical points: self-hosted Vazirmatn font and no third-party scripts, images converted to WebP on upload, Docker Compose with Nginx, Gunicorn and PostgreSQL, a staging copy for Habibollah's trial, notification adapter with one implementation per channel.
 
@@ -164,8 +166,8 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 
 ## 10. Next steps
 
-1. Moeid applies the task 6 patch on its own branch, commits it and merges to `main`. Merging approves D27.
-2. Task 7: the `Product` model with admin and tests (see the phase 1 task list in section 4).
+1. Moeid applies the task 7 patch on its own branch, commits it and merges to `main`. Merging approves D28 and D29.
+2. Task 8: Jalali entry and display of production and expiry dates in the admin (D23).
 3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 
 ## 11. Where the detail lives

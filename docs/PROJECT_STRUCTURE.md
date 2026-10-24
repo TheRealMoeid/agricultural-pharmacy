@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-23
+Last updated: 2026-10-24
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), the start of `apps/catalog` (`ProductType`, `Crop`, `Pest` with admin), and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and now `Product`, each with admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -26,7 +26,7 @@ pharmacy-site/
 ├─ config/                       EXISTS
 ├─ apps/                         EXISTS (core and part of catalog exist so far; the other apps are PLANNED)
 │  ├─ core/                      EXISTS (helpers and SiteSettings; ClickEvent and the Jalali filter PLANNED)
-│  ├─ catalog/                   EXISTS (reference models and admin; Product, search and views PLANNED)
+│  ├─ catalog/                   EXISTS (reference models, Product, and admin; search and views PLANNED)
 │  ├─ consultations/             PLANNED
 │  ├─ pages/                     PLANNED
 │  ├─ articles/                  PLANNED
@@ -58,7 +58,7 @@ Plain pip requirements files (D19).
 
 | Path | Purpose |
 |---|---|
-| `requirements/base.txt` | EXISTS. Needed everywhere: Django 5.2, django-environ, the PostgreSQL driver. Pillow is added with the first image field. |
+| `requirements/base.txt` | EXISTS. Needed everywhere: Django 5.2, django-environ, the PostgreSQL driver, Pillow (added in task 7, for `Product.photo`). |
 | `requirements/dev.txt` | EXISTS. Includes `base.txt` and adds pytest and pytest-django. |
 | `requirements/prod.txt` | PLANNED. Production extras such as Gunicorn, added with the deployment work (phase 6). |
 
@@ -98,12 +98,12 @@ Shared things used by the whole site. It is a Django app since task 5 and is lis
 ### `apps/catalog/`
 Products and how people find them. It is a Django app since task 6 and is listed in `INSTALLED_APPS`.
 - `apps.py`: EXISTS. App configuration.
-- `models.py`: `ProductType`, `Crop` and `Pest` EXIST, built on two shared abstract bases (`ReferenceItem`, `SearchTag`). `Product` is PLANNED.
-- `admin.py`: EXISTS for the three reference lists, with a search box that ignores typing style. Product management is PLANNED.
-- `migrations/`: EXISTS. `0001_initial.py` creates the three reference tables.
-- `tests/`: EXISTS. `test_models.py` and `test_admin.py` (both use the database).
-- `search.py`: PLANNED. The search logic. Kept separate from views so it can be tested on its own.
-- `views.py` and `urls.py`: PLANNED. Product list, product detail.
+- `models.py`: `ProductType`, `Crop` and `Pest` EXIST, built on two shared abstract bases (`ReferenceItem`, `SearchTag`). `Product` EXISTS since task 7.
+- `admin.py`: EXISTS. The three reference lists have a search box that ignores typing style; `Product` has filters, a dual-list widget for crops and pests, and a plain search box.
+- `migrations/`: EXISTS. `0001_initial.py` creates the three reference tables, `0002_product.py` creates `Product`.
+- `tests/`: EXISTS. `test_models.py`, `test_admin.py` (reference lists), `test_product.py`, `test_product_admin.py` and `conftest.py` with shared fixtures (all use the database).
+- `search.py`: PLANNED, for phase 2. The search logic. Kept separate from views so it can be tested on its own.
+- `views.py` and `urls.py`: PLANNED, for phase 2. Product list, product detail.
 
 ### `apps/consultations/`
 Customer requests and how the store is told about them.

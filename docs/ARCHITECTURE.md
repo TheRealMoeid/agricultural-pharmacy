@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. Nothing here is built yet. This document describes what was agreed in the technical plan, and it says clearly which parts are settled, which are planned detail, and which are still open.
 
-Last updated: 2026-10-23
+Last updated: 2026-10-24
 
 Status tags:
 
@@ -93,8 +93,9 @@ Things used everywhere. **Built so far (phase 1, tasks 4 to 5):** the text helpe
 - Click counting for call and message buttons (D16). Mechanism OPEN.
 
 ### `catalog`
-Products and how people find them. **Built so far (phase 1, task 6):** `ProductType`, `Crop` and `Pest` with their admin pages. `Product`, the views and search are PLANNED.
+Products and how people find them. **Built so far (phase 1, tasks 6 to 7):** `ProductType`, `Crop`, `Pest` and now `Product`, each with an admin page. The views and search (`search.py`) are PLANNED, for phase 2.
 - Models: `Product`, `ProductType`, `Crop`, `Pest`.
+- `Product` stores no search key of its own (see section 5); the public search built in phase 2 normalizes at query time instead.
 - The three reference lists share one base: the name is cleaned on save, a stored comparison key (`normalize_for_search()` of the name) is unique, and the slug is made once from the name (D27). Crops and pests also have `search_keys()`, the set of keys the entry answers to, for the search work in phase 2.
 - The admin search box on these lists uses the same normalization, so Habibollah finds an entry however he types it.
 - Product list with type filter and search, product detail page.
@@ -126,14 +127,14 @@ The custom mobile page for Habibollah.
 
 Planned fields. Types and constraints are finalized when the models are written in phase 1.
 
-**Product** (D6, D7, D8)
-- Trade name, generic (active-ingredient) name, slug
-- Product type (foreign key)
-- Usage, dosage, timing (text)
-- Photo
-- Manufacturer, importer, country of origin (plain text, one per product)
-- Production date, expiry date (both optional, stored as Gregorian dates)
-- `is_available` (the only stock information; no quantity, no price)
+**Product** (D6, D7, D8, D28, D29) — built in task 7
+- Trade name, generic (active-ingredient) name, slug. Trade name and generic name are required.
+- Product type (foreign key, `PROTECT`, so an in-use type cannot be deleted)
+- Usage (multi-line text, letters unified but line breaks kept), dosage, timing (both optional)
+- Photo (optional; `Pillow` added for this field; resizing and WebP conversion are task 9)
+- Manufacturer, importer, country of origin (plain text, one per product, required — D28)
+- Production date, expiry date (both optional, stored as Gregorian; nothing shown if both are empty, D7). An expiry date requires a production date, and expiry must be strictly after it (D29), enforced at the database level with a friendly admin message.
+- `is_available` (the only stock information; no quantity, no price). Defaults to available (D28).
 - Crops and pests (many-to-many)
 - Created and updated timestamps
 
@@ -204,6 +205,7 @@ Not in the model, on purpose: price, quantity, customer accounts, orders, batch 
 - Match against trade name, generic name, usage text, and the names and alternate spellings of crops and pests.
 - Until crop/pest tags exist for the products, search works on names and usage text only (D8).
 - Crops and pests keep their own comparison key in a column (built in task 6), and `search_keys()` also returns the keys of their alternate names.
+- `Product` itself does not get a stored key (decided in task 7): its search has to match several text fields plus two related lists at once, which a single column does not fit well. `search.py`, in phase 2, normalizes at query time instead, reusing `normalize_for_search()`.
 - This is the most important thing to test (see section 11).
 
 ## 9. Notifications
@@ -287,7 +289,9 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 | D24 | LF-only repository (`.gitattributes`) | CONFIRMED |
 | D25 | Settings and secrets from environment variables via django-environ | CONFIRMED |
 | D26 | PostgreSQL 17 in development and production | CONFIRMED |
-| D27 | Reference lists: unique comparison key, stable slugs, alternate names as text, `Pest` includes diseases and weeds | PROPOSED in task 6, CONFIRMED once merged |
+| D27 | Reference lists: unique comparison key, stable slugs, alternate names as text, `Pest` includes diseases and weeds | CONFIRMED |
+| D28 | Product: manufacturer/importer/country required, usage/dosage/timing/photo optional, default available | PROPOSED in task 7, CONFIRMED once merged |
+| D29 | Product: expiry date requires a production date, expiry strictly after production | PROPOSED in task 7, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 
