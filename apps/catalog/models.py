@@ -224,13 +224,13 @@ class Product(models.Model):
         "تاریخ تولید",
         null=True,
         blank=True,
-        help_text="اگر خالی بماند، تاریخی روی صفحه محصول نمایش داده نمی‌شود.",
+        help_text="به تقویم شمسی، مثلاً ۱۴۰۴/۰۱/۰۱. اگر خالی بماند، تاریخی روی صفحه محصول نمایش داده نمی‌شود.",
     )
     expiry_date = models.DateField(
         "تاریخ انقضا",
         null=True,
         blank=True,
-        help_text="اگر خالی بماند، تاریخی روی صفحه محصول نمایش داده نمی‌شود.",
+        help_text="به تقویم شمسی، مثلاً ۱۴۰۴/۰۱/۰۱. اگر خالی بماند، تاریخی روی صفحه محصول نمایش داده نمی‌شود.",
     )
 
     is_available = models.BooleanField("موجود است", default=True)

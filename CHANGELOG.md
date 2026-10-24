@@ -4,6 +4,12 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-24 — Phase 1, task 8: Jalali dates in the admin
+
+- Added `apps/core/jalali.py`: Gregorian/Jalali conversion, ported from the standard published algorithm (the same one jalaali-js and most Persian software use), not a third-party package (D23). Tested against several independently sourced Nowruz dates, the published reference `jalCal()` output for 1390-1393, and an exhaustive day-by-day round trip from 1800 to 2250.
+- Added `apps/core/forms.py` with `JalaliDateField`: a text field that reads Persian, Arabic-Indic or ASCII digits with "/" or "-" separators, parses them as a Jalali date, and converts to/from the Gregorian date the model actually stores. Wired into `ProductAdmin` for `production_date` and `expiry_date` via `formfield_overrides`, so both fields are now typed and shown in Jalali in the admin, matching D23.
+- Known limitation, not something this patch can fix on its own: the standard arithmetic Jalali algorithm has a documented, currently unresolved one-day discrepancy against the true astronomically-observed Iranian calendar for the Esfand 1403 / Farvardin 1404 boundary (around 20-21 March 2025) -- see the new note in `docs/DECISIONS.md`. 77 new tests.
+
 ### 2026-10-23 — Phase 1, task 7: product model
 
 - Added the `Product` model to `apps/catalog`: trade name, generic (active-ingredient) name, type, usage, dosage, timing, photo, manufacturer, importer, country of origin, production/expiry dates, availability, crops and pests. Admin page with filters, a dual-list widget for crops and pests, and a plain search box.

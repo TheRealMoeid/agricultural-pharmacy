@@ -2,7 +2,7 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-24
+Last updated: 2026-10-24 (phase 1, task 8)
 
 **Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and now `Product`, each with admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
@@ -91,7 +91,9 @@ Shared things used by the whole site. It is a Django app since task 5 and is lis
 - `context_processors.py`: EXISTS. Puts the settings into every template as `site`, so the call bar always has the number.
 - `phone.py`: EXISTS. Iranian mobile numbers: `normalize_iran_mobile()` (any typing to 09XXXXXXXXX), `to_international()`, `format_display()` and the form validator.
 - `text.py`: EXISTS. Persian text normalization at three levels: `normalize_letters()` (yeh, kaf, kashida, vowel marks), `normalize_text()` (also whitespace and invisible characters) and `normalize_for_search()` (also ASCII digits, no ZWNJ, alef forms folded into ا, case-folded), plus `normalize_digits()`. Used by search and form validation.
-- `tests/`: EXISTS. `test_text.py` and `test_phone.py` (no database), `test_site_settings.py`, `test_admin.py` and `test_context_processor.py` (these use the database).
+- `jalali.py`: EXISTS (task 8). Gregorian/Jalali conversion, hand-written (D23, D30), not a third-party package.
+- `forms.py`: EXISTS (task 8). `JalaliDateField`, a form field that reads/shows Jalali text for a model `DateField`.
+- `tests/`: EXISTS. `test_text.py`, `test_phone.py` and `test_jalali.py` (no database), `test_site_settings.py`, `test_admin.py`, `test_context_processor.py` and `test_jalali_form_field.py` (these use the database or Django's form machinery).
 - `templatetags/`: the Jalali date filter and small display helpers.
 - A small view that receives call and message button taps (OPEN, depends on D16).
 
@@ -101,7 +103,7 @@ Products and how people find them. It is a Django app since task 6 and is listed
 - `models.py`: `ProductType`, `Crop` and `Pest` EXIST, built on two shared abstract bases (`ReferenceItem`, `SearchTag`). `Product` EXISTS since task 7.
 - `admin.py`: EXISTS. The three reference lists have a search box that ignores typing style; `Product` has filters, a dual-list widget for crops and pests, and a plain search box.
 - `migrations/`: EXISTS. `0001_initial.py` creates the three reference tables, `0002_product.py` creates `Product`.
-- `tests/`: EXISTS. `test_models.py`, `test_admin.py` (reference lists), `test_product.py`, `test_product_admin.py` and `conftest.py` with shared fixtures (all use the database).
+- `tests/`: EXISTS. `test_models.py`, `test_admin.py` (reference lists), `test_product.py`, `test_product_admin.py`, `test_product_jalali_admin.py` (task 8) and `conftest.py` with shared fixtures (all use the database).
 - `search.py`: PLANNED, for phase 2. The search logic. Kept separate from views so it can be tested on its own.
 - `views.py` and `urls.py`: PLANNED, for phase 2. Product list, product detail.
 

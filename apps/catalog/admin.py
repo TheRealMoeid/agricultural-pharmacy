@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django.db import models
 from django.db.models import Q
 
+from apps.core.forms import JalaliDateField
 from apps.core.text import normalize_for_search, normalize_text
 
 from .models import Crop, Pest, Product, ProductType
@@ -71,6 +73,9 @@ class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ("product_type",)
     filter_horizontal = ("crops", "pests")
     readonly_fields = ("slug",)
+    # Production and expiry dates are typed and shown in Jalali (D23); the
+    # field itself still stores a plain Gregorian date, as the model defines it.
+    formfield_overrides = {models.DateField: {"form_class": JalaliDateField}}
 
     fieldsets = (
         (None, {"fields": ("trade_name", "generic_name", "slug", "product_type", "photo")}),
