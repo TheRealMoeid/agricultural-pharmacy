@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. Nothing here is built yet. This document describes what was agreed in the technical plan, and it says clearly which parts are settled, which are planned detail, and which are still open.
 
-Last updated: 2026-10-24
+Last updated: 2026-10-24 (phase 1, task 8)
 
 Status tags:
 
@@ -78,7 +78,7 @@ It is one Django project (a monolith) split into small apps. Everything runs in 
 All are **PLANNED** unless a section says part of it exists. App names refine the approved structure slightly (see PROJECT_STRUCTURE.md).
 
 ### `core`
-Things used everywhere. **Built so far (phase 1, tasks 4 to 5):** the text helpers, the phone helpers, `SiteSettings` with its admin, and the context processor. The rest is PLANNED.
+Things used everywhere. **Built so far (phase 1, tasks 4, 5 and 8):** the text helpers, the phone helpers, `SiteSettings` with its admin, the context processor, and now the Jalali/Gregorian date conversion (`jalali.py`) and the `JalaliDateField` form field (`forms.py`) used by the admin (D23). The rest is PLANNED.
 - `SiteSettings`: a single row. It starts with the details the client confirmed (store name, address, hours, the shared number) and holds:
   - the shared phone number (D5), stored as 09XXXXXXXXX whatever way it was typed. The `tel:` link, the WhatsApp link (`wa.me`) and the display form are derived from it;
   - the Telegram username (the link is built from it) and the Rubika link, pasted as Rubika gives it, because its link format has not been verified. A button is shown only while its field is filled in;
@@ -89,7 +89,7 @@ Things used everywhere. **Built so far (phase 1, tasks 4 to 5):** the text helpe
 - A context processor that makes those settings available in every template, so the sticky call bar always has the number.
 - Persian text normalization helpers (`text.py`), used by search and by form validation.
 - Iranian mobile number helpers (`phone.py`): accept any common way of typing a number, give back one canonical form, and derive the international and display forms.
-- Jalali date display filter (D13).
+- Jalali/Gregorian conversion (`jalali.py`, built in task 8): a hand-written port of the standard published algorithm, not a third-party package (D23, D30). Used today by `JalaliDateField` (`forms.py`) for admin entry and display; a template filter for public pages is still PLANNED, for when there are public pages to show dates on.
 - Click counting for call and message buttons (D16). Mechanism OPEN.
 
 ### `catalog`
@@ -290,8 +290,9 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 | D25 | Settings and secrets from environment variables via django-environ | CONFIRMED |
 | D26 | PostgreSQL 17 in development and production | CONFIRMED |
 | D27 | Reference lists: unique comparison key, stable slugs, alternate names as text, `Pest` includes diseases and weeds | CONFIRMED |
-| D28 | Product: manufacturer/importer/country required, usage/dosage/timing/photo optional, default available | PROPOSED in task 7, CONFIRMED once merged |
-| D29 | Product: expiry date requires a production date, expiry strictly after production | PROPOSED in task 7, CONFIRMED once merged |
+| D28 | Product: manufacturer/importer/country required, usage/dosage/timing/photo optional, default available | CONFIRMED |
+| D29 | Product: expiry date requires a production date, expiry strictly after production | CONFIRMED |
+| D30 | Jalali date conversion hand-written, not a third-party package; known 1-day limitation around the 1403/1404 boundary | PROPOSED in task 8, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 
