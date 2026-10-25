@@ -4,6 +4,15 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-25 — Phase 1, task 9: product photos
+
+- Many visitors are in villages with weak mobile coverage, so photos are built to be small, not just converted. Every new product photo is checked and stored as two WebP files: a main image (longest side at most 800 px) and a thumbnail (at most 320 px) for list pages, `<name>.webp` and `<name>_thumb.webp`. Each has a byte budget (about 50 KB and 12 KB): quality starts at 80 and is lowered step by step to 40, and if that is not enough the picture is made up to 15% smaller a few times (never under 200 px). Proposed D31.
+- Only real JPEG, PNG or WebP files (judged by content, not name) up to 10 MB and 40 megapixels are accepted; the orientation flag is applied and all camera metadata (including any GPS position) is dropped. Files get random names. The original upload is not kept.
+- Added `apps/core/images.py` (`load_image()`, `encode_webp()`, `process_image()`, the validator, `ImageRejected`) and `apps/core/fields.py` (`WebPImageField`, an `ImageField` that does the conversion in `pre_save`, so it works the same from the admin, a script or a test, and `photo.thumb_url` for templates). `Product.photo` uses it (migration `0004`); the same field can be reused for the expert photos in task 10.
+- Bad uploads are refused in the admin with a specific Persian message next to the field (not an image, wrong format, too big, too many pixels). The validator's error code is `image_rejected`: using Django's own `invalid_image` made Django replace these messages with its generic one.
+- Catalog tests now write uploads to a temporary folder instead of the real `media/`.
+- 63 new tests. The static map image field (see `CLAUDE.md`, section 8) is not part of this task.
+
 ### 2026-10-24 — Phase 1, task 8: Jalali dates in the admin
 
 - Added `apps/core/jalali.py`: Gregorian/Jalali conversion, ported from the standard published algorithm (the same one jalaali-js and most Persian software use), not a third-party package (D23). Tested against several independently sourced Nowruz dates, the published reference `jalCal()` output for 1390-1393, and an exhaustive day-by-day round trip from 1800 to 2250.

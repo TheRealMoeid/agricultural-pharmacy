@@ -196,7 +196,7 @@ def test_a_photo_can_be_attached(product_fields):
     upload = SimpleUploadedFile("leaf.png", make_image_bytes(), content_type="image/png")
     product = make(product_fields, photo=upload)
     assert product.photo.name.startswith("products/")
-    product.photo.delete(save=False)
+    assert product.photo.name.endswith(".webp")
 
 
 def test_a_non_image_file_is_rejected(product_fields):

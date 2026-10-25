@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-24 (phase 1, task 8: Jalali dates in the admin. No image handling or public pages yet)
+Last updated: 2026-10-25 (phase 1, task 9: product photos. No public pages yet)
 
 Status tags used in this file and in the other docs:
 
@@ -71,8 +71,8 @@ One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJE
 | 5 | `phase1/05-site-settings` | `SiteSettings` model, admin, context processor | Merged into `main` |
 | 6 | `phase1/06-catalog-reference` | `ProductType`, `Crop`, `Pest`, admin, tests | Merged into `main` |
 | 7 | `phase1/07-product-model` | `Product` model, admin, tests | Merged into `main` |
-| 8 | `phase1/08-jalali-dates` | Jalali entry and display of production and expiry dates in the admin (D23), with tests | Delivered as a patch, waiting for Moeid to merge |
-| 9 | `phase1/09-image-uploads` | Upload validation, resize, WebP conversion for the product photo | Not started |
+| 8 | `phase1/08-jalali-dates` | Jalali entry and display of production and expiry dates in the admin (D23), with tests | Merged into `main` |
+| 9 | `phase1/09-image-uploads` | Upload validation, resize, WebP conversion for the product photo | Delivered as a patch, waiting for Moeid to merge |
 | 10 | `phase1/10-pages-models` | `Expert` and `FaqItem` models, admin | Not started |
 | 11 | `phase1/11-consultations-model` | `ConsultationRequest` model, admin inbox with a "mark handled" action | Not started |
 | 12 | `phase1/12-articles-and-seed-data` | `Article` model, admin, and a management command that loads clearly fake sample data | Not started |
@@ -82,6 +82,7 @@ One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJE
 From the client's answers in rounds 1 to 3. Where rounds differ, the newest wins.
 
 - Customers are mostly farmers and orchardists.
+- Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so every page has to load fast on a slow connection. Photos are small by design (D31), and the other performance measures are listed in `docs/ARCHITECTURE.md`, section 11.
 - The store sells chemical and biological pesticides (fungicides, insecticides, herbicides) and booster fertilizers. Free consultation is central to the business.
 - Look: official and professional, green. Uncluttered. No brand logos and no certificates.
 - No prices anywhere. Habibollah only sets each product **available / unavailable**. Customers call for price and ordering.
@@ -129,7 +130,8 @@ IDs come from the approved technical plan.
 | D27 | Reference lists (product types, crops, pests): names cleaned on save, a stored unique comparison key blocks spelling variants, slugs made once and kept, alternate names as free text one per line, `Pest` covers pests, diseases and weeds. CONFIRMED (task 6 merged). |
 | D28 | `Product`: manufacturer, importer and country of origin are required (the client confirmed every product names them); usage, dosage, timing and photo stay optional; new products default to available. CONFIRMED (task 7 merged). |
 | D29 | `Product`: an expiry date cannot be entered without a production date (DB-enforced, friendly message); expiry must be strictly after production when both are given. CONFIRMED (task 7 merged). |
-| D30 | Jalali date entry and display in the admin (D23) uses a hand-written port of the standard Jalali/Gregorian algorithm, not a third-party package. **Proposed in task 8, counts as approved once merged.** Has a known limitation around the 1403/1404 boundary (20-21 March 2025) -- see `docs/DECISIONS.md`. |
+| D30 | Jalali date entry and display in the admin (D23) uses a hand-written port of the standard Jalali/Gregorian algorithm, not a third-party package. CONFIRMED (task 8 merged). Has a known one-day limitation around 20-21 March 2025, see `docs/DECISIONS.md`. |
+| D31 | Product photos, built for slow connections: real JPEG/PNG/WebP only (by content), max 10 MB and 40 megapixels; orientation applied, metadata dropped; stored as two WebP files under a random name, a main image (at most 800 px, about 50 KB budget) and a thumbnail for lists (at most 320 px, about 12 KB budget), quality lowered and the picture shrunk as needed to fit; original not kept. **Proposed in task 9, counts as approved once merged.** The numbers are estimates, see `docs/DECISIONS.md`. The server's Nginx needs `client_max_body_size` of at least 10 MB. |
 
 Other agreed technical points: self-hosted Vazirmatn font and no third-party scripts, images converted to WebP on upload, Docker Compose with Nginx, Gunicorn and PostgreSQL, a staging copy for Habibollah's trial, notification adapter with one implementation per channel.
 
@@ -153,7 +155,7 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 | D7 | Which batch's dates to show when two batches are in stock. | Default is the earlier expiry. Needs the client's confirmation. |
 | D16 | How to count button taps: a small counter in our own database, or a self-hosted analytics tool. | Decide when phase 3 starts. |
 | Logo | When Moeid's logo SVG will be ready. | Placeholder until then (D14). |
-| Map | The store's exact location, and which Iranian map app to link. | Location comes from the client. The settings page has fields for the Google Maps link, the Iranian app's name and link. The static map image field is added when image handling exists (task 9). |
+| Map | The store's exact location, and which Iranian map app to link. | Location comes from the client. The settings page has fields for the Google Maps link, the Iranian app's name and link. Image handling exists since task 9, but the static map image field is not added yet: a small separate task once the image is available (it can reuse `WebPImageField`). |
 | FAQ | Customers' common pre-purchase questions. | Optional. Without them there is no FAQ page. |
 | D22 | Which tool builds the Tailwind CSS. | Decide at the start of phase 2. |
 
@@ -167,8 +169,8 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 
 ## 10. Next steps
 
-1. Moeid applies the task 8 patch on its own branch, commits it and merges to `main`. Merging approves D30 -- but please read the note in `docs/DECISIONS.md` about its known limitation before merging, not just after.
-2. Task 9: upload validation, resizing and WebP conversion for `Product.photo`.
+1. Moeid applies the task 9 patch on its own branch, commits it and merges to `main`. Merging approves D31.
+2. Task 10: `Expert` and `FaqItem` models and admin (the expert photo reuses `WebPImageField`).
 3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 
 ## 11. Where the detail lives

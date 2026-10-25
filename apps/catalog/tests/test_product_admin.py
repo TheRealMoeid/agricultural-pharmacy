@@ -113,7 +113,7 @@ def test_an_uploaded_photo_is_stored(admin_client, product_fields):
     assert response.status_code == 302
     product = Product.objects.get()
     assert product.photo.name.startswith("products/")
-    product.photo.delete(save=False)
+    assert product.photo.name.endswith(".webp")
 
 
 def test_a_corrupt_file_disguised_as_an_image_is_rejected(admin_client, product_fields):
@@ -162,3 +162,51 @@ def test_search_box_finds_by_trade_and_generic_name(admin_client, product_fields
     response = admin_client.get(url("changelist"), {"q": product_fields["generic_name"]})
     names = {p.trade_name for p in response.context["cl"].result_list}
     assert names == {product_fields["trade_name"]}
+
+
+def _photo_post(product_fields, photo):
+    data = {k: (v.pk if k == "product_type" else v) for k, v in product_fields.items()}
+    data.update(usage="", dosage="", timing="", production_date="", expiry_date="", crops=[], pests=[])
+    return {**data, "photo": photo}
+
+
+def test_a_large_phone_photo_uploaded_in_the_admin_is_shrunk(admin_client, product_fields):
+    from PIL import Image
+
+    big = SimpleUploadedFile("IMG_1.jpg", make_image_bytes(fmt="JPEG", size=(3000, 2000)), content_type="image/jpeg")
+    response = admin_client.post(url("add"), _photo_post(product_fields, big))
+    assert response.status_code == 302
+    product = Product.objects.get()
+    with product.photo.open("rb") as f:
+        image = Image.open(f)
+        assert image.format == "WEBP"
+        assert image.size == (800, 533)
+
+
+def test_a_non_image_in_the_admin_shows_the_message_next_to_the_form(admin_client, product_fields):
+    bad = SimpleUploadedFile("notes.jpg", b"just some text", content_type="image/jpeg")
+    response = admin_client.post(url("add"), _photo_post(product_fields, bad))
+    assert response.status_code == 200
+    assert Product.objects.count() == 0
+    assert "errorlist" in response.content.decode()
+
+
+def test_a_gif_in_the_admin_is_refused_with_the_format_message(admin_client, product_fields):
+    gif = SimpleUploadedFile("a.gif", make_image_bytes(fmt="GIF"), content_type="image/gif")
+    response = admin_client.post(url("add"), _photo_post(product_fields, gif))
+    assert response.status_code == 200
+    assert Product.objects.count() == 0
+    assert "فقط تصویر jpg" in response.content.decode()
+
+
+def test_editing_a_product_without_touching_the_photo_keeps_it(admin_client, product_fields):
+    admin_client.post(url("add"), _photo_post(product_fields, SimpleUploadedFile("a.jpg", make_image_bytes())))
+    product = Product.objects.get()
+    name = product.photo.name
+    data = _photo_post(product_fields, "")
+    del data["photo"]
+    data["trade_name"] = product_fields["trade_name"] + " ۲"
+    response = admin_client.post(url("change", product.pk), data)
+    assert response.status_code == 302
+    product.refresh_from_db()
+    assert product.photo.name == name

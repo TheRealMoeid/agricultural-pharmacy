@@ -7,6 +7,13 @@ from PIL import Image
 from apps.catalog.models import Crop, Pest, ProductType
 
 
+@pytest.fixture(autouse=True)
+def media_root(settings, tmp_path):
+    """Uploaded photos go to a throwaway folder, never into the real media/."""
+    settings.MEDIA_ROOT = tmp_path
+    return tmp_path
+
+
 @pytest.fixture
 def product_type(db):
     return ProductType.objects.create(name="\u0642\u0627\u0631\u0686\u200c\u06a9\u0634")  # قارچ‌کش
