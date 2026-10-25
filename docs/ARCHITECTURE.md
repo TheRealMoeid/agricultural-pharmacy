@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. Nothing here is built yet. This document describes what was agreed in the technical plan, and it says clearly which parts are settled, which are planned detail, and which are still open.
 
-Last updated: 2026-10-24 (phase 1, task 8)
+Last updated: 2026-10-25 (phase 1, task 9)
 
 Status tags:
 
@@ -78,11 +78,11 @@ It is one Django project (a monolith) split into small apps. Everything runs in 
 All are **PLANNED** unless a section says part of it exists. App names refine the approved structure slightly (see PROJECT_STRUCTURE.md).
 
 ### `core`
-Things used everywhere. **Built so far (phase 1, tasks 4, 5 and 8):** the text helpers, the phone helpers, `SiteSettings` with its admin, the context processor, and now the Jalali/Gregorian date conversion (`jalali.py`) and the `JalaliDateField` form field (`forms.py`) used by the admin (D23). The rest is PLANNED.
+Things used everywhere. **Built so far (phase 1, tasks 4, 5, 8 and 9):** the text helpers, the phone helpers, `SiteSettings` with its admin, the context processor, the Jalali/Gregorian date conversion (`jalali.py`) and the `JalaliDateField` form field (`forms.py`) used by the admin (D23), and the photo handling (`images.py`, `fields.py`): every new upload is checked and stored as two small WebP files, a main image and a thumbnail (D31). The rest is PLANNED.
 - `SiteSettings`: a single row. It starts with the details the client confirmed (store name, address, hours, the shared number) and holds:
   - the shared phone number (D5), stored as 09XXXXXXXXX whatever way it was typed. The `tel:` link, the WhatsApp link (`wa.me`) and the display form are derived from it;
   - the Telegram username (the link is built from it) and the Rubika link, pasted as Rubika gives it, because its link format has not been verified. A button is shown only while its field is filled in;
-  - the Google Maps link, and the name and link of one Iranian map app (D10). The static map image field comes with image handling;
+  - the Google Maps link, and the name and link of one Iranian map app (D10). The static map image field is not built yet (it can reuse `WebPImageField`);
   - the notification channel (D3, default "none", meaning the staff inbox only);
   - the farm-visit fee text with its show/hide switch, off by default (D9).
 - The admin shows the settings as one page: the list view redirects straight to the single row, and it cannot be deleted or duplicated.
@@ -131,7 +131,7 @@ Planned fields. Types and constraints are finalized when the models are written 
 - Trade name, generic (active-ingredient) name, slug. Trade name and generic name are required.
 - Product type (foreign key, `PROTECT`, so an in-use type cannot be deleted)
 - Usage (multi-line text, letters unified but line breaks kept), dosage, timing (both optional)
-- Photo (optional; `Pillow` added for this field; resizing and WebP conversion are task 9)
+- Photo (optional; a `WebPImageField`: on save, checked and stored as WebP in two sizes, 800 px and a 320 px thumbnail for lists, each held to a size budget, D31). `product.photo.thumb_url` gives the thumbnail's URL.
 - Manufacturer, importer, country of origin (plain text, one per product, required — D28)
 - Production date, expiry date (both optional, stored as Gregorian; nothing shown if both are empty, D7). An expiry date requires a production date, and expiry must be strictly after it (D29), enforced at the database level with a friendly admin message.
 - `is_available` (the only stock information; no quantity, no price). Defaults to available (D28).
@@ -233,12 +233,19 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 
 ## 11. Performance
 
-**[PLANNED]**
+**[PLANNED]**, except the photo handling, which is built (D31).
+
+Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so the site is designed for a slow connection first and a fast one second.
 
 - Target: usable on a slow mobile connection.
-- WebP images, lazy loading, no third-party scripts, small CSS.
+- Photos (built, D31): WebP in two sizes, each held to a byte budget (main image about 50 KB, thumbnail about 12 KB), with metadata removed.
+- Product lists show the thumbnail (`photo.thumb_url`) and never the main photo; the product page shows the main one. Images use `loading="lazy"` and carry their width and height, so the page does not jump around while they arrive. (Phase 2, with the templates.)
+- Nginx serves `/media/` and `/static/` with a long cache lifetime. Photo names are random and a replaced photo gets a new name, so a cached file never goes stale, and a returning visitor downloads nothing twice.
+- No third-party scripts, fonts or other outside requests (already confirmed). The Vazirmatn font is served as WOFF2, cut down to the characters the site uses and in as few weights as possible, with `font-display: swap` so text appears at once. (Decided with the frontend work in phase 2.)
+- Small CSS bundle and very little JavaScript.
 - Indexes on product type, availability and the search fields.
-- Caching only if measurements show a need.
+- Caching of pages only if measurements show a need.
+- Measure, do not guess: Lighthouse and the browser's network throttling ("Slow 3G" in the developer tools), plus a real phone on a poor connection, before launch.
 
 ## 12. Testing
 
@@ -246,7 +253,7 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 
 - **Unit and integration** (pytest with Django): models and constraints, the Persian search normalization, form validation and rate limiting, stock toggle permissions, notification adapter with a fake sender, and that a failed notification still saves the request.
 - **Browser smoke tests** (Playwright, mobile viewport): home to product to call button, each form, the staff toggle.
-- **Manual**: a real Android phone, RTL layout check, Lighthouse on key pages, and Habibollah trying the stock page himself on staging.
+- **Manual**: a real Android phone (also on a weak connection), RTL layout check, Lighthouse on key pages with the network throttled, and Habibollah trying the stock page himself on staging.
 - **Acceptance**: walk through the Round 3 requirements item by item.
 
 ## 13. Deployment
@@ -255,6 +262,7 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 
 - Docker Compose with Nginx, Gunicorn/Django and PostgreSQL.
 - A staging copy, used for Habibollah's trial before going live.
+- Nginx must accept uploads of at least 10 MB (`client_max_body_size`), because phone photos are several MB before they are shrunk (D31), and must serve `/media/` and `/static/` with a long cache lifetime (section 11).
 - Deploy by pulling from Git and running a short script: migrate, collect static files, restart.
 - No CI at the start. It can be added later.
 - Iran-based hosting is faster for local customers; foreign hosting can be easier to buy. A .ir domain needs an Iranian owner's registration details. None of this is decided, and prices should be checked when we get there.
@@ -292,7 +300,8 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 | D27 | Reference lists: unique comparison key, stable slugs, alternate names as text, `Pest` includes diseases and weeds | CONFIRMED |
 | D28 | Product: manufacturer/importer/country required, usage/dosage/timing/photo optional, default available | CONFIRMED |
 | D29 | Product: expiry date requires a production date, expiry strictly after production | CONFIRMED |
-| D30 | Jalali date conversion hand-written, not a third-party package; known 1-day limitation around the 1403/1404 boundary | PROPOSED in task 8, CONFIRMED once merged |
+| D30 | Jalali date conversion hand-written, not a third-party package; known 1-day limitation around the 1403/1404 boundary | CONFIRMED |
+| D31 | Product photos: content-checked, stored as a small WebP main image plus a thumbnail, each within a size budget, metadata dropped, original not kept | PROPOSED in task 9, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 

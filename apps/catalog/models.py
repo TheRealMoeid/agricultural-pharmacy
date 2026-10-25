@@ -13,10 +13,10 @@ so they share the same care about spelling:
   the same, so a link does not break if someone later fixes a spelling.
 """
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_image_file_extension
 from django.db import models
 from django.utils.text import slugify
 
+from apps.core.fields import WebPImageField
 from apps.core.text import normalize_for_search, normalize_letters, normalize_text
 
 
@@ -155,10 +155,8 @@ class Pest(SearchTag):
 
 
 def product_photo_path(instance: "Product", filename: str) -> str:
-    # The slug is not set yet on first save (it is assigned in save(), below
-    # the file field), so uploads land in a flat folder named by id later if
-    # needed. Keeping the path simple now; task 9 adds resizing and WebP
-    # conversion and can reorganize storage at the same time.
+    # `filename` is already a random name ending in .webp, made by
+    # WebPImageField (see apps/core/images.py), so a flat folder is enough.
     return f"products/{filename}"
 
 
@@ -208,12 +206,16 @@ class Product(models.Model):
     dosage = models.CharField("میزان مصرف", max_length=200, blank=True)
     timing = models.CharField("زمان مصرف", max_length=200, blank=True)
 
-    photo = models.ImageField(
+    photo = WebPImageField(
         "عکس",
         upload_to=product_photo_path,
         blank=True,
-        validators=[validate_image_file_extension],
-        help_text="فایل باید تصویر باشد (jpg، png یا webp). تغییر اندازه و تبدیل به WebP در کار بعدی اضافه می‌شود.",
+        max_side=800,
+        quality=80,
+        max_bytes=50_000,
+        thumb_side=320,
+        thumb_max_bytes=12_000,
+        help_text="تصویر jpg، png یا webp تا ۱۰ مگابایت. حجم آن خودکار کم و به webp تبدیل می‌شود و یک نسخه کوچک برای فهرست‌ها ساخته می‌شود.",
     )
 
     manufacturer = models.CharField("شرکت تولیدکننده", max_length=150)
