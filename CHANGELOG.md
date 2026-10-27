@@ -4,6 +4,14 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-26 — Phase 1, task 10: experts and FAQ
+
+- Started the `pages` app with two models and their admin pages. `Expert`: name and degree are required; role, experience, specialty and photo are optional, and a line left empty is simply not shown, which is how Rahmatollah (degree, experience, role) and Habibollah (degree, specialty) get different profiles from the same model. `FaqItem`: question, answer (several lines allowed) and order; the FAQ page will exist only if there are questions.
+- Text is cleaned on save like in the catalog (Arabic yeh and kaf, spacing). A required value that is only spaces is refused with a normal form message, and so is a value that grows past its column when cleaned.
+- Expert photos reuse `WebPImageField` with their own numbers: 480 px, about 30 KB, no thumbnail (proposed D32). Files go to `media/experts/`.
+- Both lists have an editable order column in the admin; lower comes first.
+- 41 new tests. D31 is recorded as approved (task 9 merged).
+
 ### 2026-10-25 — Phase 1, task 9: product photos
 
 - Many visitors are in villages with weak mobile coverage, so photos are built to be small, not just converted. Every new product photo is checked and stored as two WebP files: a main image (longest side at most 800 px) and a thumbnail (at most 320 px) for list pages, `<name>.webp` and `<name>_thumb.webp`. Each has a byte budget (about 50 KB and 12 KB): quality starts at 80 and is lowered step by step to 40, and if that is not enough the picture is made up to 15% smaller a few times (never under 200 px). Proposed D31.

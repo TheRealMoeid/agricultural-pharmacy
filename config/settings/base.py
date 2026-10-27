@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     # Project apps are added here as they are created.
     "apps.core",
     "apps.catalog",
+    "apps.pages",
 ]
 
 MIDDLEWARE = [

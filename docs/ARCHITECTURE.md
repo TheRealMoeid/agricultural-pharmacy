@@ -1,8 +1,8 @@
 # ARCHITECTURE.md
 
-Architecture of the agricultural pharmacy website. Nothing here is built yet. This document describes what was agreed in the technical plan, and it says clearly which parts are settled, which are planned detail, and which are still open.
+Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-10-25 (phase 1, task 9)
+Last updated: 2026-10-26 (phase 1, task 10)
 
 Status tags:
 
@@ -109,9 +109,11 @@ Everything a customer can send or ask.
 - Staff inbox: list of requests, mark as handled.
 
 ### `pages`
-Mostly static content.
-- Models: `Expert`, `FaqItem`.
+Mostly static content. **Built so far (phase 1, task 10):** the `Expert` and `FaqItem` models with their admin pages. The views and templates are PLANNED, for phase 2 and 4.
+- Models: `Expert`, `FaqItem`. Both clean their text on save (as the catalog does) and refuse a required value that is only spaces.
+- Expert photos use `WebPImageField` with their own numbers and no thumbnail (D32).
 - Views: home, experts, contact and location, FAQ.
+- The FAQ page exists only if there is at least one `FaqItem`; without questions from the client it is simply not linked.
 
 ### `articles`
 Seasonal articles by the experts.
@@ -153,11 +155,11 @@ In all three, the comparison key is a stored column with a unique constraint, so
 - Created time
 - Notification result (sent, failed, and why)
 
-**Expert**: name, degree, role, experience (optional), specialty (optional), photo, order. Which fields appear for whom is controlled by which fields are filled in. Rahmatollah has degree, experience and role. Habibollah has degree and specialty only.
+**Expert** (built in task 10): name and degree (required), role, experience and specialty (optional text), photo (optional, D32), order. Which lines appear for whom is controlled by which fields are filled in: a field left empty is not shown. Rahmatollah has degree, experience and role. Habibollah has degree and specialty only. Lower `order` comes first.
 
 **Article**: title, slug, body, season, published flag, date.
 
-**FaqItem**: question, answer, order. Only used if the client provides questions.
+**FaqItem** (built in task 10): question, answer (several lines allowed), order. Only used if the client provides questions.
 
 **SiteSettings**: see `core` above. A single row.
 
@@ -301,7 +303,8 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D28 | Product: manufacturer/importer/country required, usage/dosage/timing/photo optional, default available | CONFIRMED |
 | D29 | Product: expiry date requires a production date, expiry strictly after production | CONFIRMED |
 | D30 | Jalali date conversion hand-written, not a third-party package; known 1-day limitation around the 1403/1404 boundary | CONFIRMED |
-| D31 | Product photos: content-checked, stored as a small WebP main image plus a thumbnail, each within a size budget, metadata dropped, original not kept | PROPOSED in task 9, CONFIRMED once merged |
+| D31 | Product photos: content-checked, stored as a small WebP main image plus a thumbnail, each within a size budget, metadata dropped, original not kept | CONFIRMED |
+| D32 | Expert photos: same field and checks as D31, one WebP of at most 480 px and about 30 KB, no thumbnail | PROPOSED in task 10, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 

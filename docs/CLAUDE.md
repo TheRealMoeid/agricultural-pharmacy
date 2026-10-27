@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-25 (phase 1, task 9: product photos. No public pages yet)
+Last updated: 2026-10-26 (phase 1, task 10: expert and FAQ models. No public pages yet)
 
 Status tags used in this file and in the other docs:
 
@@ -72,8 +72,8 @@ One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJE
 | 6 | `phase1/06-catalog-reference` | `ProductType`, `Crop`, `Pest`, admin, tests | Merged into `main` |
 | 7 | `phase1/07-product-model` | `Product` model, admin, tests | Merged into `main` |
 | 8 | `phase1/08-jalali-dates` | Jalali entry and display of production and expiry dates in the admin (D23), with tests | Merged into `main` |
-| 9 | `phase1/09-image-uploads` | Upload validation, resize, WebP conversion for the product photo | Delivered as a patch, waiting for Moeid to merge |
-| 10 | `phase1/10-pages-models` | `Expert` and `FaqItem` models, admin | Not started |
+| 9 | `phase1/09-image-uploads` | Upload validation, resize, WebP conversion for the product photo | Merged into `main` |
+| 10 | `phase1/10-pages-models` | `Expert` and `FaqItem` models, admin | Delivered as a patch, waiting for Moeid to merge |
 | 11 | `phase1/11-consultations-model` | `ConsultationRequest` model, admin inbox with a "mark handled" action | Not started |
 | 12 | `phase1/12-articles-and-seed-data` | `Article` model, admin, and a management command that loads clearly fake sample data | Not started |
 
@@ -131,7 +131,8 @@ IDs come from the approved technical plan.
 | D28 | `Product`: manufacturer, importer and country of origin are required (the client confirmed every product names them); usage, dosage, timing and photo stay optional; new products default to available. CONFIRMED (task 7 merged). |
 | D29 | `Product`: an expiry date cannot be entered without a production date (DB-enforced, friendly message); expiry must be strictly after production when both are given. CONFIRMED (task 7 merged). |
 | D30 | Jalali date entry and display in the admin (D23) uses a hand-written port of the standard Jalali/Gregorian algorithm, not a third-party package. CONFIRMED (task 8 merged). Has a known one-day limitation around 20-21 March 2025, see `docs/DECISIONS.md`. |
-| D31 | Product photos, built for slow connections: real JPEG/PNG/WebP only (by content), max 10 MB and 40 megapixels; orientation applied, metadata dropped; stored as two WebP files under a random name, a main image (at most 800 px, about 50 KB budget) and a thumbnail for lists (at most 320 px, about 12 KB budget), quality lowered and the picture shrunk as needed to fit; original not kept. **Proposed in task 9, counts as approved once merged.** The numbers are estimates, see `docs/DECISIONS.md`. The server's Nginx needs `client_max_body_size` of at least 10 MB. |
+| D31 | Product photos, built for slow connections: real JPEG/PNG/WebP only (by content), max 10 MB and 40 megapixels; orientation applied, metadata dropped; stored as two WebP files under a random name, a main image (at most 800 px, about 50 KB budget) and a thumbnail for lists (at most 320 px, about 12 KB budget), quality lowered and the picture shrunk as needed to fit; original not kept. CONFIRMED (task 9 merged). The numbers are estimates, see `docs/DECISIONS.md`. The server's Nginx needs `client_max_body_size` of at least 10 MB. |
+| D32 | Expert photos reuse `WebPImageField` with their own numbers: at most 480 px on the longest side, about 30 KB budget, and no thumbnail (nothing lists small expert pictures). Everything else is as D31. **Proposed in task 10, counts as approved once merged.** The numbers are estimates, see `docs/DECISIONS.md`. |
 
 Other agreed technical points: self-hosted Vazirmatn font and no third-party scripts, images converted to WebP on upload, Docker Compose with Nginx, Gunicorn and PostgreSQL, a staging copy for Habibollah's trial, notification adapter with one implementation per channel.
 
@@ -169,8 +170,8 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 
 ## 10. Next steps
 
-1. Moeid applies the task 9 patch on its own branch, commits it and merges to `main`. Merging approves D31.
-2. Task 10: `Expert` and `FaqItem` models and admin (the expert photo reuses `WebPImageField`).
+1. Moeid applies the task 10 patch on its own branch, commits it and merges to `main`. Merging approves D32.
+2. Task 11: `ConsultationRequest` model and the admin inbox with a "mark handled" action.
 3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 
 ## 11. Where the detail lives

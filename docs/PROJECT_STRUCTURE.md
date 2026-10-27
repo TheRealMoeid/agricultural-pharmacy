@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-25 (phase 1, task 9)
+Last updated: 2026-10-26 (phase 1, task 10)
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and now `Product`, each with admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -24,11 +24,11 @@ pharmacy-site/
 ├─ pytest.ini                    EXISTS
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
-├─ apps/                         EXISTS (core and part of catalog exist so far; the other apps are PLANNED)
+├─ apps/                         EXISTS (core, catalog and part of pages exist so far; the other apps are PLANNED)
 │  ├─ core/                      EXISTS (helpers and SiteSettings; ClickEvent and the Jalali filter PLANNED)
 │  ├─ catalog/                   EXISTS (reference models, Product, and admin; search and views PLANNED)
 │  ├─ consultations/             PLANNED
-│  ├─ pages/                     PLANNED
+│  ├─ pages/                     EXISTS (Expert, FaqItem and admin; views PLANNED)
 │  ├─ articles/                  PLANNED
 │  └─ staff_panel/               PLANNED
 ├─ templates/                    PLANNED
@@ -78,7 +78,7 @@ Project-level Django configuration. No business logic. All of it exists since ph
 
 ## 5. `apps/`
 
-Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except `core` and `catalog`, which exist in part.
+Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except `core`, `catalog` and `pages`, which exist in part.
 
 Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.py`, `apps.py`, `migrations/`, and `tests/`.
 
@@ -118,9 +118,13 @@ Customer requests and how the store is told about them.
 - Rate limiting for the forms (how it is done is decided in phase 3).
 
 ### `apps/pages/`
-Mostly static content.
-- `models.py`: `Expert`, `FaqItem`.
-- `views.py` and `urls.py`: home, experts, contact and location, FAQ.
+Mostly static content. It is a Django app since task 10 and is listed in `INSTALLED_APPS`.
+- `apps.py`: EXISTS. App configuration.
+- `models.py`: EXISTS. `Expert` (photo through `WebPImageField`, no thumbnail, D32) and `FaqItem`.
+- `admin.py`: EXISTS. Both lists have an editable order column; experts are searchable.
+- `migrations/`: EXISTS. `0001_initial.py` creates both tables.
+- `tests/`: EXISTS. `test_models.py`, `test_admin.py` and `conftest.py` (uploads go to a temporary folder).
+- `views.py` and `urls.py`: PLANNED. Home, experts, contact and location, FAQ.
 
 ### `apps/articles/`
 Seasonal articles.
@@ -160,7 +164,7 @@ Files we ship ourselves. Nothing is loaded from other websites.
 
 ## 8. `media/` (not in Git)
 
-Files uploaded through the admin: product photos, expert photos, article images. Kept out of Git and included in the daily backup. Served by Nginx in production.
+Files uploaded through the admin: product photos (`products/`), expert photos (`experts/`), article images. Kept out of Git and included in the daily backup. Served by Nginx in production.
 
 ## 9. `tests/`
 
