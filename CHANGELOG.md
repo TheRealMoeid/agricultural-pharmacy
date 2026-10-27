@@ -4,6 +4,14 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-27 — Phase 1, task 11: consultation requests and the admin inbox
+
+- Started the `consultations` app with `ConsultationRequest`: kind (question or farm visit), name, phone, message, optional crop, village or address, status (new or handled), creation time, and a place for the notification result (not attempted, sent, failed, plus the reason; phase 3 fills it in). Proposed D33.
+- Rules: name and phone are always required and the phone is stored as 09XXXXXXXXX whatever way it was typed; a question needs its text, a farm visit needs the village or address and its text is optional; the text is limited to 2000 characters. A name that is only spaces, or text that grows past its column when cleaned, gives a normal form message. Deleting a crop keeps the requests that name it.
+- The admin is the inbox. Customer details are read-only and only the status can be changed; requests cannot be added there. Open requests are listed first, newest first in each group; the time is shown in Jalali in store time; the phone is a tap-to-call link; search finds phones typed with Persian digits and names typed with Arabic letters. Two actions mark the selected requests as handled or put them back to new. Someone with view-only rights cannot run them.
+- The phone number is left out of `__str__()`, so it does not end up in logs or admin messages.
+- 50 new tests. D32 is recorded as approved (task 10 merged).
+
 ### 2026-10-26 — Phase 1, task 10: experts and FAQ
 
 - Started the `pages` app with two models and their admin pages. `Expert`: name and degree are required; role, experience, specialty and photo are optional, and a line left empty is simply not shown, which is how Rahmatollah (degree, experience, role) and Habibollah (degree, specialty) get different profiles from the same model. `FaqItem`: question, answer (several lines allowed) and order; the FAQ page will exist only if there are questions.

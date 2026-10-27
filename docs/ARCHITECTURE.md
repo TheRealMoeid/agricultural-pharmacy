@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-10-26 (phase 1, task 10)
+Last updated: 2026-10-27 (phase 1, task 11)
 
 Status tags:
 
@@ -102,11 +102,11 @@ Products and how people find them. **Built so far (phase 1, tasks 6 to 7):** `Pr
 - Persian-aware search (section 8).
 
 ### `consultations`
-Everything a customer can send or ask.
+Everything a customer can send or ask. **Built so far (phase 1, task 11):** the `ConsultationRequest` model and its admin, which is the staff inbox (D33). The forms, notifications and public views are PLANNED, for phase 3.
 - Model: `ConsultationRequest`, covering both "ask an expert" and "farm visit".
-- The two forms, spam protection (D12), validation.
-- Notification adapter and its channel implementations (section 9).
-- Staff inbox: list of requests, mark as handled.
+- Staff inbox (built): the admin list shows time (Jalali, store time), name, kind, a tap-to-call phone and status, with new requests first. Customer details are read-only; the status can be changed on the request page or with the two actions "رسیدگی شد" and "برگرداندن به جدید". Requests cannot be added from the admin.
+- The two forms, spam protection (D12), validation. PLANNED.
+- Notification adapter and its channel implementations (section 9). PLANNED. The model already has `notification_status` and `notification_detail` for the outcome.
 
 ### `pages`
 Mostly static content. **Built so far (phase 1, task 10):** the `Expert` and `FaqItem` models with their admin pages. The views and templates are PLANNED, for phase 2 and 4.
@@ -146,14 +146,16 @@ Planned fields. Types and constraints are finalized when the models are written 
 
 In all three, the comparison key is a stored column with a unique constraint, so two spellings of the same name cannot both exist. Whether `Product` stores a key too is still decided when its model is written.
 
-**ConsultationRequest**
+**ConsultationRequest** (built in task 11, D33)
 - Kind: question or farm visit
-- Name, phone, message
-- Optional crop
+- Name and phone (required; the phone is stored as 09XXXXXXXXX), message (up to 2000 characters)
+- Optional crop (foreign key to the catalog's `Crop`, emptied if the crop is deleted)
 - Village or address (farm visits)
+- A question needs its message; a farm visit needs the village or address
 - Status: new or handled
 - Created time
-- Notification result (sent, failed, and why)
+- Notification result: not attempted, sent or failed, plus a free-text reason
+- The phone is never part of `__str__()`, so it does not reach logs.
 
 **Expert** (built in task 10): name and degree (required), role, experience and specialty (optional text), photo (optional, D32), order. Which lines appear for whom is controlled by which fields are filled in: a field left empty is not shown. Rahmatollah has degree, experience and role. Habibollah has degree and specialty only. Lower `order` comes first.
 
@@ -304,7 +306,8 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D29 | Product: expiry date requires a production date, expiry strictly after production | CONFIRMED |
 | D30 | Jalali date conversion hand-written, not a third-party package; known 1-day limitation around the 1403/1404 boundary | CONFIRMED |
 | D31 | Product photos: content-checked, stored as a small WebP main image plus a thumbnail, each within a size budget, metadata dropped, original not kept | CONFIRMED |
-| D32 | Expert photos: same field and checks as D31, one WebP of at most 480 px and about 30 KB, no thumbnail | PROPOSED in task 10, CONFIRMED once merged |
+| D32 | Expert photos: same field and checks as D31, one WebP of at most 480 px and about 30 KB, no thumbnail | CONFIRMED |
+| D33 | Consultation requests: required fields per kind, crop optional, new/handled status, notification result stored, read-only admin inbox | PROPOSED in task 11, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 

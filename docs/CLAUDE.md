@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-26 (phase 1, task 10: expert and FAQ models. No public pages yet)
+Last updated: 2026-10-27 (phase 1, task 11: consultation requests and the admin inbox. No public pages yet)
 
 Status tags used in this file and in the other docs:
 
@@ -73,8 +73,8 @@ One patch and one branch per task. Each task also updates `CLAUDE.md` and `PROJE
 | 7 | `phase1/07-product-model` | `Product` model, admin, tests | Merged into `main` |
 | 8 | `phase1/08-jalali-dates` | Jalali entry and display of production and expiry dates in the admin (D23), with tests | Merged into `main` |
 | 9 | `phase1/09-image-uploads` | Upload validation, resize, WebP conversion for the product photo | Merged into `main` |
-| 10 | `phase1/10-pages-models` | `Expert` and `FaqItem` models, admin | Delivered as a patch, waiting for Moeid to merge |
-| 11 | `phase1/11-consultations-model` | `ConsultationRequest` model, admin inbox with a "mark handled" action | Not started |
+| 10 | `phase1/10-pages-models` | `Expert` and `FaqItem` models, admin | Merged into `main` |
+| 11 | `phase1/11-consultations-model` | `ConsultationRequest` model, admin inbox with a "mark handled" action | Delivered as a patch, waiting for Moeid to merge |
 | 12 | `phase1/12-articles-and-seed-data` | `Article` model, admin, and a management command that loads clearly fake sample data | Not started |
 
 ## 5. Confirmed requirements
@@ -132,7 +132,8 @@ IDs come from the approved technical plan.
 | D29 | `Product`: an expiry date cannot be entered without a production date (DB-enforced, friendly message); expiry must be strictly after production when both are given. CONFIRMED (task 7 merged). |
 | D30 | Jalali date entry and display in the admin (D23) uses a hand-written port of the standard Jalali/Gregorian algorithm, not a third-party package. CONFIRMED (task 8 merged). Has a known one-day limitation around 20-21 March 2025, see `docs/DECISIONS.md`. |
 | D31 | Product photos, built for slow connections: real JPEG/PNG/WebP only (by content), max 10 MB and 40 megapixels; orientation applied, metadata dropped; stored as two WebP files under a random name, a main image (at most 800 px, about 50 KB budget) and a thumbnail for lists (at most 320 px, about 12 KB budget), quality lowered and the picture shrunk as needed to fit; original not kept. CONFIRMED (task 9 merged). The numbers are estimates, see `docs/DECISIONS.md`. The server's Nginx needs `client_max_body_size` of at least 10 MB. |
-| D32 | Expert photos reuse `WebPImageField` with their own numbers: at most 480 px on the longest side, about 30 KB budget, and no thumbnail (nothing lists small expert pictures). Everything else is as D31. **Proposed in task 10, counts as approved once merged.** The numbers are estimates, see `docs/DECISIONS.md`. |
+| D32 | Expert photos reuse `WebPImageField` with their own numbers: at most 480 px on the longest side, about 30 KB budget, and no thumbnail (nothing lists small expert pictures). Everything else is as D31. CONFIRMED (task 10 merged). The numbers are estimates, see `docs/DECISIONS.md`. |
+| D33 | `ConsultationRequest`: kind is question or farm visit; name and phone always required (phone stored as 09XXXXXXXXX); a question needs its text, a farm visit needs the village or address and its text is optional; optional crop (deleting a crop keeps the request); status new or handled; the result of the notification is stored on the request. The admin is the inbox: customer details are read-only, only the status changes, nobody adds requests there, new requests sort first, and two actions switch between new and handled. The phone is never part of `__str__()`. **Proposed in task 11, counts as approved once merged.** Details in `docs/DECISIONS.md`. |
 
 Other agreed technical points: self-hosted Vazirmatn font and no third-party scripts, images converted to WebP on upload, Docker Compose with Nginx, Gunicorn and PostgreSQL, a staging copy for Habibollah's trial, notification adapter with one implementation per channel.
 
@@ -158,6 +159,7 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 | Logo | When Moeid's logo SVG will be ready. | Placeholder until then (D14). |
 | Map | The store's exact location, and which Iranian map app to link. | Location comes from the client. The settings page has fields for the Google Maps link, the Iranian app's name and link. Image handling exists since task 9, but the static map image field is not added yet: a small separate task once the image is available (it can reuse `WebPImageField`). |
 | FAQ | Customers' common pre-purchase questions. | Optional. Without them there is no FAQ page. |
+| Inbox taps | How many taps Habibollah needs to mark a request handled. | In the admin it is: tick the row, pick the action, press go (or change the status on the request page). A one-tap button belongs to the staff panel in phase 4; decide there. |
 | D22 | Which tool builds the Tailwind CSS. | Decide at the start of phase 2. |
 
 ## 9. Content still to collect
@@ -170,8 +172,8 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 
 ## 10. Next steps
 
-1. Moeid applies the task 10 patch on its own branch, commits it and merges to `main`. Merging approves D32.
-2. Task 11: `ConsultationRequest` model and the admin inbox with a "mark handled" action.
+1. Moeid applies the task 11 patch on its own branch, commits it and merges to `main`. Merging approves D33.
+2. Task 12: `Article` model, admin, and a management command that loads clearly fake sample data.
 3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 
 ## 11. Where the detail lives

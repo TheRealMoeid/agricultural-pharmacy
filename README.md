@@ -6,7 +6,7 @@ The site shows the store's products and experts and makes it easy to call or mes
 
 ## Status
 
-Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products) and the experts and FAQ models are in place, but there are no public pages yet.
+Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products), the experts and FAQ models and the consultation request model with its admin inbox are in place, but there are no public pages yet.
 
 ## Running it locally
 

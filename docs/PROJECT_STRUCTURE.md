@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-26 (phase 1, task 10)
+Last updated: 2026-10-27 (phase 1, task 11)
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -24,10 +24,10 @@ pharmacy-site/
 ├─ pytest.ini                    EXISTS
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
-├─ apps/                         EXISTS (core, catalog and part of pages exist so far; the other apps are PLANNED)
+├─ apps/                         EXISTS (core, catalog, pages and part of consultations exist so far; the other apps are PLANNED)
 │  ├─ core/                      EXISTS (helpers and SiteSettings; ClickEvent and the Jalali filter PLANNED)
 │  ├─ catalog/                   EXISTS (reference models, Product, and admin; search and views PLANNED)
-│  ├─ consultations/             PLANNED
+│  ├─ consultations/             EXISTS (ConsultationRequest and admin inbox; forms, views and notifications PLANNED)
 │  ├─ pages/                     EXISTS (Expert, FaqItem and admin; views PLANNED)
 │  ├─ articles/                  PLANNED
 │  └─ staff_panel/               PLANNED
@@ -78,7 +78,7 @@ Project-level Django configuration. No business logic. All of it exists since ph
 
 ## 5. `apps/`
 
-Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except `core`, `catalog` and `pages`, which exist in part.
+Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except `core`, `catalog`, `pages` and `consultations`, which exist in part.
 
 Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.py`, `apps.py`, `migrations/`, and `tests/`.
 
@@ -110,9 +110,13 @@ Products and how people find them. It is a Django app since task 6 and is listed
 - `views.py` and `urls.py`: PLANNED, for phase 2. Product list, product detail.
 
 ### `apps/consultations/`
-Customer requests and how the store is told about them.
-- `models.py`: `ConsultationRequest`.
-- `forms.py`: the ask-an-expert form and the farm-visit form, with validation, honeypot and phone checks.
+Customer requests and how the store is told about them. It is a Django app since task 11 and is listed in `INSTALLED_APPS`.
+- `apps.py`: EXISTS. App configuration.
+- `models.py`: EXISTS. `ConsultationRequest` (D33).
+- `admin.py`: EXISTS. The staff inbox: read-only customer details, status filter, tap-to-call phone, Jalali time, search that ignores digit and letter typing style, and the two actions that switch requests between new and handled.
+- `migrations/`: EXISTS. `0001_initial.py` creates the table (it depends on the catalog's latest migration, because of the crop).
+- `tests/`: EXISTS. `test_models.py` and `test_admin.py`.
+- `forms.py`: PLANNED, phase 3. the ask-an-expert form and the farm-visit form, with validation, honeypot and phone checks.
 - `views.py` and `urls.py`: form pages, confirmation, staff inbox.
 - `notifications/`: the notification interface in `base.py`, a fake sender for tests, and one file per real channel (SMS, Telegram, WhatsApp). Only the channel Moeid chooses (D3, OPEN) gets a real implementation.
 - Rate limiting for the forms (how it is done is decided in phase 3).
