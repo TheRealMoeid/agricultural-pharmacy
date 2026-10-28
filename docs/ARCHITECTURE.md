@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-10-27 (phase 1, task 11)
+Last updated: 2026-10-28 (phase 1, task 12)
 
 Status tags:
 
@@ -91,6 +91,7 @@ Things used everywhere. **Built so far (phase 1, tasks 4, 5, 8 and 9):** the tex
 - Iranian mobile number helpers (`phone.py`): accept any common way of typing a number, give back one canonical form, and derive the international and display forms.
 - Jalali/Gregorian conversion (`jalali.py`, built in task 8): a hand-written port of the standard published algorithm, not a third-party package (D23, D30). Used today by `JalaliDateField` (`forms.py`) for admin entry and display; a template filter for public pages is still PLANNED, for when there are public pages to show dates on.
 - Click counting for call and message buttons (D16). Mechanism OPEN.
+- A development command, `seed_sample_data` (D35), that loads clearly fake sample data, marked "[نمونه]", and removes it again with `--clear`. It refuses to run unless DEBUG is on.
 
 ### `catalog`
 Products and how people find them. **Built so far (phase 1, tasks 6 to 7):** `ProductType`, `Crop`, `Pest` and now `Product`, each with an admin page. The views and search (`search.py`) are PLANNED, for phase 2.
@@ -116,9 +117,10 @@ Mostly static content. **Built so far (phase 1, task 10):** the `Expert` and `Fa
 - The FAQ page exists only if there is at least one `FaqItem`; without questions from the client it is simply not linked.
 
 ### `articles`
-Seasonal articles by the experts.
-- Model: `Article` with a season tag.
-- Built from the start but hidden from navigation until the first article is published (D11).
+Seasonal articles by the experts. **Built so far (phase 1, task 12):** the `Article` model and its admin. The views and templates are PLANNED, for phase 4.
+- Model: `Article` with one of four seasons, a plain-text body and an optional cover image (D34).
+- `Article.objects.published()` gives the published articles, newest first. The section is built from the start but hidden from navigation until that returns something (D11).
+- Admin: a tick box in the list publishes an article; the date is typed in Jalali and filled in if left empty when publishing.
 
 ### `staff_panel`
 The custom mobile page for Habibollah.
@@ -159,7 +161,7 @@ In all three, the comparison key is a stored column with a unique constraint, so
 
 **Expert** (built in task 10): name and degree (required), role, experience and specialty (optional text), photo (optional, D32), order. Which lines appear for whom is controlled by which fields are filled in: a field left empty is not shown. Rahmatollah has degree, experience and role. Habibollah has degree and specialty only. Lower `order` comes first.
 
-**Article**: title, slug, body, season, published flag, date.
+**Article** (built in task 12, D34): title and body (required, plain text), slug, season (spring, summer, autumn or winter, required), optional cover image (main image and thumbnail, D31 numbers), published flag (off by default), publication date (Jalali in the admin; filled with today's date when published without one; the database requires a date on a published article), created and updated times.
 
 **FaqItem** (built in task 10): question, answer (several lines allowed), order. Only used if the client provides questions.
 
@@ -307,7 +309,9 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D30 | Jalali date conversion hand-written, not a third-party package; known 1-day limitation around the 1403/1404 boundary | CONFIRMED |
 | D31 | Product photos: content-checked, stored as a small WebP main image plus a thumbnail, each within a size budget, metadata dropped, original not kept | CONFIRMED |
 | D32 | Expert photos: same field and checks as D31, one WebP of at most 480 px and about 30 KB, no thumbnail | CONFIRMED |
-| D33 | Consultation requests: required fields per kind, crop optional, new/handled status, notification result stored, read-only admin inbox | PROPOSED in task 11, CONFIRMED once merged |
+| D33 | Consultation requests: required fields per kind, crop optional, new/handled status, notification result stored, read-only admin inbox | CONFIRMED |
+| D34 | Articles: four seasons, plain-text body, optional cover image, draft by default, Jalali publication date filled in on publish, `published()` for public pages | PROPOSED in task 12, CONFIRMED once merged |
+| D35 | `seed_sample_data`: clearly fake, marked sample data for development; DEBUG only; repeatable; `--clear` removes exactly the marked rows; no photos | PROPOSED in task 12, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 

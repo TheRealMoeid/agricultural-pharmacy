@@ -4,6 +4,13 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-28 — Phase 1, task 12: articles and sample data
+
+- Started the `articles` app with `Article`: title, a plain-text body (a blank line starts a new paragraph), a season (spring, summer, autumn or winter), an optional cover image, a publish box and a publication date. Proposed D34.
+- An article is a draft until published. The date is typed in Jalali in the admin; if the article is published without one, today's date (store time) is filled in, and the database refuses a published article without a date. The cover image is stored like a product photo (D31): a small WebP plus a thumbnail. The list in the admin has a tick box that publishes an article in one step, and filters by publication and season. `Article.objects.published()` gives the published articles, newest first, for the public pages; the section stays hidden until there is one (D11).
+- Added `python manage.py seed_sample_data`: loads clearly fake sample data for development (types, crops, pests, 12 products, two experts, FAQ items, four articles, four requests), every name marked "[نمونه]". Safe to repeat. `--clear` removes exactly the marked rows. It refuses to run unless DEBUG is on, so fake dosages cannot reach a live site. No photos are created. Proposed D35.
+- 55 new tests. D33 is recorded as approved (task 11 merged). Phase 1 is complete once this is merged.
+
 ### 2026-10-27 — Phase 1, task 11: consultation requests and the admin inbox
 
 - Started the `consultations` app with `ConsultationRequest`: kind (question or farm visit), name, phone, message, optional crop, village or address, status (new or handled), creation time, and a place for the notification result (not attempted, sent, failed, plus the reason; phase 3 fills it in). Proposed D33.

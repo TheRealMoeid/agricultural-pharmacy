@@ -6,7 +6,7 @@ The site shows the store's products and experts and makes it easy to call or mes
 
 ## Status
 
-Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products), the experts and FAQ models and the consultation request model with its admin inbox are in place, but there are no public pages yet.
+Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products), the experts and FAQ models, the consultation request model with its admin inbox and the articles model are in place, but there are no public pages yet.
 
 ## Running it locally
 
@@ -39,6 +39,17 @@ Useful commands:
 | `docker compose logs db` | Shows the database log, useful when something fails to connect |
 
 If port 5432 is already used on your machine (for example by a local PostgreSQL), change the first number in the `ports` line of `compose.yml` to another port, such as 5433, and set `DATABASE_URL` in `.env` with the same port.
+
+## Sample data
+
+To try the site with something in it, load clearly fake data (every name starts with "[نمونه]"):
+
+```
+python manage.py seed_sample_data           # load it, safe to repeat
+python manage.py seed_sample_data --clear   # remove it again, nothing else is touched
+```
+
+It only runs with `DEBUG` on, which is the case locally and never in production.
 
 ## Running the tests
 

@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.catalog",
     "apps.pages",
     "apps.consultations",
+    "apps.articles",
 ]
 
 MIDDLEWARE = [

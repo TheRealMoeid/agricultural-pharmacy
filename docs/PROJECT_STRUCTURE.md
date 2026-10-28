@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-27 (phase 1, task 11)
+Last updated: 2026-10-28 (phase 1, task 12)
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No other app, no view, template or static file exists yet, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -24,12 +24,12 @@ pharmacy-site/
 ├─ pytest.ini                    EXISTS
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
-├─ apps/                         EXISTS (core, catalog, pages and part of consultations exist so far; the other apps are PLANNED)
+├─ apps/                         EXISTS (core, catalog, pages, consultations and articles exist in part; staff_panel is PLANNED)
 │  ├─ core/                      EXISTS (helpers and SiteSettings; ClickEvent and the Jalali filter PLANNED)
 │  ├─ catalog/                   EXISTS (reference models, Product, and admin; search and views PLANNED)
 │  ├─ consultations/             EXISTS (ConsultationRequest and admin inbox; forms, views and notifications PLANNED)
 │  ├─ pages/                     EXISTS (Expert, FaqItem and admin; views PLANNED)
-│  ├─ articles/                  PLANNED
+│  ├─ articles/                  EXISTS (Article and admin; views PLANNED)
 │  └─ staff_panel/               PLANNED
 ├─ templates/                    PLANNED
 ├─ static/                       PLANNED
@@ -78,7 +78,7 @@ Project-level Django configuration. No business logic. All of it exists since ph
 
 ## 5. `apps/`
 
-Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except `core`, `catalog`, `pages` and `consultations`, which exist in part.
+Each app follows the usual Django layout. Files that an app does not need are not created. `apps/__init__.py` exists (empty). Every app below is still planned, except `core`, `catalog`, `pages`, `consultations` and `articles`, which exist in part.
 
 Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.py`, `apps.py`, `migrations/`, and `tests/`.
 
@@ -96,6 +96,7 @@ Shared things used by the whole site. It is a Django app since task 5 and is lis
 - `images.py`: EXISTS (task 9). `load_image()` (check, decode, rotate), `encode_webp()` (shrink and convert to WebP within a byte budget), `process_image()`, the upload validator and `ImageRejected` (D31).
 - `fields.py`: EXISTS (task 9). `WebPImageField`, an `ImageField` that stores every new upload as a main WebP image plus a thumbnail when the model is saved, and `WebPFieldFile`, whose `thumb_url` templates use for lists.
 - `tests/`: EXISTS. `test_text.py`, `test_phone.py`, `test_jalali.py` and `test_images.py` (no database), `test_site_settings.py`, `test_admin.py`, `test_context_processor.py` and `test_jalali_form_field.py` (these use the database or Django's form machinery).
+- `management/commands/seed_sample_data.py`: EXISTS (task 12, D35). Loads clearly fake sample data for development, marked "[نمونه]", and removes it again with `--clear`. DEBUG only. Tested in `tests/test_seed_sample_data.py`.
 - `templatetags/`: the Jalali date filter and small display helpers.
 - A small view that receives call and message button taps (OPEN, depends on D16).
 
@@ -131,9 +132,13 @@ Mostly static content. It is a Django app since task 10 and is listed in `INSTAL
 - `views.py` and `urls.py`: PLANNED. Home, experts, contact and location, FAQ.
 
 ### `apps/articles/`
-Seasonal articles.
-- `models.py`: `Article` with a season.
-- `views.py` and `urls.py`: list and detail. The list is not linked from navigation until the first article is published (D11).
+Seasonal articles. It is a Django app since task 12 and is listed in `INSTALLED_APPS`.
+- `apps.py`: EXISTS. App configuration.
+- `models.py`: EXISTS. `Article` (four seasons, plain-text body, optional cover image through `WebPImageField`, `published()` queryset method, D34).
+- `admin.py`: EXISTS. A tick box in the list publishes an article; Jalali date entry; filters by publication and season.
+- `migrations/`: EXISTS. `0001_initial.py` creates the table.
+- `tests/`: EXISTS. `test_models.py`, `test_admin.py` and `conftest.py` (uploads go to a temporary folder).
+- `views.py` and `urls.py`: PLANNED. List and detail. The list is not linked from navigation until the first article is published (D11).
 
 ### `apps/staff_panel/`
 The mobile page Habibollah uses most.

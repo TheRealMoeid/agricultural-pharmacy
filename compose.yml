@@ -16,7 +16,7 @@ services:
       # Bound to this machine only, so the weak dev password is not reachable
       # from the network. If 5432 is taken, change the first number (for
       # example 5433) and put the same port in DATABASE_URL.
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - pharmacy_db:/var/lib/postgresql/data
     healthcheck:
