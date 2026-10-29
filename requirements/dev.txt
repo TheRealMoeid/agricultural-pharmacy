@@ -2,3 +2,7 @@
 -r base.txt
 pytest>=9.0,<10
 pytest-django>=4.14,<5
+
+# Only for scripts/subset_fonts.py and the font test.
+fonttools>=4.50,<5
+brotli>=1.1,<2

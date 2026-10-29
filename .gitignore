@@ -22,8 +22,8 @@ htmlcov/
 playwright-report/
 test-results/
 
-# Node (only if the Tailwind tooling ends up needing it, see D22)
-node_modules/
+# The Tailwind program that scripts/tailwind.py downloads (D36)
+.tools/
 
 # Editors and operating systems
 .idea/

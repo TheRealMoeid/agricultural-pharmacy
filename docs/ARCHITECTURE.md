@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-10-28 (phase 1, task 12)
+Last updated: 2026-10-29 (phase 2, task 1)
 
 Status tags:
 
@@ -35,7 +35,7 @@ Who uses it:
 | Rendering | Server-rendered Django templates, no single-page app | CONFIRMED (D1) |
 | Styling | Tailwind CSS, RTL, mobile first | CONFIRMED (D1) |
 | Interactivity | Small amount of vanilla JS or HTMX | CONFIRMED (D1) |
-| Font | Vazirmatn, self-hosted | CONFIRMED |
+| Font | Vazirmatn, self-hosted, cut down, two weights | CONFIRMED, details PROPOSED (D37) |
 | Admin | Django admin plus a custom mobile stock page | CONFIRMED (D2) |
 | Images | Resized and converted to WebP on upload | CONFIRMED |
 | Web server | Nginx in front of Gunicorn | PLANNED |
@@ -46,7 +46,7 @@ Who uses it:
 | Testing | pytest with pytest-django. Browser smoke tests with Playwright come later | CONFIRMED (pytest is in place) |
 | Settings and secrets | Environment variables read with django-environ, optional local `.env` file | CONFIRMED (D25) |
 | Persian strings | Written directly in templates and model labels, no gettext | CONFIRMED (D20) |
-| Tailwind build tooling | Not chosen | OPEN (D22), settle at the start of phase 2 |
+| Tailwind build tooling | Standalone program (no Node.js), pinned version, built CSS committed | Program CONFIRMED, committing the built CSS PROPOSED (D36) |
 | Hosting and domain | Not chosen | OPEN (D4), only blocks deployment |
 
 Why this stack: Moeid knows Python best and will maintain the site alone. Django's admin, forms, migrations and auth cover most of what is needed. With 50 to 200 products there is no reason for anything heavier, and server-rendered pages stay light on slow mobile connections and work well for Persian search engines.
@@ -190,7 +190,7 @@ Not in the model, on purpose: price, quantity, customer accounts, orders, batch 
 - Persian only, RTL throughout. Layout uses logical (start/end) spacing so RTL is the default, not an override. **[PLANNED]**
 - Mobile first, large tap targets, high contrast. **[CONFIRMED]**
 - Official, professional, green. Uncluttered. No brand logos, no certificate images. **[CONFIRMED]**
-- A sticky call bar on mobile and a call button in the header on desktop, on every page. **[CONFIRMED]**
+- A sticky call bar on mobile and a call button in the header on desktop, on every page. **[CONFIRMED]** Built in phase 2, task 1 (`templates/base.html` and `templates/partials/call_bar.html`). Layout uses the logical Tailwind utilities, so right to left is the default.
 - Store logo in the header. A styled text placeholder until Moeid's SVG is ready (D14). **[CONFIRMED]**
 - No requests to other websites: font, scripts and images are all served by us. **[CONFIRMED]**
 - Lazy-loaded images, small CSS bundle. **[PLANNED]**
@@ -247,8 +247,8 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 - Photos (built, D31): WebP in two sizes, each held to a byte budget (main image about 50 KB, thumbnail about 12 KB), with metadata removed.
 - Product lists show the thumbnail (`photo.thumb_url`) and never the main photo; the product page shows the main one. Images use `loading="lazy"` and carry their width and height, so the page does not jump around while they arrive. (Phase 2, with the templates.)
 - Nginx serves `/media/` and `/static/` with a long cache lifetime. Photo names are random and a replaced photo gets a new name, so a cached file never goes stale, and a returning visitor downloads nothing twice.
-- No third-party scripts, fonts or other outside requests (already confirmed). The Vazirmatn font is served as WOFF2, cut down to the characters the site uses and in as few weights as possible, with `font-display: swap` so text appears at once. (Decided with the frontend work in phase 2.)
-- Small CSS bundle and very little JavaScript.
+- No third-party scripts, fonts or other outside requests (already confirmed). The Vazirmatn font is served as WOFF2, cut down to the characters the site uses and in as few weights as possible, with `font-display: swap` so text appears at once. (Built in phase 2, task 1: two weights, about 22 KB each, D37.)
+- Small CSS bundle (about 8 KB, built from the templates only, D36) and very little JavaScript.
 - Indexes on product type, availability and the search fields.
 - Caching of pages only if measurements show a need.
 - Measure, do not guess: Lighthouse and the browser's network throttling ("Slow 3G" in the developer tools), plus a real phone on a poor connection, before launch.
@@ -270,6 +270,7 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 - A staging copy, used for Habibollah's trial before going live.
 - Nginx must accept uploads of at least 10 MB (`client_max_body_size`), because phone photos are several MB before they are shrunk (D31), and must serve `/media/` and `/static/` with a long cache lifetime (section 11).
 - Deploy by pulling from Git and running a short script: migrate, collect static files, restart.
+- The built stylesheet (`static/css/site.css`) is committed, so the image and the server never need Tailwind or Node (D36).
 - No CI at the start. It can be added later.
 - Iran-based hosting is faster for local customers; foreign hosting can be easier to buy. A .ir domain needs an Iranian owner's registration details. None of this is decided, and prices should be checked when we get there.
 
@@ -298,7 +299,7 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D19 | pip with `requirements/` files | CONFIRMED |
 | D20 | Persian written directly in templates, no gettext | CONFIRMED |
 | D21 | Local workflow: virtualenv plus PostgreSQL in Docker Compose | CONFIRMED |
-| D22 | Tailwind build tooling | OPEN, decide at the start of phase 2 |
+| D22 | Tailwind build tooling | CONFIRMED, settled as D36 |
 | D23 | Dates typed in Jalali in the admin, stored as Gregorian | CONFIRMED |
 | D24 | LF-only repository (`.gitattributes`) | CONFIRMED |
 | D25 | Settings and secrets from environment variables via django-environ | CONFIRMED |
@@ -310,8 +311,10 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D31 | Product photos: content-checked, stored as a small WebP main image plus a thumbnail, each within a size budget, metadata dropped, original not kept | CONFIRMED |
 | D32 | Expert photos: same field and checks as D31, one WebP of at most 480 px and about 30 KB, no thumbnail | CONFIRMED |
 | D33 | Consultation requests: required fields per kind, crop optional, new/handled status, notification result stored, read-only admin inbox | CONFIRMED |
-| D34 | Articles: four seasons, plain-text body, optional cover image, draft by default, Jalali publication date filled in on publish, `published()` for public pages | PROPOSED in task 12, CONFIRMED once merged |
-| D35 | `seed_sample_data`: clearly fake, marked sample data for development; DEBUG only; repeatable; `--clear` removes exactly the marked rows; no photos | PROPOSED in task 12, CONFIRMED once merged |
+| D34 | Articles: four seasons, plain-text body, optional cover image, draft by default, Jalali publication date filled in on publish, `published()` for public pages | CONFIRMED |
+| D35 | `seed_sample_data`: clearly fake, marked sample data for development; DEBUG only; repeatable; `--clear` removes exactly the marked rows; no photos | CONFIRMED |
+| D36 | Tailwind standalone program, pinned, checksum-verified, only templates scanned; built CSS committed | Program CONFIRMED, committing the built CSS PROPOSED in phase 2, task 1 |
+| D37 | Vazirmatn cut down to Persian, digits and basic Latin, two weights, about 22 KB each, `font-display: swap` | PROPOSED in phase 2, task 1, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 

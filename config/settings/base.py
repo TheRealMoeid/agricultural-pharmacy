@@ -84,9 +84,10 @@ TIME_ZONE = "Asia/Tehran"
 USE_I18N = True
 USE_TZ = True
 
-# Static files. STATICFILES_DIRS is added together with the static/ folder
-# when the frontend work starts.
+# Static files: our own CSS and fonts live in static/ (see scripts/tailwind.py).
+# collectstatic gathers them into STATIC_ROOT, which Nginx serves.
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Uploaded files (product photos and so on). Not in Git.

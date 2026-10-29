@@ -1,0 +1,39 @@
+/*
+ * The Tailwind input file. The built, minified result is static/css/site.css
+ * (python scripts/tailwind.py build) and is committed.
+ *
+ * Right to left: the site is Persian only, so <html> is dir="rtl" and layout
+ * uses the logical utilities (ms-, me-, ps-, pe-, start-, end-, text-start)
+ * instead of left and right. Then RTL is the default and nothing is flipped.
+ */
+/* source(none) turns off Tailwind's automatic scan of the whole project, which
+ * would pick up words from docs and tests. Only the templates are read. */
+@import "tailwindcss" source(none);
+@source "../../templates";
+
+/* Self-hosted and cut down to the characters we use (D37). Two weights only. */
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "Vazirmatn", ui-sans-serif, system-ui, sans-serif;
+
+  /* Official and professional: one green, used sparingly, on neutral grays. */
+  --color-brand-50: #f1f8f2;
+  --color-brand-100: #dcefdf;
+  --color-brand-600: #2e7d3a;
+  --color-brand-700: #256530;
+  --color-brand-800: #1f5128;
+}

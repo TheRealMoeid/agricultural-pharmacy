@@ -6,7 +6,7 @@ The site shows the store's products and experts and makes it easy to call or mes
 
 ## Status
 
-Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products), the experts and FAQ models, the consultation request model with its admin inbox and the articles model are in place, but there are no public pages yet.
+Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products), the experts and FAQ models, the consultation request model with its admin inbox and the articles model are in place, but the only public page so far is a placeholder home page.
 
 ## Running it locally
 
@@ -50,6 +50,18 @@ python manage.py seed_sample_data --clear   # remove it again, nothing else is t
 ```
 
 It only runs with `DEBUG` on, which is the case locally and never in production.
+
+## Styles
+
+The CSS is built with the Tailwind standalone program, so no Node.js or npm is needed. The built file, `static/css/site.css`, is committed: running or deploying the site needs nothing extra. Only when you change how a template looks:
+
+```
+python scripts/tailwind.py install   # once: downloads the pinned version (about 110 MB)
+python scripts/tailwind.py watch     # rebuilds while you work
+python scripts/tailwind.py build     # final build; commit static/css/site.css
+```
+
+A test fails if `site.css` is out of date. Use only normal and bold text in templates: those are the two weights of the font.
 
 ## Running the tests
 

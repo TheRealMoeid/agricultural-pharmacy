@@ -4,6 +4,16 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-29 — Phase 2, task 1: Tailwind, fonts and the base template
+
+- Styling tooling settled (D22 resolved as D36): Tailwind runs as its standalone program, with no Node.js or npm, pinned to 4.3.3. `python scripts/tailwind.py install` downloads it once into `.tools/` (not in Git) after checking it against the checksum published with the release; `build` and `watch` make `static/css/site.css`. The built, minified file (about 8 KB) is committed, so the server and the Docker image never need Tailwind. A test fails if it is out of date (on a machine where the program is installed).
+- Found and fixed while building: Tailwind scans the whole project folder by default, so words in the docs and tests added rules no template uses and the output depended on which files existed. `source(none)` in `static/css/input.css` limits the scan to `templates/`.
+- Fonts (D37): Vazirmatn 33.0.3, self-hosted and cut down to Persian letters, digits, punctuation and basic Latin, in two weights, regular and bold, about 22 KB each (the full font is about 50 KB). `font-display: swap`; only the regular weight is preloaded. The license file stays next to them. `scripts/subset_fonts.py` reproduces them byte for byte; a test checks every letter people type is still there, including the Arabic yeh and kaf and the half space.
+- `templates/base.html`: `<html lang="fa" dir="rtl">`, the text logo, a call button in the header on wide screens, the call bar fixed to the bottom of the screen on phones (`partials/call_bar.html`), and a footer with the address, hours and number, all from the site settings. Nothing is loaded from other websites.
+- A placeholder home page at `/` (`pages/views.py`, `pages/urls.py`, `pages/home.html`) so the base template has a page; the real pages come in phase 4. `STATICFILES_DIRS` points at `static/`.
+- `requirements/dev.txt` adds fonttools and brotli, only for the font script and its test. `.gitignore` now ignores `.tools/` instead of `node_modules/`.
+- 49 new tests. D34 and D35 are recorded as approved (task 12 merged).
+
 ### 2026-10-28 — Phase 1, task 12: articles and sample data
 
 - Started the `articles` app with `Article`: title, a plain-text body (a blank line starts a new paragraph), a season (spring, summer, autumn or winter), an optional cover image, a publish box and a publication date. Proposed D34.

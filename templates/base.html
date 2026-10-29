@@ -1,0 +1,40 @@
+{% load static %}<!doctype html>
+<html lang="fa" dir="rtl" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site.store_name }}{% endblock %}</title>
+  {# Only the regular weight is preloaded: it is on every page. Same site, so no extra connection. #}
+  <link rel="preload" href="{% static 'fonts/Vazirmatn-Regular.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  {% block head %}{% endblock %}
+</head>
+{# pb-24 keeps the last lines clear of the sticky call bar on phones. #}
+<body class="flex min-h-full flex-col bg-stone-50 pb-24 text-stone-900 antialiased md:pb-0">
+  <header class="border-b border-stone-200 bg-white">
+    <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
+      {# Text logo until the SVG is ready (D14). #}
+      <a href="{% url 'pages:home' %}" class="text-lg font-bold text-brand-700">{{ site.store_name }}</a>
+      {% if site.tel_url %}
+      <a href="{{ site.tel_url }}" class="hidden min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800 md:inline-flex">
+        تماس بگیرید: <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
+      </a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="border-t border-stone-200 bg-white">
+    <address class="mx-auto max-w-5xl space-y-1 px-4 py-6 text-sm not-italic text-stone-600">
+      <p>{{ site.address }}</p>
+      <p>{{ site.working_hours }}</p>
+      {% if site.tel_url %}<p>تلفن: <a href="{{ site.tel_url }}" dir="ltr" class="font-bold text-brand-700">{{ site.phone_display }}</a></p>{% endif %}
+    </address>
+  </footer>
+
+  {% include "partials/call_bar.html" %}
+</body>
+</html>

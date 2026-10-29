@@ -1,0 +1,8 @@
+{# The call bar: always at the bottom of the screen on phones, on every page. On wider screens the header has the call button instead. #}
+{% if site.tel_url %}
+<div id="call-bar" class="fixed inset-x-0 bottom-0 z-10 border-t border-brand-800 bg-brand-600 pb-[env(safe-area-inset-bottom)] md:hidden">
+  <a href="{{ site.tel_url }}" class="flex min-h-14 items-center justify-center gap-2 px-4 text-lg font-bold text-white active:bg-brand-800 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-white">
+    تماس با داروخانه <span dir="ltr">{{ site.phone_display }}</span>
+  </a>
+</div>
+{% endif %}
