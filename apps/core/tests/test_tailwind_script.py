@@ -1,6 +1,7 @@
 """Tests for scripts/tailwind.py. No network and no database needed."""
 import hashlib
 import importlib.util
+import os
 import re
 import sys
 from pathlib import Path
@@ -107,7 +108,8 @@ def test_install_stores_a_verified_download_and_makes_it_runnable(tw, monkeypatc
     path = tw.install()
     assert path == tw.binary_path()
     assert path.read_bytes() == b"binary"
-    assert path.stat().st_mode & 0o111
+    if os.name != "nt":  # Windows has no executable bit; sys.platform is faked above, so it cannot be used here
+        assert path.stat().st_mode & 0o111
     assert [p.name for p in tw.TOOLS_DIR.iterdir()] == [path.name]  # no leftover partial file
 
 

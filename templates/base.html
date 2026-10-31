@@ -13,8 +13,11 @@
 <body class="flex min-h-full flex-col bg-stone-50 pb-24 text-stone-900 antialiased md:pb-0">
   <header class="border-b border-stone-200 bg-white">
     <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-      {# Text logo until the SVG is ready (D14). #}
-      <a href="{% url 'pages:home' %}" class="text-lg font-bold text-brand-700">{{ site.store_name }}</a>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+        {# Text logo until the SVG is ready (D14). #}
+        <a href="{% url 'pages:home' %}" class="text-lg font-bold text-brand-700">{{ site.store_name }}</a>
+        <a href="{% url 'catalog:product_list' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">محصولات</a>
+      </div>
       {% if site.tel_url %}
       <a href="{{ site.tel_url }}" class="hidden min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800 md:inline-flex">
         تماس بگیرید: <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
