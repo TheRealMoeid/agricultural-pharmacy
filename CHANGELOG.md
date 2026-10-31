@@ -4,6 +4,18 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-31 — Phase 2, task 3: the product list
+
+- Added the public product list at `/products/` (`apps/catalog/views.py`, `urls.py`, `templates/catalog/product_list.html`). It takes two optional parameters: `type`, a product type slug (an unknown slug is ignored, not a 404), and `q`, the search text (cut at 100 characters). The text goes through `search()` from the last task, over the products of the chosen type. Proposed D39.
+- The type filter is a row of plain links: "همه" plus the types that have at least one product, in the types' own order. No JavaScript. The chips keep the search text and the search form keeps the chosen type.
+- Cards show the thumbnail (`photo.thumb_url`) in a fixed square box, with width and height set and `loading="lazy"`, so the page does not jump; a small inline placeholder is drawn when there is no photo. Then trade name, generic name, type and an availability badge in words, "موجود" or "فعلاً موجود نیست". Unavailable products stay in the list (D7). No prices. Cards are not links yet; the product page is the next task.
+- With no query, available products come first, then alphabetical by trade name. With a query, the ranking from D38 comes first and this order is kept inside each rank.
+- When nothing matches, the page says so, shows a large call button and a link to show everything; an empty catalog has its own message. The call bar and the header call button are on the page as everywhere.
+- The header and the placeholder home page now link to the list. A small `persian_digits` template filter (`apps/core/templatetags/persian.py`) writes the result count in Persian digits.
+- Measured with 200 sample products: about 185 KB of HTML, about 7 KB gzipped, so Nginx needs gzip on for HTML (noted in `ARCHITECTURE.md`, section 13). `static/css/site.css` was rebuilt with the pinned Tailwind (10 KB).
+- Fixed a test that failed only on Windows: `test_install_stores_a_verified_download_and_makes_it_runnable` checked the Unix executable bit. It now checks `os.name`, because the test fakes `sys.platform` and Windows files have no such bit.
+- 37 new tests for the list and 3 for the filter, including a query-count check that the number of queries does not grow with the number of products. D36, D37 and D38 are recorded as approved (tasks 1 and 2 merged).
+
 ### 2026-10-30 — Phase 2, task 2: the product search
 
 - Added `apps/catalog/search.py`: `search(query, products=None)`, the Persian-aware search the public product list (task 3) will use. A query is split into words and every word has to match somewhere -- the trade name, the generic name, the usage text, or a crop's or a pest's name or an alternate name -- the same "every word must match" rule the admin search already uses, with the same typing-style tolerance (`normalize_for_search()`: letters, digits, the half space and the forms of alef do not matter). Proposed D38.

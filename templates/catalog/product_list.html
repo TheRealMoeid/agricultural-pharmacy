@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load persian %}
+{# The public product list (D39). Normal and bold text only: those are the two font weights we ship (D37). #}
+{% block title %}محصولات | {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-brand-800">محصولات</h1>
+
+<form method="get" action="{% url 'catalog:product_list' %}" role="search" class="mt-4 flex gap-2">
+  {% if selected_type %}<input type="hidden" name="type" value="{{ selected_type.slug }}">{% endif %}
+  <input type="search" name="q" value="{{ q }}" maxlength="100" enterkeyhint="search" autocomplete="off" aria-label="جست‌وجوی محصول" placeholder="نام محصول، گیاه یا آفت" class="min-h-12 min-w-0 flex-1 rounded-lg border border-stone-200 bg-white px-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+  <button type="submit" class="min-h-12 rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">جست‌وجو</button>
+</form>
+
+{% if types %}
+<nav aria-label="نوع محصول" class="mt-4 flex flex-wrap gap-2">
+  <a href="{% querystring type=None q=q|default:None %}"{% if not selected_type %} aria-current="true" class="inline-flex min-h-11 items-center rounded-lg border border-brand-600 bg-brand-600 px-4 text-sm font-bold text-white"{% else %} class="inline-flex min-h-11 items-center rounded-lg border border-stone-200 bg-white px-4 text-sm hover:bg-brand-50"{% endif %}>همه</a>
+  {% for type in types %}
+  <a href="{% querystring type=type.slug q=q|default:None %}"{% if type == selected_type %} aria-current="true" class="inline-flex min-h-11 items-center rounded-lg border border-brand-600 bg-brand-600 px-4 text-sm font-bold text-white"{% else %} class="inline-flex min-h-11 items-center rounded-lg border border-stone-200 bg-white px-4 text-sm hover:bg-brand-50"{% endif %}>{{ type.name }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+
+{% if products %}
+<p class="mt-4 text-sm text-stone-600">{{ count|persian_digits }} محصول</p>
+<ul class="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+  {% for product in products %}
+  <li data-product="{{ product.pk }}" class="flex flex-col overflow-hidden rounded-lg border border-stone-200 bg-white">
+    {# A square box of fixed size, so the page does not jump while thumbnails arrive. #}
+    <div class="flex aspect-square items-center justify-center bg-stone-100">
+      {% if product.photo %}
+      <img src="{{ product.photo.thumb_url }}" alt="" width="320" height="320" loading="lazy" decoding="async" class="size-full object-contain">
+      {% else %}
+      <svg viewBox="0 0 24 24" class="size-16 text-stone-300" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19l8-8"/></svg>
+      {% endif %}
+    </div>
+    <div class="flex flex-1 flex-col gap-1 p-3">
+      <h2 class="font-bold">{{ product.trade_name }}</h2>
+      <p class="text-sm text-stone-600">{{ product.generic_name }}</p>
+      <p class="text-sm text-stone-600">{{ product.product_type.name }}</p>
+      <p class="mt-auto pt-2">
+        {% if product.is_available %}
+        <span data-badge="available" class="inline-block rounded-lg bg-brand-100 px-2 py-1 text-sm font-bold text-brand-800">موجود</span>
+        {% else %}
+        <span data-badge="unavailable" class="inline-block rounded-lg bg-stone-200 px-2 py-1 text-sm font-bold text-stone-900">فعلاً موجود نیست</span>
+        {% endif %}
+      </p>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<section id="empty" class="mt-6 rounded-lg border border-stone-200 bg-white p-6 text-center">
+  {% if q or selected_type %}
+  <h2 class="text-lg font-bold">محصولی پیدا نشد</h2>
+  <p class="mt-2 text-stone-600">نام محصول، گیاه یا آفت را به شکل دیگری بنویسید. یا با داروخانه تماس بگیرید تا راهنمایی‌تان کنیم.</p>
+  {% else %}
+  <h2 class="text-lg font-bold">هنوز محصولی ثبت نشده است</h2>
+  <p class="mt-2 text-stone-600">برای اطلاع از محصولات با داروخانه تماس بگیرید.</p>
+  {% endif %}
+  {% if site.tel_url %}
+  <a href="{{ site.tel_url }}" class="mt-4 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+    تماس با داروخانه <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
+  </a>
+  {% endif %}
+  {% if q or selected_type %}
+  <p class="mt-4"><a href="{% url 'catalog:product_list' %}" class="font-bold text-brand-700 underline">نمایش همه محصولات</a></p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

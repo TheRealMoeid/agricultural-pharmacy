@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-10-30 (phase 2, task 2)
+Last updated: 2026-10-31 (phase 2, task 3)
 
 Status tags:
 
@@ -35,7 +35,7 @@ Who uses it:
 | Rendering | Server-rendered Django templates, no single-page app | CONFIRMED (D1) |
 | Styling | Tailwind CSS, RTL, mobile first | CONFIRMED (D1) |
 | Interactivity | Small amount of vanilla JS or HTMX | CONFIRMED (D1) |
-| Font | Vazirmatn, self-hosted, cut down, two weights | CONFIRMED, details PROPOSED (D37) |
+| Font | Vazirmatn, self-hosted, cut down, two weights | CONFIRMED (D37) |
 | Admin | Django admin plus a custom mobile stock page | CONFIRMED (D2) |
 | Images | Resized and converted to WebP on upload | CONFIRMED |
 | Web server | Nginx in front of Gunicorn | PLANNED |
@@ -46,7 +46,7 @@ Who uses it:
 | Testing | pytest with pytest-django. Browser smoke tests with Playwright come later | CONFIRMED (pytest is in place) |
 | Settings and secrets | Environment variables read with django-environ, optional local `.env` file | CONFIRMED (D25) |
 | Persian strings | Written directly in templates and model labels, no gettext | CONFIRMED (D20) |
-| Tailwind build tooling | Standalone program (no Node.js), pinned version, built CSS committed | Program CONFIRMED, committing the built CSS PROPOSED (D36) |
+| Tailwind build tooling | Standalone program (no Node.js), pinned version, built CSS committed | CONFIRMED (D36) |
 | Hosting and domain | Not chosen | OPEN (D4), only blocks deployment |
 
 Why this stack: Moeid knows Python best and will maintain the site alone. Django's admin, forms, migrations and auth cover most of what is needed. With 50 to 200 products there is no reason for anything heavier, and server-rendered pages stay light on slow mobile connections and work well for Persian search engines.
@@ -88,18 +88,20 @@ Things used everywhere. **Built so far (phase 1, tasks 4, 5, 8 and 9):** the tex
 - The admin shows the settings as one page: the list view redirects straight to the single row, and it cannot be deleted or duplicated.
 - A context processor that makes those settings available in every template, so the sticky call bar always has the number.
 - Persian text normalization helpers (`text.py`), used by search and by form validation.
+- A template filter library, `templatetags/persian.py`: `persian_digits` (built, used for the result count on the list). The Jalali date filter joins it in phase 2, task 4.
 - Iranian mobile number helpers (`phone.py`): accept any common way of typing a number, give back one canonical form, and derive the international and display forms.
 - Jalali/Gregorian conversion (`jalali.py`, built in task 8): a hand-written port of the standard published algorithm, not a third-party package (D23, D30). Used today by `JalaliDateField` (`forms.py`) for admin entry and display; a template filter for public pages is still PLANNED, for when there are public pages to show dates on.
 - Click counting for call and message buttons (D16). Mechanism OPEN.
 - A development command, `seed_sample_data` (D35), that loads clearly fake sample data, marked "[نمونه]", and removes it again with `--clear`. It refuses to run unless DEBUG is on.
 
 ### `catalog`
-Products and how people find them. **Built so far (phase 1, tasks 6 to 7, and phase 2, task 2):** `ProductType`, `Crop`, `Pest` and `Product`, each with an admin page, and the public search (`search.py`, D38). The views (product list, product page) are PLANNED, for phase 2, tasks 3 and 4.
+Products and how people find them. **Built so far (phase 1, tasks 6 to 7, and phase 2, tasks 2 and 3):** `ProductType`, `Crop`, `Pest` and `Product`, each with an admin page, the public search (`search.py`, D38) and the product list view (`views.py`, `urls.py`, D39). The product page is PLANNED, for phase 2, task 4.
 - Models: `Product`, `ProductType`, `Crop`, `Pest`.
 - `Product` stores no search key of its own (see section 5); the public search built in phase 2 normalizes at query time instead.
 - The three reference lists share one base: the name is cleaned on save, a stored comparison key (`normalize_for_search()` of the name) is unique, and the slug is made once from the name (D27). Crops and pests also have `search_keys()`, the set of keys the entry answers to, for the search work in phase 2.
 - The admin search box on these lists uses the same normalization, so Habibollah finds an entry however he types it.
-- Product list with type filter and search, product detail page. PLANNED, phase 2, tasks 3 and 4.
+- Product list at `/products/` (built, D39): the type filter is a row of plain links (types that have products), the search box is a GET form, and both keep each other's state. The queryset is `select_related("product_type")`, ordered available first and then by trade name, filtered by type, and passed to `search()`. Unavailable products stay visible with a text badge. Cards use `photo.thumb_url` in a fixed square box with `loading="lazy"`. The number of queries does not depend on the number of products (a test guards it). No pagination: with 200 products the page is about 185 KB of HTML and about 7 KB gzipped.
+- Product detail page. PLANNED, phase 2, task 4. Slugs are Persian, so its URL pattern needs `<str:slug>`, not `<slug:slug>`.
 - Persian-aware search (section 8): built, see `search.py` below.
 
 ### `consultations`
@@ -190,10 +192,10 @@ Not in the model, on purpose: price, quantity, customer accounts, orders, batch 
 - Persian only, RTL throughout. Layout uses logical (start/end) spacing so RTL is the default, not an override. **[PLANNED]**
 - Mobile first, large tap targets, high contrast. **[CONFIRMED]**
 - Official, professional, green. Uncluttered. No brand logos, no certificate images. **[CONFIRMED]**
-- A sticky call bar on mobile and a call button in the header on desktop, on every page. **[CONFIRMED]** Built in phase 2, task 1 (`templates/base.html` and `templates/partials/call_bar.html`). Layout uses the logical Tailwind utilities, so right to left is the default.
+- A sticky call bar on mobile and a call button in the header on desktop, on every page. **[CONFIRMED]** Built in phase 2, task 1 (`templates/base.html` and `templates/partials/call_bar.html`). Layout uses the logical Tailwind utilities, so right to left is the default. The header also links to the product list (phase 2, task 3).
 - Store logo in the header. A styled text placeholder until Moeid's SVG is ready (D14). **[CONFIRMED]**
 - No requests to other websites: font, scripts and images are all served by us. **[CONFIRMED]**
-- Lazy-loaded images, small CSS bundle. **[PLANNED]**
+- Lazy-loaded images (built on the product list, phase 2, task 3), small CSS bundle. **[PLANNED]**
 - Map: static image plus links, no embed (D10). **[CONFIRMED]**
 - Dates shown in the Jalali calendar (D13). **[CONFIRMED]**
 
@@ -269,7 +271,7 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 
 - Docker Compose with Nginx, Gunicorn/Django and PostgreSQL.
 - A staging copy, used for Habibollah's trial before going live.
-- Nginx must accept uploads of at least 10 MB (`client_max_body_size`), because phone photos are several MB before they are shrunk (D31), and must serve `/media/` and `/static/` with a long cache lifetime (section 11).
+- Nginx must accept uploads of at least 10 MB (`client_max_body_size`), because phone photos are several MB before they are shrunk (D31), must serve `/media/` and `/static/` with a long cache lifetime (section 11), and must gzip HTML: the product list is about 185 KB raw and about 7 KB gzipped at 200 products (D39).
 - Deploy by pulling from Git and running a short script: migrate, collect static files, restart.
 - The built stylesheet (`static/css/site.css`) is committed, so the image and the server never need Tailwind or Node (D36).
 - No CI at the start. It can be added later.
@@ -314,9 +316,10 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D33 | Consultation requests: required fields per kind, crop optional, new/handled status, notification result stored, read-only admin inbox | CONFIRMED |
 | D34 | Articles: four seasons, plain-text body, optional cover image, draft by default, Jalali publication date filled in on publish, `published()` for public pages | CONFIRMED |
 | D35 | `seed_sample_data`: clearly fake, marked sample data for development; DEBUG only; repeatable; `--clear` removes exactly the marked rows; no photos | CONFIRMED |
-| D36 | Tailwind standalone program, pinned, checksum-verified, only templates scanned; built CSS committed | Program CONFIRMED, committing the built CSS PROPOSED in phase 2, task 1 |
+| D36 | Tailwind standalone program, pinned, checksum-verified, only templates scanned; built CSS committed | CONFIRMED |
 | D37 | Vazirmatn cut down to Persian, digits and basic Latin, two weights, about 22 KB each, `font-display: swap` | CONFIRMED |
-| D38 | Public product search: every query word must match somewhere, ranked trade/generic name above usage text above crop/pest tags, Python-side over prefetched products | PROPOSED in phase 2, task 2, CONFIRMED once merged |
+| D38 | Public product search: every query word must match somewhere, ranked trade/generic name above usage text above crop/pest tags, Python-side over prefetched products | CONFIRMED |
+| D39 | Public product list at `/products/`: `type` and `q` GET parameters, type filter as plain links, no pagination, available first then trade name, unavailable products visible with a text badge, thumbnails lazy-loaded in a fixed square box, empty state with the call button, query count independent of the number of products | PROPOSED in phase 2, task 3, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 
