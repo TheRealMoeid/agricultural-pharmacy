@@ -2,7 +2,7 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-29 (phase 2, task 1)
+Last updated: 2026-10-30 (phase 2, task 2)
 
 **Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. No public page exists yet except a placeholder home page, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
@@ -108,8 +108,9 @@ Products and how people find them. It is a Django app since task 6 and is listed
 - `admin.py`: EXISTS. The three reference lists have a search box that ignores typing style; `Product` has filters, a dual-list widget for crops and pests, and a plain search box.
 - `migrations/`: EXISTS. `0001_initial.py` creates the three reference tables, `0002_product.py` creates `Product`, `0003` and `0004` adjust its date and photo fields.
 - `tests/`: EXISTS. `test_models.py`, `test_admin.py` (reference lists), `test_product.py`, `test_product_admin.py`, `test_product_jalali_admin.py` (task 8), `test_product_photo.py` (task 9) and `conftest.py` with shared fixtures (all use the database).
-- `search.py`: PLANNED, for phase 2. The search logic. Kept separate from views so it can be tested on its own.
-- `views.py` and `urls.py`: PLANNED, for phase 2. Product list, product detail.
+- `search.py`: EXISTS (phase 2, task 2, D38). `search(query, products=None)`: Persian-aware, every word of the query has to match somewhere, ranked (trade/generic name, then usage text, then crop/pest names and alternates). Kept separate from views, as planned, so it is tested on its own, with no database-level search feature needed at this catalog's size.
+- `tests/test_search.py`: EXISTS (phase 2, task 2). Typing style, ranking, the starting-queryset argument, and a query-count check that guards the crops/pests prefetch.
+- `views.py` and `urls.py`: PLANNED, for phase 2, tasks 3 and 4. Product list, product detail.
 
 ### `apps/consultations/`
 Customer requests and how the store is told about them. It is a Django app since task 11 and is listed in `INSTALLED_APPS`.

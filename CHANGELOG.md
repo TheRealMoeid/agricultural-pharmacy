@@ -4,6 +4,13 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-10-30 — Phase 2, task 2: the product search
+
+- Added `apps/catalog/search.py`: `search(query, products=None)`, the Persian-aware search the public product list (task 3) will use. A query is split into words and every word has to match somewhere -- the trade name, the generic name, the usage text, or a crop's or a pest's name or an alternate name -- the same "every word must match" rule the admin search already uses, with the same typing-style tolerance (`normalize_for_search()`: letters, digits, the half space and the forms of alef do not matter). Proposed D38.
+- Results are ranked, not only filtered: a product's rank is the best tier any query word matched -- the trade or generic name first, then the usage text, then crop or pest names and alternates -- so a search for a product by its own name is not buried under products that only mention the word elsewhere. Within a rank, products keep their usual alphabetical order.
+- `Product` still stores no search key (decided in phase 1, task 7); the function loads products, with `crops` and `pests` prefetched, and compares in Python, which fits the catalog's expected size (50 to 200 products) without a database-level search feature. An optional starting queryset lets a caller narrow the search first (by type, by availability); an empty query returns everything in `Product`'s own order, including unavailable products, which stay visible per D7.
+- 33 new tests, including a query-count check that guards the prefetch against a silent N+1 regression. D37 is recorded as approved (phase 2, task 1 merged).
+
 ### 2026-10-29 — Phase 2, task 1: Tailwind, fonts and the base template
 
 - Styling tooling settled (D22 resolved as D36): Tailwind runs as its standalone program, with no Node.js or npm, pinned to 4.3.3. `python scripts/tailwind.py install` downloads it once into `.tools/` (not in Git) after checking it against the checksum published with the release; `build` and `watch` make `static/css/site.css`. The built, minified file (about 8 KB) is committed, so the server and the Docker image never need Tailwind. A test fails if it is out of date (on a machine where the program is installed).

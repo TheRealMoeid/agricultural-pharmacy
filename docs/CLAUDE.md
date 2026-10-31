@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-10-29 (phase 2, task 1: Tailwind, fonts and the base template. Only a placeholder home page exists)
+Last updated: 2026-10-30 (phase 2, task 2: the product search, built and tested on its own. Only a placeholder home page exists; nothing uses the search yet)
 
 Status tags used in this file and in the other docs:
 
@@ -83,8 +83,8 @@ Same rules as phase 1: one patch and one branch per task, and each task also upd
 
 | # | Branch | Content | Status |
 |---|---|---|---|
-| 1 | `phase2/01-tailwind-and-base-template` | Tailwind standalone program (D36), self-hosted cut-down Vazirmatn (D37), `base.html` with the call bar and a placeholder home page | Delivered as a patch, waiting for Moeid to merge |
-| 2 | `phase2/02-product-search` | `catalog/search.py`: the Persian-aware search, built and tested on its own, no views | Not started |
+| 1 | `phase2/01-tailwind-and-base-template` | Tailwind standalone program (D36), self-hosted cut-down Vazirmatn (D37), `base.html` with the call bar and a placeholder home page | Merged into `main` |
+| 2 | `phase2/02-product-search` | `catalog/search.py`: the Persian-aware search, built and tested on its own, no views | Delivered as a patch, waiting for Moeid to merge |
 | 3 | `phase2/03-product-list` | Product list with the type filter and the search box, thumbnails, availability badges | Not started |
 | 4 | `phase2/04-product-detail` | Product page, the "call to ask the price" button, Jalali date filter | Not started |
 
@@ -134,6 +134,7 @@ IDs come from the approved technical plan.
 | D20 | Persian text is written directly in templates and model labels. No gettext. |
 | D21 | Local workflow: Django in a virtualenv on Moeid's machine, only PostgreSQL in Docker Compose. Full containers wait for deployment. |
 | D22 | The Tailwind build tooling was to be decided at the start of phase 2. Decided: see D36. |
+| D38 | The public product search (`apps/catalog/search.py`, function `search()`). See D38 for the rest. |
 | D23 | Production and expiry dates are typed in Jalali in the admin and stored as Gregorian. The conversion is written and tested in the project. |
 | D24 | The repository is LF-only, enforced with `.gitattributes`, so patches apply cleanly. |
 | D25 | Settings and secrets come from environment variables, read with the `django-environ` package, plus an optional local `.env` file. |
@@ -149,6 +150,7 @@ IDs come from the approved technical plan.
 | D35 | `python manage.py seed_sample_data` loads clearly fake sample data for development (every name starts with "[نمونه]"), is safe to repeat, and `--clear` removes exactly those rows. It refuses to run unless DEBUG is on. No photos are created. CONFIRMED (task 12 merged). Details in `docs/DECISIONS.md`. |
 | D36 | Tailwind CSS runs as the standalone program (no Node.js or npm), pinned to one version (4.3.3), downloaded by `python scripts/tailwind.py install` into `.tools/` (not in Git) and checked against the checksum published with the release. Only the templates are scanned for classes. The built, minified `static/css/site.css` is committed, so the server and the Docker image never need Tailwind. **Standalone program approved by Moeid on 2026-10-28; committing the built CSS is a recommendation that counts as approved once phase 2, task 1 is merged.** Details in `docs/DECISIONS.md`. |
 | D37 | Vazirmatn 33.0.3 (SIL Open Font License, `OFL.txt` kept next to the files), self-hosted and cut down by `scripts/subset_fonts.py` to Persian letters, digits, punctuation and basic Latin: two weights, regular and bold, about 22 KB each (the full font is about 50 KB), `font-display: swap`, only the regular weight preloaded. **Proposed in phase 2, task 1, counts as approved once merged.** Details in `docs/DECISIONS.md`. |
+| D38 | The public product search (`apps/catalog/search.py`, function `search()`). Persian-aware, like the reference-list admin search: a query is split into words and every word has to match somewhere, with typing style, digits, the half space and the forms of alef not mattering (`normalize_for_search()`). It matches the trade name, the generic name, the usage text, and the name or an alternate name of any of the product's crops or pests. Results are ranked, not just filtered: a product ranks by the best tier any query word matched -- the trade or generic name first, then the usage text, then crop/pest names and alternates last -- so a search for a product by its own name is not buried under products that merely mention the same word elsewhere. `Product` still stores no search key (phase 1, task 7): the function loads products, with their crops and pests prefetched, and compares in Python, which fits the catalog's expected size (50 to 200 products). An optional starting queryset lets a caller narrow the search first, by type or availability; the product list view (task 3) will use this for the type filter. **Proposed in phase 2, task 2, counts as approved once merged.** Details in `docs/DECISIONS.md`. |
 
 Other agreed technical points: self-hosted Vazirmatn font and no third-party scripts, images converted to WebP on upload, Docker Compose with Nginx, Gunicorn and PostgreSQL, a staging copy for Habibollah's trial, notification adapter with one implementation per channel.
 
@@ -186,8 +188,8 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 
 ## 10. Next steps
 
-1. Moeid applies the phase 2, task 1 patch on its own branch, commits it and merges to `main`. Merging approves D36 and D37. To change styles later: `python scripts/tailwind.py install` once, then `watch` or `build`.
-2. Phase 2, task 2: the Persian-aware product search, on its own, with tests. `python manage.py seed_sample_data` gives it something to search.
+1. Moeid applies the phase 2, task 2 patch on its own branch, commits it and merges to `main`. Merging approves D38.
+2. Phase 2, task 3: the product list, using `catalog/search.py` and a type filter, with thumbnails and availability badges.
 3. Moeid talks to his father about the fee, the usernames, and the product list and tags, and creates the Telegram and Rubika accounts.
 
 ## 11. Where the detail lives

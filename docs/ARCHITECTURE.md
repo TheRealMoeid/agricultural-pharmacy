@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-10-29 (phase 2, task 1)
+Last updated: 2026-10-30 (phase 2, task 2)
 
 Status tags:
 
@@ -94,13 +94,13 @@ Things used everywhere. **Built so far (phase 1, tasks 4, 5, 8 and 9):** the tex
 - A development command, `seed_sample_data` (D35), that loads clearly fake sample data, marked "[نمونه]", and removes it again with `--clear`. It refuses to run unless DEBUG is on.
 
 ### `catalog`
-Products and how people find them. **Built so far (phase 1, tasks 6 to 7):** `ProductType`, `Crop`, `Pest` and now `Product`, each with an admin page. The views and search (`search.py`) are PLANNED, for phase 2.
+Products and how people find them. **Built so far (phase 1, tasks 6 to 7, and phase 2, task 2):** `ProductType`, `Crop`, `Pest` and `Product`, each with an admin page, and the public search (`search.py`, D38). The views (product list, product page) are PLANNED, for phase 2, tasks 3 and 4.
 - Models: `Product`, `ProductType`, `Crop`, `Pest`.
 - `Product` stores no search key of its own (see section 5); the public search built in phase 2 normalizes at query time instead.
 - The three reference lists share one base: the name is cleaned on save, a stored comparison key (`normalize_for_search()` of the name) is unique, and the slug is made once from the name (D27). Crops and pests also have `search_keys()`, the set of keys the entry answers to, for the search work in phase 2.
 - The admin search box on these lists uses the same normalization, so Habibollah finds an entry however he types it.
-- Product list with type filter and search, product detail page.
-- Persian-aware search (section 8).
+- Product list with type filter and search, product detail page. PLANNED, phase 2, tasks 3 and 4.
+- Persian-aware search (section 8): built, see `search.py` below.
 
 ### `consultations`
 Everything a customer can send or ask. **Built so far (phase 1, task 11):** the `ConsultationRequest` model and its admin, which is the staff inbox (D33). The forms, notifications and public views are PLANNED, for phase 3.
@@ -212,7 +212,8 @@ Not in the model, on purpose: price, quantity, customer accounts, orders, batch 
 - Until crop/pest tags exist for the products, search works on names and usage text only (D8).
 - Crops and pests keep their own comparison key in a column (built in task 6), and `search_keys()` also returns the keys of their alternate names.
 - `Product` itself does not get a stored key (decided in task 7): its search has to match several text fields plus two related lists at once, which a single column does not fit well. `search.py`, in phase 2, normalizes at query time instead, reusing `normalize_for_search()`.
-- This is the most important thing to test (see section 11).
+- Built in phase 2, task 2: `search.py`'s `search(query, products=None)` splits the query into words, requires every word to match somewhere, and ranks results (trade/generic name, then usage text, then crop/pest names and alternates, D38), rather than only filtering. It loads products with `crops` and `pests` prefetched and compares in Python, which this catalog's size (50 to 200 products) makes simple and fast without a database-level search feature.
+- This is the most important thing to test (see section 11), and it is: `apps/catalog/tests/test_search.py`.
 
 ## 9. Notifications
 
@@ -314,7 +315,8 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D34 | Articles: four seasons, plain-text body, optional cover image, draft by default, Jalali publication date filled in on publish, `published()` for public pages | CONFIRMED |
 | D35 | `seed_sample_data`: clearly fake, marked sample data for development; DEBUG only; repeatable; `--clear` removes exactly the marked rows; no photos | CONFIRMED |
 | D36 | Tailwind standalone program, pinned, checksum-verified, only templates scanned; built CSS committed | Program CONFIRMED, committing the built CSS PROPOSED in phase 2, task 1 |
-| D37 | Vazirmatn cut down to Persian, digits and basic Latin, two weights, about 22 KB each, `font-display: swap` | PROPOSED in phase 2, task 1, CONFIRMED once merged |
+| D37 | Vazirmatn cut down to Persian, digits and basic Latin, two weights, about 22 KB each, `font-display: swap` | CONFIRMED |
+| D38 | Public product search: every query word must match somewhere, ranked trade/generic name above usage text above crop/pest tags, Python-side over prefetched products | PROPOSED in phase 2, task 2, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 
