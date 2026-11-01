@@ -156,7 +156,7 @@ def test_a_product_without_a_photo_gets_a_placeholder_and_no_img_tag(client, pro
     make(product_fields)
     html = html_of(client)
     assert "<img" not in html
-    assert re.search(r'<li data-product="\d+"[^>]*>\s*<div[^>]*>\s*<svg', html)
+    assert re.search(r'<li data-product="\d+"[^>]*>\s*<a[^>]*>\s*<div[^>]*>\s*<svg', html)
 
 
 def test_every_card_has_the_same_square_box(client, product_fields):

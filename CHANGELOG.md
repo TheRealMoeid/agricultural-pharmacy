@@ -4,6 +4,16 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-11-01 — Phase 2, task 4: the product page
+
+- Added the product page at `/products/<slug>/` (`apps/catalog/views.py`'s `product_detail`, `templates/catalog/product_detail.html`). The URL uses `<str:slug>`, not Django's `<slug:slug>` converter: `Product.slug` allows Unicode (D27), and the ASCII-only converter would 404 on every real product. Proposed D40.
+- Shows trade name, generic name, type, availability badge, the full-size photo (or the same placeholder as the list), usage, dosage and timing when filled in, manufacturer, importer, country of origin, and the product's crops and pests. No price anywhere. Production and expiry dates each get their own line only if that exact field was entered (D7); nothing is inferred and nothing is shown as a pair. Dates are formatted in Jalali with a new `jalali_date` template filter (`apps/core/templatetags/persian.py`), reusing `apps/core/jalali.py` from task 8.
+- The "تماس برای استعلام قیمت" (call to ask the price) button is the page's main call to action, the same size and weight as the sticky call bar's button.
+- A missing or mistyped slug renders a friendly Persian page (`catalog/product_not_found.html`, still HTTP 404) with the call button, rather than Django's bare 404.
+- A "بازگشت به محصولات" link returns to `/products/`, keeping the type the customer came from (`?type=<slug>`) when there was one. The list's cards now link to the detail page, carrying `?from_type=<slug>` when a type is selected; `product_detail` turns a known `from_type` into the back link and falls back to the plain list link otherwise.
+- `select_related("product_type")` and `prefetch_related("crops", "pests")` keep the page to a fixed 5 queries whatever the product's crops and pests; a test pins that number exactly, after an earlier, looser bound (`<= 6`) let a dropped prefetch slip through undetected during mutation testing.
+- 27 new tests for the detail page, 4 for the `jalali_date` filter, and one existing list test updated for the new card markup. D39 is recorded as approved (task 3 merged). Phase 2 is complete once this is merged.
+
 ### 2026-10-31 — Phase 2, task 3: the product list
 
 - Added the public product list at `/products/` (`apps/catalog/views.py`, `urls.py`, `templates/catalog/product_list.html`). It takes two optional parameters: `type`, a product type slug (an unknown slug is ignored, not a 404), and `q`, the search text (cut at 100 characters). The text goes through `search()` from the last task, over the products of the chosen type. Proposed D39.

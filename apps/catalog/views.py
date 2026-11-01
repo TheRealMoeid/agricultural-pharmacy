@@ -1,4 +1,4 @@
-"""The public product list (D39)."""
+"""The public product list (D39) and the product page (D40)."""
 from django.shortcuts import render
 
 from .models import Product, ProductType
@@ -39,4 +39,30 @@ def product_list(request):
             "selected_type": selected_type,
             "q": query,
         },
+    )
+
+
+def product_detail(request, slug):
+    """A single product, by its (Persian) slug.
+
+    A missing product is not a plain 404: it gets its own Persian page with
+    the call button, since a dead product link should not be a dead end for
+    someone who wants to buy something (D40). The `from_type` query parameter,
+    when it names a real product type, is used only to build the "back to the
+    list" link, so the customer returns to the filtered list they came from.
+    """
+    product = (
+        Product.objects.select_related("product_type")
+        .prefetch_related("crops", "pests")
+        .filter(slug=slug)
+        .first()
+    )
+    if product is None:
+        return render(request, "catalog/product_not_found.html", status=404)
+
+    back_type = ProductType.objects.filter(slug=request.GET.get("from_type", "")).first()
+    return render(
+        request,
+        "catalog/product_detail.html",
+        {"product": product, "back_type": back_type},
     )
