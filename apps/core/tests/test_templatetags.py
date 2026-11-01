@@ -14,3 +14,37 @@ def test_other_characters_are_left_alone():
 def test_it_is_available_to_templates_as_a_filter():
     template = Template("{% load persian %}{{ n|persian_digits }}")
     assert template.render(Context({"n": 30})) == "\u06f3\u06f0"
+
+
+# --- jalali_date -------------------------------------------------------------------------
+
+
+def test_jalali_date_formats_a_gregorian_date_in_jalali_persian_digits():
+    import datetime
+
+    from apps.core.templatetags.persian import jalali_date
+
+    assert jalali_date(datetime.date(2026, 3, 21)) == "\u06f1\u06f4\u06f0\u06f5/\u06f0\u06f1/\u06f0\u06f1"
+    assert jalali_date(datetime.date(2024, 3, 20)) == "\u06f1\u06f4\u06f0\u06f3/\u06f0\u06f1/\u06f0\u06f1"
+
+
+def test_jalali_date_pads_single_digit_month_and_day():
+    import datetime
+
+    from apps.core.templatetags.persian import jalali_date
+
+    assert jalali_date(datetime.date(2024, 12, 21)) == "\u06f1\u06f4\u06f0\u06f3/\u06f1\u06f0/\u06f0\u06f1"
+
+
+def test_jalali_date_of_none_is_an_empty_string():
+    from apps.core.templatetags.persian import jalali_date
+
+    assert jalali_date(None) == ""
+
+
+def test_jalali_date_is_available_to_templates_as_a_filter():
+    from django.template import Context, Template
+    import datetime
+
+    template = Template("{% load persian %}{{ d|jalali_date }}")
+    assert template.render(Context({"d": datetime.date(2026, 3, 21)})) == "\u06f1\u06f4\u06f0\u06f5/\u06f0\u06f1/\u06f0\u06f1"

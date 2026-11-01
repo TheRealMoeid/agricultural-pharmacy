@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-10-31 (phase 2, task 3)
+Last updated: 2026-11-01 (phase 2, task 4)
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The only public pages are a placeholder home page and the product list, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The only public pages are a placeholder home page, the product list and the product page, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -25,13 +25,13 @@ pharmacy-site/
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
 ├─ apps/                         EXISTS (core, catalog, pages, consultations and articles exist in part; staff_panel is PLANNED)
-│  ├─ core/                      EXISTS (helpers, SiteSettings and the persian_digits filter; ClickEvent and the Jalali filter PLANNED)
-│  ├─ catalog/                   EXISTS (reference models, Product, admin, search and the product list; the product page PLANNED)
+│  ├─ core/                      EXISTS (helpers, SiteSettings, and the persian_digits and jalali_date filters; ClickEvent PLANNED)
+│  ├─ catalog/                   EXISTS (reference models, Product, admin, search, the product list and the product page; phase 2's catalog views are complete)
 │  ├─ consultations/             EXISTS (ConsultationRequest and admin inbox; forms, views and notifications PLANNED)
 │  ├─ pages/                     EXISTS (Expert, FaqItem and admin; views PLANNED)
 │  ├─ articles/                  EXISTS (Article and admin; views PLANNED)
 │  └─ staff_panel/               PLANNED
-├─ templates/                    EXISTS (base.html, partials/call_bar.html, pages/home.html, catalog/product_list.html; the rest PLANNED)
+├─ templates/                    EXISTS (base.html, partials/call_bar.html, pages/home.html, catalog/product_list.html, catalog/product_detail.html, catalog/product_not_found.html; the rest PLANNED)
 ├─ static/                       EXISTS (css/ and fonts/; js/ and img/ PLANNED)
 ├─ media/                        PLANNED (not in Git)
 ├─ tests/                        PLANNED
@@ -98,7 +98,7 @@ Shared things used by the whole site. It is a Django app since task 5 and is lis
 - `tests/`: EXISTS. `test_text.py`, `test_phone.py`, `test_jalali.py` and `test_images.py` (no database), `test_site_settings.py`, `test_admin.py`, `test_context_processor.py` and `test_jalali_form_field.py` (these use the database or Django's form machinery).
 - `management/commands/seed_sample_data.py`: EXISTS (task 12, D35). Loads clearly fake sample data for development, marked "[نمونه]", and removes it again with `--clear`. DEBUG only. Tested in `tests/test_seed_sample_data.py`.
 - `tests/test_static_assets.py` and `tests/test_tailwind_script.py`: EXISTS (phase 2, task 1). They check the built CSS (made by the pinned version, up to date when the program is installed, small, nothing from other sites, only templates scanned), the fonts (small WOFF2, every Persian letter people type is in them, license present) and the Tailwind script (platform choice, checksums, a failed download leaves nothing behind).
-- `templatetags/persian.py`: EXISTS (phase 2, task 3). The `persian_digits` filter (12 becomes ۱۲), used for the result count on the product list. Tested in `tests/test_templatetags.py`. The Jalali date filter is PLANNED here too, for phase 2, task 4.
+- `templatetags/persian.py`: EXISTS. `persian_digits` (task 3; 12 becomes ۱۲, used for the result count on the product list) and `jalali_date` (task 4; a stored Gregorian date to Jalali Persian digits, `۱۴۰۴/۰۱/۰۱`, built on `jalali.py` from task 8). Tested in `tests/test_templatetags.py`.
 - A small view that receives call and message button taps (OPEN, depends on D16).
 
 ### `apps/catalog/`
@@ -110,8 +110,9 @@ Products and how people find them. It is a Django app since task 6 and is listed
 - `tests/`: EXISTS. `test_models.py`, `test_admin.py` (reference lists), `test_product.py`, `test_product_admin.py`, `test_product_jalali_admin.py` (task 8), `test_product_photo.py` (task 9) and `conftest.py` with shared fixtures (all use the database).
 - `search.py`: EXISTS (phase 2, task 2, D38). `search(query, products=None)`: Persian-aware, every word of the query has to match somewhere, ranked (trade/generic name, then usage text, then crop/pest names and alternates). Kept separate from views, as planned, so it is tested on its own, with no database-level search feature needed at this catalog's size.
 - `tests/test_search.py`: EXISTS (phase 2, task 2). Typing style, ranking, the starting-queryset argument, and a query-count check that guards the crops/pests prefetch.
-- `views.py` and `urls.py`: EXISTS (phase 2, task 3, D39). `product_list`, mounted at `/products/` by `config/urls.py` (namespace `catalog`). The product detail view is PLANNED, for phase 2, task 4.
+- `views.py` and `urls.py`: EXISTS. `product_list` (task 3, D39) and `product_detail` (task 4, D40) at `/products/` and `/products/<str:slug>/`, namespace `catalog`. `product_detail` renders `catalog/product_not_found.html` (HTTP 404) for a missing or mistyped slug instead of Django's bare one.
 - `tests/test_product_list.py`: EXISTS (phase 2, task 3). The filters, the chips, the cards and their badges, thumbnails, the order, the empty states, the call button, the 100-character cap on the query, and a query-count check that the list does not become one query per product.
+- `tests/test_product_detail.py`: EXISTS (phase 2, task 4). The Persian slug (the regression `<str:slug>` exists to avoid), the not-found page, every field shown and the ones left out when empty, the date lines shown only when entered, the call-to-ask-the-price button's size, the back link with and without a preserved type, and a query count pinned at exactly 5.
 
 ### `apps/consultations/`
 Customer requests and how the store is told about them. It is a Django app since task 11 and is listed in `INSTALLED_APPS`.
@@ -156,7 +157,7 @@ Django templates, all in Persian and RTL.
 |---|---|
 | `base.html` | EXISTS. Page shell: `<html lang="fa" dir="rtl">`, header with the text logo, a link to the product list and a call button (wide screens), footer with address, hours and number, and the call bar. |
 | `partials/` | `call_bar.html` EXISTS: the bar fixed to the bottom of the screen on phones. PLANNED: product card, availability badge, message buttons, form field, messages. |
-| `catalog/` | `product_list.html` EXISTS (phase 2, task 3). PLANNED: product detail. |
+| `catalog/` | `product_list.html` (task 3), `product_detail.html` and `product_not_found.html` (task 4) EXIST. |
 | `consultations/` | The two forms, confirmation page, staff inbox. |
 | `pages/` | `home.html` EXISTS as a placeholder (with a link to the product list). PLANNED: experts, contact, FAQ. |
 | `articles/` | Article list and detail. |

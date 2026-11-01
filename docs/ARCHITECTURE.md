@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-10-31 (phase 2, task 3)
+Last updated: 2026-11-01 (phase 2, task 4)
 
 Status tags:
 
@@ -88,20 +88,20 @@ Things used everywhere. **Built so far (phase 1, tasks 4, 5, 8 and 9):** the tex
 - The admin shows the settings as one page: the list view redirects straight to the single row, and it cannot be deleted or duplicated.
 - A context processor that makes those settings available in every template, so the sticky call bar always has the number.
 - Persian text normalization helpers (`text.py`), used by search and by form validation.
-- A template filter library, `templatetags/persian.py`: `persian_digits` (built, used for the result count on the list). The Jalali date filter joins it in phase 2, task 4.
+- A template filter library, `templatetags/persian.py`: `persian_digits` (used for the result count on the list) and, built in task 4, `jalali_date` (`gregorian_to_jalali()` from `jalali.py`, formatted as `۱۴۰۴/۰۱/۰۱` for the product page's date lines).
 - Iranian mobile number helpers (`phone.py`): accept any common way of typing a number, give back one canonical form, and derive the international and display forms.
 - Jalali/Gregorian conversion (`jalali.py`, built in task 8): a hand-written port of the standard published algorithm, not a third-party package (D23, D30). Used today by `JalaliDateField` (`forms.py`) for admin entry and display; a template filter for public pages is still PLANNED, for when there are public pages to show dates on.
 - Click counting for call and message buttons (D16). Mechanism OPEN.
 - A development command, `seed_sample_data` (D35), that loads clearly fake sample data, marked "[نمونه]", and removes it again with `--clear`. It refuses to run unless DEBUG is on.
 
 ### `catalog`
-Products and how people find them. **Built so far (phase 1, tasks 6 to 7, and phase 2, tasks 2 and 3):** `ProductType`, `Crop`, `Pest` and `Product`, each with an admin page, the public search (`search.py`, D38) and the product list view (`views.py`, `urls.py`, D39). The product page is PLANNED, for phase 2, task 4.
+Products and how people find them. **Built so far (phase 1, tasks 6 to 7, and phase 2, tasks 2 to 4):** `ProductType`, `Crop`, `Pest` and `Product`, each with an admin page, the public search (`search.py`, D38), the product list view and the product page (`views.py`, `urls.py`, D39, D40). Phase 2's catalog views are complete.
 - Models: `Product`, `ProductType`, `Crop`, `Pest`.
 - `Product` stores no search key of its own (see section 5); the public search built in phase 2 normalizes at query time instead.
 - The three reference lists share one base: the name is cleaned on save, a stored comparison key (`normalize_for_search()` of the name) is unique, and the slug is made once from the name (D27). Crops and pests also have `search_keys()`, the set of keys the entry answers to, for the search work in phase 2.
 - The admin search box on these lists uses the same normalization, so Habibollah finds an entry however he types it.
 - Product list at `/products/` (built, D39): the type filter is a row of plain links (types that have products), the search box is a GET form, and both keep each other's state. The queryset is `select_related("product_type")`, ordered available first and then by trade name, filtered by type, and passed to `search()`. Unavailable products stay visible with a text badge. Cards use `photo.thumb_url` in a fixed square box with `loading="lazy"`. The number of queries does not depend on the number of products (a test guards it). No pagination: with 200 products the page is about 185 KB of HTML and about 7 KB gzipped.
-- Product detail page. PLANNED, phase 2, task 4. Slugs are Persian, so its URL pattern needs `<str:slug>`, not `<slug:slug>`.
+- Product page at `/products/<str:slug>/` (built, D40; `<str:slug>` because slugs are Persian, not `<slug:slug>`). Shows trade and generic name, type, availability, the full-size photo or placeholder, usage/dosage/timing when filled in, manufacturer/importer/country, crops and pests, and each date line only when that date was entered (D7). The call-to-ask-the-price button matches the call bar's size and weight. A missing or mistyped slug renders a friendly Persian not-found page (still HTTP 404) instead of Django's bare one, keeping the call button in front of the customer. The list's cards link here, keeping the chosen type as `?from_type=<slug>` so the "back to products" link returns to the same filtered list. `select_related`/`prefetch_related` keep this to a fixed 5 queries regardless of how many crops or pests a product has.
 - Persian-aware search (section 8): built, see `search.py` below.
 
 ### `consultations`
@@ -319,7 +319,8 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D36 | Tailwind standalone program, pinned, checksum-verified, only templates scanned; built CSS committed | CONFIRMED |
 | D37 | Vazirmatn cut down to Persian, digits and basic Latin, two weights, about 22 KB each, `font-display: swap` | CONFIRMED |
 | D38 | Public product search: every query word must match somewhere, ranked trade/generic name above usage text above crop/pest tags, Python-side over prefetched products | CONFIRMED |
-| D39 | Public product list at `/products/`: `type` and `q` GET parameters, type filter as plain links, no pagination, available first then trade name, unavailable products visible with a text badge, thumbnails lazy-loaded in a fixed square box, empty state with the call button, query count independent of the number of products | PROPOSED in phase 2, task 3, CONFIRMED once merged |
+| D39 | Public product list at `/products/`: `type` and `q` GET parameters, type filter as plain links, no pagination, available first then trade name, unavailable products visible with a text badge, thumbnails lazy-loaded in a fixed square box, empty state with the call button, query count independent of the number of products | CONFIRMED |
+| D40 | Product page at `/products/<str:slug>/`: friendly Persian not-found page on a missing slug, each date line shown only when that date is entered, call-to-ask-the-price button sized like the call bar, back link preserves the type filter, fixed query count | PROPOSED in phase 2, task 4, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 
