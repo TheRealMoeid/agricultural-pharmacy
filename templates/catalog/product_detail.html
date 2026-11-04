@@ -34,6 +34,7 @@
       تماس برای استعلام قیمت <span dir="ltr">{{ site.phone_display }}</span>
     </a>
     {% endif %}
+    <p class="mt-3 text-sm"><a href="{% url 'consultations:form' %}" class="font-bold text-brand-700 underline">درباره این محصول از کارشناس بپرسید</a></p>
 
     {% if product.dosage or product.timing %}
     <dl class="mt-6 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">

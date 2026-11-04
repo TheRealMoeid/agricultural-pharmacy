@@ -4,6 +4,17 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-11-03 — Phase 3, task 1: the consultation forms
+
+- Added the public forms at `/consultation/` (`apps/consultations/forms.py`, `views.py`, `urls.py`, `ratelimit.py`, `templates/consultations/`). One page, one form at a time: `?kind=question` (the default) or `?kind=farm_visit`, switched by two plain links, no JavaScript. Proposed D41.
+- Fields: name and phone on both, the crop (optional, from the catalog) on both. The question needs its text; the farm visit needs the village or address, and its text is optional. The farm-visit form says visits are only in Gonbad-e Kavus county and that the fee depends on the farm and is told after the call; no fee is shown anywhere (decided with the father: it differs for every farm).
+- A valid request is stored (status "new", notification "not attempted") and the visitor is redirected to `/consultation/thank-you/`: "درخواست شما دریافت شد، به‌زودی با شما تماس می‌گیریم", with the call button. Nobody is notified yet; that is the next task.
+- Spam protection (D12): a honeypot field people never see (a filled one gets the normal thank-you page and nothing is stored), the Iranian mobile validation, and a limit of 5 submissions per visitor per hour. Past the limit the page answers 429, keeps what was typed and shows the call button.
+- The limit is a small counter in Django's cache, written in the project. `django-ratelimit` was the plan, but its own system check refuses Django's in-memory, file and database caches and accepts only memcached or Redis, which this site does not have. The cache is per process, so with several Gunicorn workers the real limit is a few times higher.
+- Behind Nginx every request seems to come from the proxy, so production reads the visitor's address from the header in the new `CLIENT_IP_HEADER` setting (default `HTTP_X_REAL_IP`, `DJANGO_CLIENT_IP_HEADER` in `.env.example`). Nginx must set `proxy_set_header X-Real-IP $remote_addr;`.
+- The header has a new "مشاوره" link and the product page a link to ask an expert about the product. `static/css/site.css` was rebuilt.
+- 68 new tests; 20 deliberate breakages of the new code were each caught. D40 is recorded as approved (task 4 merged). Decided with Moeid: the farm-visit fee is never shown, there is no FAQ section, and notifications go through a Telegram bot.
+
 ### 2026-11-01 — Phase 2, task 4: the product page
 
 - Added the product page at `/products/<slug>/` (`apps/catalog/views.py`'s `product_detail`, `templates/catalog/product_detail.html`). The URL uses `<str:slug>`, not Django's `<slug:slug>` converter: `Product.slug` allows Unicode (D27), and the ASCII-only converter would 404 on every real product. Proposed D40.

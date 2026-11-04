@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-11-01 (phase 2, task 4)
+Last updated: 2026-11-03 (phase 3, task 1)
 
 Status tags:
 
@@ -105,10 +105,10 @@ Products and how people find them. **Built so far (phase 1, tasks 6 to 7, and ph
 - Persian-aware search (section 8): built, see `search.py` below.
 
 ### `consultations`
-Everything a customer can send or ask. **Built so far (phase 1, task 11):** the `ConsultationRequest` model and its admin, which is the staff inbox (D33). The forms, notifications and public views are PLANNED, for phase 3.
+Everything a customer can send or ask. **Built so far (phase 1, task 11, and phase 3, task 1):** the `ConsultationRequest` model and its admin, which is the staff inbox (D33), and the two public forms with the thank-you page (D41). The notifications are PLANNED, for phase 3, task 2.
 - Model: `ConsultationRequest`, covering both "ask an expert" and "farm visit".
 - Staff inbox (built): the admin list shows time (Jalali, store time), name, kind, a tap-to-call phone and status, with new requests first. Customer details are read-only; the status can be changed on the request page or with the two actions "رسیدگی شد" and "برگرداندن به جدید". Requests cannot be added from the admin.
-- The two forms, spam protection (D12), validation. PLANNED.
+- The two forms (built, D41): `/consultation/?kind=question` or `?kind=farm_visit`, one at a time, switched by plain links. A valid request is stored and the visitor is redirected to `/consultation/thank-you/`, so a refresh never sends it twice. Spam protection (D12): a honeypot field (a filled one gets the normal thank-you page and nothing is stored), Iranian mobile validation, and a limit of 5 submissions per visitor per hour. The limit is a small counter in Django's cache (`ratelimit.py`), not `django-ratelimit`, whose system check refuses every cache except memcached and Redis; it is per process, so with several Gunicorn workers the real limit is a few times higher. Past the limit the visitor gets HTTP 429, keeps what was typed and sees the call button. The farm-visit form says the fee depends on the farm and is told after the call; no fee is shown.
 - Notification adapter and its channel implementations (section 9). PLANNED. The model already has `notification_status` and `notification_detail` for the outcome.
 
 ### `pages`
@@ -234,7 +234,7 @@ Mostly **[CONFIRMED]** as part of the approved plan (D12, D17); the exact settin
 
 - HTTPS only, secure cookies, HSTS, Django's CSRF protection.
 - Admin on a non-default URL, strong passwords, two kinds of account: Moeid as superuser, Habibollah as limited staff. The exact permission set for Habibollah is settled in phase 4.
-- Forms: honeypot, per-IP rate limiting, Iranian mobile number validation, length limits. No Google reCAPTCHA because it often fails from Iran (D12).
+- Forms: honeypot, per-IP rate limiting, Iranian mobile number validation, length limits. No Google reCAPTCHA because it often fails from Iran (D12). Built in phase 3, task 1 (D41). Behind Nginx the limit tells visitors apart by the header named in `CLIENT_IP_HEADER` (production default `HTTP_X_REAL_IP`).
 - Customer phone numbers are personal data. They appear only to logged-in staff, never on public pages, never in logs.
 - Upload validation for type and size. Images are re-encoded on upload.
 - Secrets live in environment variables, never in the repository.
@@ -271,6 +271,7 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 
 - Docker Compose with Nginx, Gunicorn/Django and PostgreSQL.
 - A staging copy, used for Habibollah's trial before going live.
+- Nginx must set `proxy_set_header X-Real-IP $remote_addr;` (an overwrite, never a pass-through of a header the visitor sent). The form limit (D41) reads the visitor's address from it; without it every visitor would look like the proxy and one person could block everyone.
 - Nginx must accept uploads of at least 10 MB (`client_max_body_size`), because phone photos are several MB before they are shrunk (D31), must serve `/media/` and `/static/` with a long cache lifetime (section 11), and must gzip HTML: the product list is about 185 KB raw and about 7 KB gzipped at 200 products (D39).
 - Deploy by pulling from Git and running a short script: migrate, collect static files, restart.
 - The built stylesheet (`static/css/site.css`) is committed, so the image and the server never need Tailwind or Node (D36).
@@ -283,13 +284,13 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 |---|---|---|
 | D1 | Stack | CONFIRMED |
 | D2 | Admin approach | CONFIRMED |
-| D3 | Notification channel | OPEN |
+| D3 | Notification channel | DECIDED (Telegram bot, cheapest), built in phase 3, task 2 |
 | D4 | Hosting and domain | OPEN |
 | D5 | Shared contact number (09112747628) | CONFIRMED |
 | D6 | Producer, importer, country as per-product text | CONFIRMED |
 | D7 | Dates: one set per product, nothing shown if empty | CONFIRMED, batch rule to confirm with client |
 | D8 | Crop/pest tags | CONFIRMED that they will exist; readiness date OPEN |
-| D9 | Farm-visit fee: hidden by default, switch in settings | CONFIRMED default; actual display OPEN |
+| D9 | Farm-visit fee: hidden by default, switch in settings | CONFIRMED: the fee differs per farm and is told after the call, so it is never shown |
 | D10 | Map: static image plus links | CONFIRMED |
 | D11 | Articles built, hidden at launch | CONFIRMED |
 | D12 | Spam protection without reCAPTCHA | CONFIRMED |
@@ -320,7 +321,8 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D37 | Vazirmatn cut down to Persian, digits and basic Latin, two weights, about 22 KB each, `font-display: swap` | CONFIRMED |
 | D38 | Public product search: every query word must match somewhere, ranked trade/generic name above usage text above crop/pest tags, Python-side over prefetched products | CONFIRMED |
 | D39 | Public product list at `/products/`: `type` and `q` GET parameters, type filter as plain links, no pagination, available first then trade name, unavailable products visible with a text badge, thumbnails lazy-loaded in a fixed square box, empty state with the call button, query count independent of the number of products | CONFIRMED |
-| D40 | Product page at `/products/<str:slug>/`: friendly Persian not-found page on a missing slug, each date line shown only when that date is entered, call-to-ask-the-price button sized like the call bar, back link preserves the type filter, fixed query count | PROPOSED in phase 2, task 4, CONFIRMED once merged |
+| D40 | Product page at `/products/<str:slug>/`: friendly Persian not-found page on a missing slug, each date line shown only when that date is entered, call-to-ask-the-price button sized like the call bar, back link preserves the type filter, fixed query count | CONFIRMED |
+| D41 | Consultation forms at `/consultation/`: one form at a time by `?kind=`, honeypot, hand-written 5-per-hour limit per visitor in Django's cache, thank-you page after a redirect, 429 page that keeps what was typed, no fee shown | PROPOSED in phase 3, task 1, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 

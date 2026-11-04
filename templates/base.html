@@ -17,6 +17,7 @@
         {# Text logo until the SVG is ready (D14). #}
         <a href="{% url 'pages:home' %}" class="text-lg font-bold text-brand-700">{{ site.store_name }}</a>
         <a href="{% url 'catalog:product_list' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">محصولات</a>
+        <a href="{% url 'consultations:form' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">مشاوره</a>
       </div>
       {% if site.tel_url %}
       <a href="{{ site.tel_url }}" class="hidden min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800 md:inline-flex">
