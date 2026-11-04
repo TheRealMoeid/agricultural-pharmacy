@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-11-01 (phase 2, task 4)
+Last updated: 2026-11-03 (phase 3, task 1)
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The only public pages are a placeholder home page, the product list and the product page, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The only public pages are a placeholder home page, the product list, the product page and the consultation forms, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -27,7 +27,7 @@ pharmacy-site/
 ├─ apps/                         EXISTS (core, catalog, pages, consultations and articles exist in part; staff_panel is PLANNED)
 │  ├─ core/                      EXISTS (helpers, SiteSettings, and the persian_digits and jalali_date filters; ClickEvent PLANNED)
 │  ├─ catalog/                   EXISTS (reference models, Product, admin, search, the product list and the product page; phase 2's catalog views are complete)
-│  ├─ consultations/             EXISTS (ConsultationRequest and admin inbox; forms, views and notifications PLANNED)
+│  ├─ consultations/             EXISTS (ConsultationRequest, admin inbox, the two public forms and the thank-you page; notifications PLANNED)
 │  ├─ pages/                     EXISTS (Expert, FaqItem and admin; views PLANNED)
 │  ├─ articles/                  EXISTS (Article and admin; views PLANNED)
 │  └─ staff_panel/               PLANNED
@@ -120,11 +120,12 @@ Customer requests and how the store is told about them. It is a Django app since
 - `models.py`: EXISTS. `ConsultationRequest` (D33).
 - `admin.py`: EXISTS. The staff inbox: read-only customer details, status filter, tap-to-call phone, Jalali time, search that ignores digit and letter typing style, and the two actions that switch requests between new and handled.
 - `migrations/`: EXISTS. `0001_initial.py` creates the table (it depends on the catalog's latest migration, because of the crop).
-- `tests/`: EXISTS. `test_models.py` and `test_admin.py`.
-- `forms.py`: PLANNED, phase 3. the ask-an-expert form and the farm-visit form, with validation, honeypot and phone checks.
-- `views.py` and `urls.py`: form pages, confirmation, staff inbox.
+- `forms.py`: EXISTS (phase 3, task 1, D41). `ConsultationForm`, one ModelForm for both kinds (the kind decides the fields and which are required), with the honeypot field `website`.
+- `views.py` and `urls.py`: EXISTS (phase 3, task 1). `consultation` (the form, GET and POST) and `thank_you`, mounted at `/consultation/` by `config/urls.py` (namespace `consultations`).
+- `ratelimit.py`: EXISTS (phase 3, task 1). `client_ip()` and `over_limit()`: 5 submissions per visitor per hour, counted in Django's cache.
+- `tests/`: EXISTS. `test_models.py` and `test_admin.py`, and, since phase 3, task 1, `test_forms.py`, `test_views.py`, `test_ratelimit.py` and `conftest.py` (empties the cache before every test).
 - `notifications/`: the notification interface in `base.py`, a fake sender for tests, and one file per real channel (SMS, Telegram, WhatsApp). Only the channel Moeid chooses (D3, OPEN) gets a real implementation.
-- Rate limiting for the forms (how it is done is decided in phase 3).
+- Staff inbox views: the admin is the inbox for now; a one-tap page belongs to the staff panel (phase 4).
 
 ### `apps/pages/`
 Mostly static content. It is a Django app since task 10 and is listed in `INSTALLED_APPS`.
@@ -158,7 +159,7 @@ Django templates, all in Persian and RTL.
 | `base.html` | EXISTS. Page shell: `<html lang="fa" dir="rtl">`, header with the text logo, a link to the product list and a call button (wide screens), footer with address, hours and number, and the call bar. |
 | `partials/` | `call_bar.html` EXISTS: the bar fixed to the bottom of the screen on phones. PLANNED: product card, availability badge, message buttons, form field, messages. |
 | `catalog/` | `product_list.html` (task 3), `product_detail.html` and `product_not_found.html` (task 4) EXIST. |
-| `consultations/` | The two forms, confirmation page, staff inbox. |
+| `consultations/` | `form.html` and `thank_you.html` EXIST (phase 3, task 1). PLANNED: staff inbox. |
 | `pages/` | `home.html` EXISTS as a placeholder (with a link to the product list). PLANNED: experts, contact, FAQ. |
 | `articles/` | Article list and detail. |
 | `staff_panel/` | The stock page. |

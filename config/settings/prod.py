@@ -29,3 +29,8 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # No default here, so production cannot start on the public /admin/ path.
 ADMIN_URL = env("DJANGO_ADMIN_URL")
+
+# Behind Nginx every request seems to come from the proxy, so the form limit
+# (apps/consultations/ratelimit.py) reads the visitor's address from this
+# header. Nginx must overwrite it: proxy_set_header X-Real-IP $remote_addr;
+CLIENT_IP_HEADER = env("DJANGO_CLIENT_IP_HEADER", default="HTTP_X_REAL_IP")

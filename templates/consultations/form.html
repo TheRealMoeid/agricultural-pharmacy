@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{# The two consultation forms (D41). One page; the tabs are plain links, no JavaScript. Normal and bold text only (D37). #}
+{% block title %}{% if kind == Kind.FARM_VISIT %}درخواست بازدید از مزرعه{% else %}پرسش از کارشناس{% endif %} | {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-brand-800">مشاوره رایگان با کارشناسان</h1>
+<p class="mt-2 text-stone-600">شماره موبایل‌تان را بنویسید تا کارشناس با شما تماس بگیرد. اگر عجله دارید، مستقیم تماس بگیرید.</p>
+
+<nav aria-label="نوع درخواست" class="mt-4 flex flex-wrap gap-2">
+  <a href="{% url 'consultations:form' %}?kind={{ Kind.QUESTION.value }}"{% if kind == Kind.QUESTION %} aria-current="true" class="inline-flex min-h-11 items-center rounded-lg border border-brand-600 bg-brand-600 px-4 text-sm font-bold text-white"{% else %} class="inline-flex min-h-11 items-center rounded-lg border border-stone-200 bg-white px-4 text-sm hover:bg-brand-50"{% endif %}>پرسش از کارشناس</a>
+  <a href="{% url 'consultations:form' %}?kind={{ Kind.FARM_VISIT.value }}"{% if kind == Kind.FARM_VISIT %} aria-current="true" class="inline-flex min-h-11 items-center rounded-lg border border-brand-600 bg-brand-600 px-4 text-sm font-bold text-white"{% else %} class="inline-flex min-h-11 items-center rounded-lg border border-stone-200 bg-white px-4 text-sm hover:bg-brand-50"{% endif %}>درخواست بازدید از مزرعه</a>
+</nav>
+
+{% if kind == Kind.FARM_VISIT %}
+<p class="mt-4 text-sm text-stone-600">بازدید فقط در شهرستان گنبدکاووس انجام می‌شود. هزینه بازدید به فاصله و دسترسی مزرعه بستگی دارد و بعد از تماس کارشناس اعلام می‌شود.</p>
+{% endif %}
+
+{% if limited %}
+<section id="limited" class="mt-4 rounded-lg border border-stone-200 bg-white p-4">
+  <p class="font-bold">درخواست‌های زیادی از این شبکه ارسال شده است.</p>
+  <p class="mt-1 text-stone-600">لطفاً کمی بعد دوباره تلاش کنید، یا همین حالا با داروخانه تماس بگیرید.</p>
+  {% if site.tel_url %}
+  <a href="{{ site.tel_url }}" class="mt-3 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+    تماس با داروخانه <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
+  </a>
+  {% endif %}
+</section>
+{% endif %}
+
+<form method="post" action="{% url 'consultations:form' %}?kind={{ kind }}" novalidate class="mt-2">
+  {% csrf_token %}
+  {% for field in form.visible_fields %}
+  {% if field.name == "website" %}
+  {# The honeypot: people never see it, bots fill it in (D12). #}
+  <div class="hidden" aria-hidden="true"><label>وب‌سایت {{ field }}</label></div>
+  {% else %}
+  <div class="mt-4">
+    <label for="{{ field.id_for_label }}" class="block font-bold">{{ field.label }}{% if not field.field.required %} <span class="font-normal text-stone-600">(اختیاری)</span>{% endif %}</label>
+    <div class="mt-1">{{ field }}</div>
+    {% for error in field.errors %}<p class="mt-1 text-sm text-red-700">{{ error }}</p>{% endfor %}
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% for error in form.non_field_errors %}<p class="mt-4 text-sm text-red-700">{{ error }}</p>{% endfor %}
+  <button type="submit" class="mt-6 flex min-h-14 w-full items-center justify-center rounded-lg bg-brand-600 px-6 text-lg font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800 md:w-auto">ارسال درخواست</button>
+</form>
+{% endblock %}

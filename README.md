@@ -6,7 +6,7 @@ The site shows the store's products and experts and makes it easy to call or mes
 
 ## Status
 
-Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products), the experts and FAQ models, the consultation request model with its admin inbox and the articles model are in place. The public pages so far are a placeholder home page, the product list at `/products/` (type filter, Persian-aware search) and the product page at `/products/<slug>/`, with the call-to-ask-the-price button and Jalali dates.
+Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products), the experts and FAQ models, the consultation request model with its admin inbox and the articles model are in place. The public pages so far are a placeholder home page, the product list at `/products/` (type filter, Persian-aware search) and the product page at `/products/<slug>/`, with the call-to-ask-the-price button and Jalali dates, and the two consultation forms at `/consultation/`.
 
 ## Running it locally
 
