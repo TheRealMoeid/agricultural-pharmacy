@@ -18,6 +18,8 @@ gregorian_to_jalali() and jalali_to_gregorian().
 """
 import datetime
 
+from django.utils import timezone
+
 # Jalali years where the 33-year leap-year cycle breaks (restarts). Table from
 # the reference algorithm; not something to hand-tune.
 _BREAKS = [
@@ -151,3 +153,14 @@ def jalali_to_gregorian(jy: int, jm: int, jd: int) -> datetime.date:
 def gregorian_to_jalali(date: datetime.date) -> tuple[int, int, int]:
     """A Gregorian `datetime.date` to a (jalali_year, jalali_month, jalali_day) tuple."""
     return _d2j(_g2d(date.year, date.month, date.day))
+
+
+def format_jalali_datetime(value) -> str:
+    """A stored datetime as "1405/01/01 15:30": Jalali date, store-local time.
+
+    The stamp the admin inbox shows and the Telegram notification carries, so
+    the two never disagree. ASCII digits, as everywhere staff-facing.
+    """
+    local = timezone.localtime(value)
+    jy, jm, jd = gregorian_to_jalali(local.date())
+    return f"{jy:04d}/{jm:02d}/{jd:02d} {local:%H:%M}"

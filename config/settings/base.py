@@ -22,6 +22,15 @@ if _env_file.exists():
 # that is not "admin/".
 ADMIN_URL = env("DJANGO_ADMIN_URL", default="admin/")
 
+# The store's own Telegram bot, which tells the staff about a new consultation
+# request (D3, D42). Both values come from the environment; with either one
+# empty nothing is sent and the request says so, which is what a development
+# machine without a bot needs. The token is a secret: never in Git, a log line
+# or a traceback (it is part of the Bot API address, so the address is never
+# logged either).
+TELEGRAM_BOT_TOKEN = env("DJANGO_TELEGRAM_BOT_TOKEN", default="")
+TELEGRAM_CHAT_ID = env("DJANGO_TELEGRAM_CHAT_ID", default="")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

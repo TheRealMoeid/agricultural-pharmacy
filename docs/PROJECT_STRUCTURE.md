@@ -2,7 +2,7 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-11-03 (phase 3, task 1)
+Last updated: 2026-11-04 (phase 3, task 2)
 
 **Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The only public pages are a placeholder home page, the product list, the product page and the consultation forms, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
 
@@ -91,7 +91,7 @@ Shared things used by the whole site. It is a Django app since task 5 and is lis
 - `context_processors.py`: EXISTS. Puts the settings into every template as `site`, so the call bar always has the number.
 - `phone.py`: EXISTS. Iranian mobile numbers: `normalize_iran_mobile()` (any typing to 09XXXXXXXXX), `to_international()`, `format_display()` and the form validator.
 - `text.py`: EXISTS. Persian text normalization at three levels: `normalize_letters()` (yeh, kaf, kashida, vowel marks), `normalize_text()` (also whitespace and invisible characters) and `normalize_for_search()` (also ASCII digits, no ZWNJ, alef forms folded into ا, case-folded), plus `normalize_digits()`. Used by search and form validation.
-- `jalali.py`: EXISTS (task 8). Gregorian/Jalali conversion, hand-written (D23, D30), not a third-party package.
+- `jalali.py`: EXISTS (task 8). Gregorian/Jalali conversion, hand-written (D23, D30), not a third-party package. Since phase 3, task 2, also `format_jalali_datetime()` (moved here from `apps/consultations/admin.py`, D42), the "1405/01/01 15:30" stamp the admin inbox and the Telegram notification both use.
 - `forms.py`: EXISTS (task 8). `JalaliDateField`, a form field that reads/shows Jalali text for a model `DateField`.
 - `images.py`: EXISTS (task 9). `load_image()` (check, decode, rotate), `encode_webp()` (shrink and convert to WebP within a byte budget), `process_image()`, the upload validator and `ImageRejected` (D31).
 - `fields.py`: EXISTS (task 9). `WebPImageField`, an `ImageField` that stores every new upload as a main WebP image plus a thumbnail when the model is saved, and `WebPFieldFile`, whose `thumb_url` templates use for lists.
@@ -121,10 +121,10 @@ Customer requests and how the store is told about them. It is a Django app since
 - `admin.py`: EXISTS. The staff inbox: read-only customer details, status filter, tap-to-call phone, Jalali time, search that ignores digit and letter typing style, and the two actions that switch requests between new and handled.
 - `migrations/`: EXISTS. `0001_initial.py` creates the table (it depends on the catalog's latest migration, because of the crop).
 - `forms.py`: EXISTS (phase 3, task 1, D41). `ConsultationForm`, one ModelForm for both kinds (the kind decides the fields and which are required), with the honeypot field `website`.
-- `views.py` and `urls.py`: EXISTS (phase 3, task 1). `consultation` (the form, GET and POST) and `thank_you`, mounted at `/consultation/` by `config/urls.py` (namespace `consultations`).
+- `views.py` and `urls.py`: EXISTS. `consultation` (the form, GET and POST) and `thank_you`, mounted at `/consultation/` by `config/urls.py` (namespace `consultations`). Since phase 3, task 2, `consultation` also calls `_notify()` after a successful save, D42.
 - `ratelimit.py`: EXISTS (phase 3, task 1). `client_ip()` and `over_limit()`: 5 submissions per visitor per hour, counted in Django's cache.
-- `tests/`: EXISTS. `test_models.py` and `test_admin.py`, and, since phase 3, task 1, `test_forms.py`, `test_views.py`, `test_ratelimit.py` and `conftest.py` (empties the cache before every test).
-- `notifications/`: the notification interface in `base.py`, a fake sender for tests, and one file per real channel (SMS, Telegram, WhatsApp). Only the channel Moeid chooses (D3, OPEN) gets a real implementation.
+- `notifications.py`: EXISTS (phase 3, task 2, D42). `send_consultation_notification()`, `format_message()` and `post_to_telegram()`: one plain HTTPS call to the Telegram Bot API, no new dependency. `is_configured()` turns the whole thing off when either setting is empty.
+- `tests/`: EXISTS. `test_models.py` and `test_admin.py`, and, since phase 3, task 1, `test_forms.py`, `test_views.py`, `test_ratelimit.py` and `conftest.py` (empties the cache, and, since task 2, forces notifications off and blocks the network, before every test). `test_notifications.py` (task 2) covers the message, the three stored outcomes, and the HTTP call itself with the network faked.
 - Staff inbox views: the admin is the inbox for now; a one-tap page belongs to the staff panel (phase 4).
 
 ### `apps/pages/`
@@ -159,7 +159,7 @@ Django templates, all in Persian and RTL.
 | `base.html` | EXISTS. Page shell: `<html lang="fa" dir="rtl">`, header with the text logo, a link to the product list and a call button (wide screens), footer with address, hours and number, and the call bar. |
 | `partials/` | `call_bar.html` EXISTS: the bar fixed to the bottom of the screen on phones. PLANNED: product card, availability badge, message buttons, form field, messages. |
 | `catalog/` | `product_list.html` (task 3), `product_detail.html` and `product_not_found.html` (task 4) EXIST. |
-| `consultations/` | `form.html` and `thank_you.html` EXIST (phase 3, task 1). PLANNED: staff inbox. |
+| `consultations/` | `form.html` and `thank_you.html` EXIST (phase 3, task 1); neither shows anything about the notification (D42). PLANNED: staff inbox. |
 | `pages/` | `home.html` EXISTS as a placeholder (with a link to the product list). PLANNED: experts, contact, FAQ. |
 | `articles/` | Article list and detail. |
 | `staff_panel/` | The stock page. |

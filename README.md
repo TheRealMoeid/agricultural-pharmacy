@@ -6,7 +6,22 @@ The site shows the store's products and experts and makes it easy to call or mes
 
 ## Status
 
-Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products), the experts and FAQ models, the consultation request model with its admin inbox and the articles model are in place. The public pages so far are a placeholder home page, the product list at `/products/` (type filter, Persian-aware search) and the product page at `/products/<slug>/`, with the call-to-ask-the-price button and Jalali dates, and the two consultation forms at `/consultation/`.
+Early development. The documentation, the Django skeleton, the local database setup, the site settings, the full catalog data model (product types, crops, pests, products), the experts and FAQ models, the consultation request model with its admin inbox and the articles model are in place. The public pages so far are a placeholder home page, the product list at `/products/` (type filter, Persian-aware search) and the product page at `/products/<slug>/`, with the call-to-ask-the-price button and Jalali dates, and the two consultation forms at `/consultation/`. A new request is announced in the store's own Telegram chat through a bot.
+
+## Notifications
+
+A submitted consultation request is always saved first, then the store is told about it over Telegram, so the admin inbox stays the source of truth even if a message never goes out.
+
+To receive them locally, set these two in your `.env` (see `.env.example`):
+
+```
+DJANGO_TELEGRAM_BOT_TOKEN=123456789:AA...
+DJANGO_TELEGRAM_CHAT_ID=-1001234567890
+```
+
+Get the token from [@BotFather](https://t.me/BotFather) (`/newbot`), then start a chat with your new bot (or add it to a group) and get the chat id -- the simplest way is to send it any message and read `https://api.telegram.org/bot<token>/getUpdates`.
+
+With either value left empty or missing, nothing is sent: the request is still saved, and its notification result is recorded as "not attempted". This is the normal state for local development without a bot configured.
 
 ## Running it locally
 

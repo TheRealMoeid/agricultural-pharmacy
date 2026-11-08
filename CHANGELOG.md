@@ -4,6 +4,15 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-11-04 — Phase 3, task 2: the Telegram notification adapter
+
+- Added `apps/consultations/notifications.py`: `send_consultation_notification()` turns a saved request into a Persian message (kind, name, phone, the crop if set, the address or message text depending on what is filled in, and the Jalali time the admin inbox already shows) and posts it to the store's own Telegram bot with one plain HTTPS call (`urllib`, no new dependency). Resolves D3; proposed D42.
+- Two settings, `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, read from the environment (`DJANGO_TELEGRAM_BOT_TOKEN`, `DJANGO_TELEGRAM_CHAT_ID` in `.env.example`). With either one empty, nothing is attempted and the request is stored as "not attempted" with a Persian reason -- the normal state for a development machine with no bot, never an error.
+- Wired into `apps/consultations/views.py`: the request is saved first (D33's inbox stays the source of truth), then `_notify()` tries the send and stores the result (`notification_status`, `notification_detail`) with one extra update. A failure of any kind -- unreachable, a bad answer, Telegram's own refusal, or a bug in the notifier itself -- is caught, logged and stored; the customer always reaches the thank-you page (D41), whatever happened.
+- `format_jalali_datetime()` moved from `apps/consultations/admin.py` into `apps/core/jalali.py`, so the admin inbox's time stamp and the Telegram message agree; both now import it from one place.
+- The bot token never reaches a log line, an exception shown anywhere, or the reason stored on the request; Telegram's own explanation is clipped to 200 characters.
+- 42 new tests (message formatting, every stored outcome, and the HTTP call itself with the network faked, including timeouts, connection errors, non-200 and non-JSON answers, and Telegram's own `{"ok": false}` refusals) plus a few additions to the existing view tests. D41 is recorded as approved (task 1 merged).
+
 ### 2026-11-03 — Phase 3, task 1: the consultation forms
 
 - Added the public forms at `/consultation/` (`apps/consultations/forms.py`, `views.py`, `urls.py`, `ratelimit.py`, `templates/consultations/`). One page, one form at a time: `?kind=question` (the default) or `?kind=farm_visit`, switched by two plain links, no JavaScript. Proposed D41.
