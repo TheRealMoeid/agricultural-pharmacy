@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-11-03 (phase 3, task 1)
+Last updated: 2026-11-04 (phase 3, task 2)
 
 Status tags:
 
@@ -105,11 +105,11 @@ Products and how people find them. **Built so far (phase 1, tasks 6 to 7, and ph
 - Persian-aware search (section 8): built, see `search.py` below.
 
 ### `consultations`
-Everything a customer can send or ask. **Built so far (phase 1, task 11, and phase 3, task 1):** the `ConsultationRequest` model and its admin, which is the staff inbox (D33), and the two public forms with the thank-you page (D41). The notifications are PLANNED, for phase 3, task 2.
+Everything a customer can send or ask. **Built so far (phase 1, task 11, and phase 3, tasks 1 and 2):** the `ConsultationRequest` model and its admin, which is the staff inbox (D33), the two public forms with the thank-you page (D41), and the Telegram notification adapter (D42).
 - Model: `ConsultationRequest`, covering both "ask an expert" and "farm visit".
 - Staff inbox (built): the admin list shows time (Jalali, store time), name, kind, a tap-to-call phone and status, with new requests first. Customer details are read-only; the status can be changed on the request page or with the two actions "رسیدگی شد" and "برگرداندن به جدید". Requests cannot be added from the admin.
 - The two forms (built, D41): `/consultation/?kind=question` or `?kind=farm_visit`, one at a time, switched by plain links. A valid request is stored and the visitor is redirected to `/consultation/thank-you/`, so a refresh never sends it twice. Spam protection (D12): a honeypot field (a filled one gets the normal thank-you page and nothing is stored), Iranian mobile validation, and a limit of 5 submissions per visitor per hour. The limit is a small counter in Django's cache (`ratelimit.py`), not `django-ratelimit`, whose system check refuses every cache except memcached and Redis; it is per process, so with several Gunicorn workers the real limit is a few times higher. Past the limit the visitor gets HTTP 429, keeps what was typed and sees the call button. The farm-visit form says the fee depends on the farm and is told after the call; no fee is shown.
-- Notification adapter and its channel implementations (section 9). PLANNED. The model already has `notification_status` and `notification_detail` for the outcome.
+- Notification adapter (built, D42, section 9): `apps/consultations/notifications.py`. A saved request is turned into a Persian message and posted to the store's own Telegram bot; the result (sent, failed, or not attempted when no bot is configured) is stored in `notification_status` and `notification_detail`.
 
 ### `pages`
 Mostly static content. **Built so far (phase 1, task 10):** the `Expert` and `FaqItem` models with their admin pages. The views and templates are PLANNED, for phase 2 and 4.
@@ -219,12 +219,13 @@ Not in the model, on purpose: price, quantity, customer accounts, orders, batch 
 
 ## 9. Notifications
 
-**Channel: OPEN (D3).** The design does not depend on the answer.
+**Channel: Telegram, resolved (D3, D42).** Built in phase 3, task 2.
 
-- A small interface with one method, "send a notification about this request".
-- One implementation per channel. Phase 3 will build the interface and a fake implementation for tests. The real channel is built once Moeid chooses.
-- The channel is a setting, so switching later is a configuration change.
-- Failures are caught, logged, and stored on the request. They never block the customer.
+- `apps/consultations/notifications.py`: `send_consultation_notification(consultation)` formats a Persian message (kind, name, phone, the crop if set, the address or message text depending on what is filled in, and the Jalali time) and sends it to the store's own Telegram bot (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, both from the environment, D42).
+- With either setting empty nothing is attempted and the request is stored as not-attempted -- the normal state for a development machine with no bot.
+- The request is saved first (D33). The notification runs after, in `apps/consultations/views.py`'s `_notify()`, wrapped so that any failure of its own -- unreachable, a bad answer, Telegram's own refusal, or a bug in the notifier -- is stored on the request and never reaches the customer; the thank-you page (D41) is shown regardless.
+- The bot token never reaches a log line, an exception shown anywhere, or the stored reason.
+- SMS and WhatsApp senders are not built; Telegram is the only channel for now, chosen as the cheapest to run.
 
 Things to know when choosing: SMS is the most dependable for non-technical staff. Telegram is the easiest to build. Neither is decided.
 
@@ -284,7 +285,6 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 |---|---|---|
 | D1 | Stack | CONFIRMED |
 | D2 | Admin approach | CONFIRMED |
-| D3 | Notification channel | DECIDED (Telegram bot, cheapest), built in phase 3, task 2 |
 | D4 | Hosting and domain | OPEN |
 | D5 | Shared contact number (09112747628) | CONFIRMED |
 | D6 | Producer, importer, country as per-product text | CONFIRMED |
@@ -322,7 +322,8 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D38 | Public product search: every query word must match somewhere, ranked trade/generic name above usage text above crop/pest tags, Python-side over prefetched products | CONFIRMED |
 | D39 | Public product list at `/products/`: `type` and `q` GET parameters, type filter as plain links, no pagination, available first then trade name, unavailable products visible with a text badge, thumbnails lazy-loaded in a fixed square box, empty state with the call button, query count independent of the number of products | CONFIRMED |
 | D40 | Product page at `/products/<str:slug>/`: friendly Persian not-found page on a missing slug, each date line shown only when that date is entered, call-to-ask-the-price button sized like the call bar, back link preserves the type filter, fixed query count | CONFIRMED |
-| D41 | Consultation forms at `/consultation/`: one form at a time by `?kind=`, honeypot, hand-written 5-per-hour limit per visitor in Django's cache, thank-you page after a redirect, 429 page that keeps what was typed, no fee shown | PROPOSED in phase 3, task 1, CONFIRMED once merged |
+| D41 | Consultation forms at `/consultation/`: one form at a time by `?kind=`, honeypot, hand-written 5-per-hour limit per visitor in Django's cache, thank-you page after a redirect, 429 page that keeps what was typed, no fee shown | CONFIRMED |
+| D42 | Telegram notification adapter: a saved request formats a Persian message with kind, name, phone, crop, address/text and Jalali time, sent to the store's own bot; empty settings mean not-attempted, never an error; failures of the notifier itself never reach the customer | PROPOSED in phase 3, task 2, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 

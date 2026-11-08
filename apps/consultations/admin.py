@@ -1,22 +1,14 @@
 from django.contrib import admin, messages
 from django.db.models import Q
-from django.utils import timezone
 from django.utils.html import format_html
 
-from apps.core.jalali import gregorian_to_jalali
+from apps.core.jalali import format_jalali_datetime
 from apps.core.phone import format_display, to_international
 from apps.core.text import normalize_digits, normalize_letters, normalize_text
 
 from .models import ConsultationRequest
 
 Status = ConsultationRequest.Status
-
-
-def format_jalali_datetime(value) -> str:
-    """A stored datetime as "1405/01/01 15:30": Jalali date, store-local time."""
-    local = timezone.localtime(value)
-    jy, jm, jd = gregorian_to_jalali(local.date())
-    return f"{jy:04d}/{jm:02d}/{jd:02d} {local:%H:%M}"
 
 
 @admin.register(ConsultationRequest)

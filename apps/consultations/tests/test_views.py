@@ -1,4 +1,4 @@
-"""Tests for the public consultation pages (D41)."""
+"""Tests for the public consultation pages (D41) and their notification (D42)."""
 import re
 
 import pytest
@@ -8,12 +8,15 @@ from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.catalog.models import Crop
+from apps.consultations import notifications, views
 from apps.consultations.models import ConsultationRequest
+from apps.consultations.notifications import CRASHED, NOT_CONFIGURED
 from apps.consultations.ratelimit import SUBMISSION_LIMIT
 
 pytestmark = pytest.mark.django_db
 
 Kind = ConsultationRequest.Kind
+NotificationStatus = ConsultationRequest.NotificationStatus
 URL = "/consultation/"
 THANKS = "/consultation/thank-you/"
 TEL = 'href="tel:+989112747628"'
@@ -252,3 +255,97 @@ def test_invalid_posts_count_too(client):
     for _ in range(SUBMISSION_LIMIT):
         client.post(URL, question(phone="1"))
     assert client.post(URL, question()).status_code == 429
+
+
+# --- telling the store (D42) -------------------------------------------------------------------------
+
+
+TELEGRAM = "\u062a\u0644\u06af\u0631\u0627\u0645"  # تلگرام
+
+
+@pytest.fixture
+def telegram(settings, monkeypatch):
+    """A configured, faked Telegram: gives back the texts that were sent."""
+    settings.TELEGRAM_BOT_TOKEN = "123456789:AAHnot-a-real-token"
+    settings.TELEGRAM_CHAT_ID = "-1001234567890"
+    sent = []
+    monkeypatch.setattr(notifications, "post_to_telegram", lambda text: sent.append(text))
+    return sent
+
+
+def refuse(monkeypatch, reason=None):
+    """Make the channel answer with a refusal instead."""
+    reason = reason or notifications.REJECTED
+
+    def sender(text):
+        raise notifications.NotificationError(reason)
+
+    monkeypatch.setattr(notifications, "post_to_telegram", sender)
+
+
+def test_a_sent_notification_is_recorded_on_the_request(client, telegram):
+    response = client.post(URL, question())
+    assert response.status_code == 302 and response.url == THANKS
+    saved = ConsultationRequest.objects.get()
+    assert (saved.notification_status, saved.notification_detail) == (NotificationStatus.SENT, "")
+    assert len(telegram) == 1 and ASK in telegram[0]
+
+
+def test_a_failed_notification_is_recorded_and_the_visitor_still_reaches_the_thank_you_page(
+    client, telegram, monkeypatch
+):
+    refuse(monkeypatch)
+    response = client.post(URL, question())
+    assert response.status_code == 302 and response.url == THANKS
+    saved = ConsultationRequest.objects.get()
+    assert (saved.notification_status, saved.notification_detail) == (NotificationStatus.FAILED, notifications.REJECTED)
+
+
+def test_the_visitor_still_reaches_the_thank_you_page_when_the_notifier_itself_breaks(client, telegram, monkeypatch):
+    def explode(consultation):
+        raise RuntimeError("a bug in the notifier")
+
+    monkeypatch.setattr(views, "send_consultation_notification", explode)
+    html = client.post(URL, question(), follow=True).content.decode()
+    assert RECEIVED in html
+    saved = ConsultationRequest.objects.get()
+    assert (saved.notification_status, saved.notification_detail) == (NotificationStatus.FAILED, CRASHED)
+
+
+def test_the_thank_you_page_says_nothing_about_the_notification(client, telegram, monkeypatch):
+    refuse(monkeypatch)
+    html = client.post(URL, question(), follow=True).content.decode()
+    assert RECEIVED in html
+    assert TELEGRAM not in html and CRASHED not in html
+
+
+def test_without_a_bot_the_request_is_stored_and_says_why_nothing_was_sent(client):
+    response = client.post(URL, question())
+    assert response.status_code == 302
+    saved = ConsultationRequest.objects.get()
+    assert (saved.notification_status, saved.notification_detail) == (
+        NotificationStatus.NOT_ATTEMPTED,
+        NOT_CONFIGURED,
+    )
+
+
+def test_the_notification_costs_one_update_and_leaves_the_customers_words_alone(client, telegram):
+    with CaptureQueriesContext(connection) as queries:
+        client.post(URL, question())
+    assert len([query for query in queries if query["sql"].startswith("UPDATE")]) == 1
+    saved = ConsultationRequest.objects.get()
+    assert (saved.kind, saved.name, saved.phone, saved.message) == (Kind.QUESTION, NAME, "09121234567", ASK)
+    assert saved.status == ConsultationRequest.Status.NEW
+
+
+def test_a_bot_submission_notifies_nobody(client, telegram):
+    client.post(URL, question(website="http://spam.example"))
+    assert telegram == []
+
+
+def test_a_refused_submission_notifies_nobody(client, telegram):
+    for _ in range(SUBMISSION_LIMIT):
+        client.post(URL, question())
+    telegram.clear()
+    assert client.post(URL, question()).status_code == 429
+    assert telegram == []
