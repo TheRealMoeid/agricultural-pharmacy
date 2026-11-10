@@ -27,7 +27,7 @@ def test_the_header_is_ignored_when_no_header_is_configured(settings):
     assert client_ip(request_from("127.0.0.1", HTTP_X_REAL_IP="198.51.100.9")) == "127.0.0.1"
 
 
-@pytest.mark.parametrize("junk", ["", "not an ip", "1.2.3.4, 5.6.7.8", "<script>"])
+@pytest.mark.parametrize("junk", ["", "not an ip", ", 5.6.7.8", "<script>"])
 def test_a_header_that_is_not_an_ip_falls_back_to_the_remote_address(settings, junk):
     settings.CLIENT_IP_HEADER = "HTTP_X_REAL_IP"
     assert client_ip(request_from("127.0.0.1", HTTP_X_REAL_IP=junk)) == "127.0.0.1"
@@ -41,6 +41,18 @@ def test_a_missing_header_falls_back_to_the_remote_address(settings):
 def test_ipv6_addresses_work_too(settings):
     settings.CLIENT_IP_HEADER = "HTTP_X_REAL_IP"
     assert client_ip(request_from("127.0.0.1", HTTP_X_REAL_IP="2001:db8::1")) == "2001:db8::1"
+
+
+def test_a_forwarded_for_chain_uses_only_the_first_address(settings):
+    # Render's proxy (and any other chained proxy) appends to this header
+    # rather than replacing it, so it can read "client, proxy1, proxy2" (D44).
+    settings.CLIENT_IP_HEADER = "HTTP_X_FORWARDED_FOR"
+    assert client_ip(request_from("127.0.0.1", HTTP_X_FORWARDED_FOR="198.51.100.9, 10.0.0.1")) == "198.51.100.9"
+
+
+def test_a_forwarded_for_chain_still_falls_back_when_the_first_address_is_junk(settings):
+    settings.CLIENT_IP_HEADER = "HTTP_X_FORWARDED_FOR"
+    assert client_ip(request_from("127.0.0.1", HTTP_X_FORWARDED_FOR="not an ip, 10.0.0.1")) == "127.0.0.1"
 
 
 # --- the limit ----------------------------------------------------------------------------

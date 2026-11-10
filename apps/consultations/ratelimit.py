@@ -10,10 +10,13 @@ The cache is per process. With several Gunicorn workers each keeps its own
 count, so the real limit is a few times higher than the number here, which is
 fine for stopping spam but not a hard guarantee. A restart forgets everyone.
 
-Who is "a visitor": the address in REMOTE_ADDR, or, behind Nginx, where every
-request seems to come from the proxy, the header named by the CLIENT_IP_HEADER
-setting. Nginx must overwrite that header (`proxy_set_header X-Real-IP
-$remote_addr;`), never pass on one the visitor sent.
+Who is "a visitor": the address in REMOTE_ADDR, or, behind a proxy, the header
+named by the CLIENT_IP_HEADER setting. Nginx is set up to overwrite that
+header with a single address (`proxy_set_header X-Real-IP $remote_addr;`),
+never passing on one the visitor sent. Render's own proxy instead sets
+X-Forwarded-For, appending to it rather than replacing it, so that header can
+hold a comma-separated chain ("client, proxy1, proxy2"); the first address in
+the chain is the visitor's own, and is the one used below (D44).
 """
 import ipaddress
 
@@ -28,7 +31,7 @@ def client_ip(request) -> str:
     """The visitor's address. A header value that is not an IP is ignored."""
     header = getattr(settings, "CLIENT_IP_HEADER", "")
     if header:
-        value = request.META.get(header, "").strip()
+        value = request.META.get(header, "").split(",")[0].strip()
         try:
             return str(ipaddress.ip_address(value))
         except ValueError:

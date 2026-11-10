@@ -1,0 +1,10 @@
+# Production and staging extras (Render staging, D44).
+-r base.txt
+
+# WSGI server. Render's "start command" runs this directly; there is no
+# separate Nginx in front of it on a Free web service.
+gunicorn>=23,<24
+
+# Serves static/ ourselves, compressed and hashed, with no Nginx involved.
+# Does NOT serve media/ (uploaded photos); see config/urls.py and D44 for why.
+whitenoise>=6.7,<7

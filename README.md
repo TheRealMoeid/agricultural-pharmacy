@@ -88,6 +88,24 @@ pytest
 
 The text and phone tests need no database. The rest (site settings, catalog, admin) need `docker compose up -d db` to be running. pytest-django creates and removes its own test database, so your development data is not touched.
 
+## Staging on Render (free tier)
+
+A free, shareable staging copy — for testing and demos, not for real customers or real data (D44).
+
+1. Push this repository to GitHub (or GitLab/Bitbucket).
+2. In the [Render dashboard](https://dashboard.render.com), choose **New +** → **Blueprint**, and point it at the repo. Render reads `render.yaml` at the repo root and proposes a free web service plus a free PostgreSQL database.
+3. When prompted for `DJANGO_ADMIN_URL`, type a hard-to-guess path (not `admin/`).
+4. Deploy. The first build runs migrations; once it finishes, open `https://<service-name>.onrender.com/<your-admin-path>/` and run `createsuperuser` from the **Shell** tab in the Render dashboard (`python manage.py createsuperuser`).
+
+**What the free tier gives up**, so there are no surprises:
+
+- **The service sleeps.** After 15 minutes with no traffic it spins down; the next visitor waits about a minute while it wakes back up. Fine for sharing a link with a tester, not for anything that must respond instantly.
+- **Uploaded files are not kept.** Render's free web services have no persistent disk: every product photo, expert photo or article image uploaded through the admin is lost the next time the service redeploys, restarts, or simply spins down from being idle. The database survives (it is a separate service); photos do not. Re-upload after any gap in traffic, or treat photos as something to test only right after a deploy.
+- **The free database expires.** It is deleted 30 days after creation (14-day grace period to upgrade first). For a short testing window this does not matter; for anything longer, recreate it or move to a paid plan before day 30.
+- **It is genuinely staging, not production.** No backups, no SLA, and Render can restart either service at any time. This is the free tier Moeid asked to accept for testing and sharing (D44); `docs/ARCHITECTURE.md` section 13 still has the real deployment plan (Nginx, Gunicorn, PostgreSQL in Docker Compose) for when hosting (D4) is chosen.
+
+To update the staging site, push to `main`: Render redeploys automatically.
+
 ## Documentation
 
 Everything lives in `docs/`. Start with `docs/CLAUDE.md`, which holds the current state, decisions and next steps.

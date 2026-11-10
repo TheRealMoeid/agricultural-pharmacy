@@ -4,7 +4,7 @@ Everything secret or specific to the server comes from environment variables,
 and a missing one stops the app at startup instead of falling back to a default.
 """
 from .base import *  # noqa: F401,F403
-from .base import env
+from .base import MIDDLEWARE, env
 
 DEBUG = False
 
@@ -14,6 +14,27 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 
 DATABASES = {"default": env.db("DATABASE_URL")}
+
+# WhiteNoise serves static/ (compressed, hashed) with no Nginx in front of us
+# (D44, the Render staging deploy, which has no separate web server). Right
+# after SecurityMiddleware, as WhiteNoise's own docs ask for.
+MIDDLEWARE = [
+    MIDDLEWARE[0],
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    *MIDDLEWARE[1:],
+]
+# base.py never sets STORAGES, so Django's own default applies to "default"
+# (plain FileSystemStorage for MEDIA_ROOT) except we swap "staticfiles".
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
+# D44: on a host with no Nginx (Render's free web services included), there is
+# nobody else to serve /media/, so Django does it itself when this is on. Off
+# by default because the real deployment plan (ARCHITECTURE.md, section 13)
+# still has Nginx do this; a host without one sets DJANGO_SERVE_MEDIA_VIA_DJANGO=true.
+SERVE_MEDIA_VIA_DJANGO = env.bool("DJANGO_SERVE_MEDIA_VIA_DJANGO", default=False)
 
 # Nginx terminates HTTPS and tells Django through this header.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

@@ -4,6 +4,13 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-11-05 — Infra: free-tier staging deploy on Render
+
+- Added `render.yaml` (a Render Blueprint): a free web service plus a free PostgreSQL database, so `main` can be deployed with a few clicks for testing and sharing. Proposed D44.
+- Added `requirements/prod.txt` (gunicorn, whitenoise). `config/settings/prod.py` now runs WhiteNoise for `static/` (no Nginx in front of it on Render's free plan) and reads a new `DJANGO_SERVE_MEDIA_VIA_DJANGO` setting; `config/urls.py` serves `/media/` itself when it is on, since Render's free web service has nobody else to do that.
+- `apps/consultations/ratelimit.py`'s `client_ip()` now reads only the first address of a comma-separated forwarded-for header, since Render's proxy appends to `X-Forwarded-For` rather than replacing it the way the Nginx setup's `X-Real-IP` does; `render.yaml` points `DJANGO_CLIENT_IP_HEADER` at it. Existing single-address headers (Nginx's `X-Real-IP`) behave exactly as before. 2 new tests, 1 existing test adjusted (the input it checked is no longer invalid after this change).
+- Documented the free tier's real costs in `README.md`: the service sleeps after 15 minutes idle (~1 minute cold start), uploaded photos are lost on every redeploy or restart (no persistent disk), and the free database is deleted 30 days after creation. None of this touches the Nginx/Gunicorn/Docker Compose deployment plan in `docs/ARCHITECTURE.md`, which is still what a real launch uses once hosting (D4) is chosen.
+
 ### 2026-11-04 — Phase 3, task 2: the Telegram notification adapter
 
 - Added `apps/consultations/notifications.py`: `send_consultation_notification()` turns a saved request into a Persian message (kind, name, phone, the crop if set, the address or message text depending on what is filled in, and the Jalali time the admin inbox already shows) and posts it to the store's own Telegram bot with one plain HTTPS call (`urllib`, no new dependency). Resolves D3; proposed D42.

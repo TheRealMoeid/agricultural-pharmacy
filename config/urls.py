@@ -16,6 +16,10 @@ urlpatterns = [
     path("", include("apps.pages.urls")),
 ]
 
-if settings.DEBUG:
-    # In production Nginx serves the media files.
+if settings.DEBUG or getattr(settings, "SERVE_MEDIA_VIA_DJANGO", False):
+    # Nginx serves the media files in the deployment this project plans for
+    # (ARCHITECTURE.md, section 13). A host with no Nginx in front of it, such
+    # as a Render free web service (D44), sets DJANGO_SERVE_MEDIA_VIA_DJANGO=true
+    # so Django serves them instead -- slower, but media/ is ephemeral there
+    # anyway (see README's "Staging on Render" section), so nothing more is lost.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
