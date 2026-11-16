@@ -4,7 +4,7 @@
 <h1 class="text-2xl font-bold text-brand-800">تماس با ما</h1>
 <div class="mt-6 space-y-6">
   {% if site.tel_url %}
-  <a href="{{ site.tel_url }}" class="flex min-h-14 items-center justify-center rounded-lg bg-brand-600 px-5 text-lg font-bold text-white hover:bg-brand-700 active:bg-brand-800">تماس بگیرید: <span dir="ltr" class="ms-2">{{ site.phone_display }}</span></a>
+  <a href="{{ site.tel_url }}" class="flex min-h-14 items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 text-lg font-bold text-white hover:bg-brand-700 active:bg-brand-800">تماس بگیرید: <span dir="ltr">{{ site.phone_display }}</span></a>
   {% endif %}
   {% if site.whatsapp_url or site.telegram_url or site.rubika_url %}
   <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">

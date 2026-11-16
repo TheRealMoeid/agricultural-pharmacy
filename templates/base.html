@@ -22,8 +22,8 @@
         <a href="{% url 'pages:contact' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">تماس با ما</a>
       </div>
       {% if site.tel_url %}
-      <a href="{{ site.tel_url }}" class="hidden min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800 md:inline-flex">
-        تماس بگیرید: <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
+            <a href="{{ site.tel_url }}" class="hidden min-h-12 items-center gap-2 rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800 md:inline-flex">
+        تماس بگیرید: <span dir="ltr">{{ site.phone_display }}</span>
       </a>
       {% endif %}
     </div>
