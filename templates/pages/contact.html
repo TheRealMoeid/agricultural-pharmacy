@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}تماس با ما | {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-brand-800">تماس با ما</h1>
+<div class="mt-6 space-y-6">
+  {% if site.tel_url %}
+  <a href="{{ site.tel_url }}" class="flex min-h-14 items-center justify-center rounded-lg bg-brand-600 px-5 text-lg font-bold text-white hover:bg-brand-700 active:bg-brand-800">تماس بگیرید: <span dir="ltr" class="ms-2">{{ site.phone_display }}</span></a>
+  {% endif %}
+  {% if site.whatsapp_url or site.telegram_url or site.rubika_url %}
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    {% if site.whatsapp_url %}
+    <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener" class="flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 font-bold text-stone-800 hover:bg-stone-50">واتساپ</a>
+    {% endif %}
+    {% if site.telegram_url %}
+    <a href="{{ site.telegram_url }}" target="_blank" rel="noopener" class="flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 font-bold text-stone-800 hover:bg-stone-50">تلگرام</a>
+    {% endif %}
+    {% if site.rubika_url %}
+    <a href="{{ site.rubika_url }}" target="_blank" rel="noopener" class="flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 font-bold text-stone-800 hover:bg-stone-50">روبیکا</a>
+    {% endif %}
+  </div>
+  {% endif %}
+  <div class="rounded-lg border border-stone-200 bg-white p-4 text-stone-700">
+    <p class="font-bold text-stone-900">نشانی</p>
+    <p class="mt-1">{{ site.address }}</p>
+    <p class="mt-3 font-bold text-stone-900">ساعات کاری</p>
+    <p class="mt-1">{{ site.working_hours }}</p>
+  </div>
+  {% if site.map_image or site.google_maps_url or site.iranian_map_url %}
+  <div>
+    {% if site.map_image %}
+    <div class="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-lg bg-stone-100">
+      <img src="{{ site.map_image.url }}" alt="نقشه موقعیت فروشگاه" class="h-full w-full object-contain" loading="lazy">
+    </div>
+    {% endif %}
+    {% if site.google_maps_url or site.iranian_map_url %}
+    <div class="mt-3 flex flex-wrap gap-3">
+      {% if site.google_maps_url %}
+      <a href="{{ site.google_maps_url }}" target="_blank" rel="noopener" class="flex min-h-10 items-center rounded-md border border-stone-300 bg-white px-3 text-sm font-bold text-stone-800 hover:bg-stone-50">باز کردن در نقشه گوگل</a>
+      {% endif %}
+      {% if site.iranian_map_name and site.iranian_map_url %}
+      <a href="{{ site.iranian_map_url }}" target="_blank" rel="noopener" class="flex min-h-10 items-center rounded-md border border-stone-300 bg-white px-3 text-sm font-bold text-stone-800 hover:bg-stone-50">باز کردن در {{ site.iranian_map_name }}</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  <p><a href="{% url 'consultations:form' %}" class="font-bold text-brand-700 underline">درخواست مشاوره یا بازدید از مزرعه</a></p>
+</div>
+{% endblock %}

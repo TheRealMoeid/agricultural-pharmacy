@@ -4,6 +4,14 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-11-15 — Phase 3, task 3: the experts and contact pages
+
+- Added `/experts/` and `/contact/` (`apps/pages/views.py`, `templates/pages/experts.html`, `templates/pages/contact.html`), plus header and home-page links to both. Proposed D43.
+- The experts page shows every `Expert` in admin order; each card shows the photo or an inline placeholder, then degree, role, experience and specialty, each only when filled in, so the two real profiles need no per-person logic. A test pins the query count.
+- The contact page shows the call button, the WhatsApp/Telegram/Rubika buttons (each hidden while its field is empty), the address and hours, and the map block, which stays absent until an image or a link exists. All links are plain anchors; nothing is loaded from other sites.
+- Added `SiteSettings.map_image`, a `WebPImageField` with its own numbers (800 px, 60 KB budget, no thumbnail, D43), with a migration and an admin fieldset entry.
+- 17 new tests. D42 is recorded as approved (merged 2026-11-08); the doc lag from that merge is fixed in this patch too.
+
 ### 2026-11-04 — Phase 3, task 2: the Telegram notification adapter
 
 - Added `apps/consultations/notifications.py`: `send_consultation_notification()` turns a saved request into a Persian message (kind, name, phone, the crop if set, the address or message text depending on what is filled in, and the Jalali time the admin inbox already shows) and posts it to the store's own Telegram bot with one plain HTTPS call (`urllib`, no new dependency). Resolves D3; proposed D42.

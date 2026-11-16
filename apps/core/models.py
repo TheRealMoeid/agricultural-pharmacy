@@ -3,6 +3,7 @@ import re
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from .fields import WebPImageField
 from .phone import (
     format_display,
     normalize_iran_mobile,
@@ -23,7 +24,6 @@ def validate_telegram_username(value: str) -> None:
 
 class SiteSettings(models.Model):
     """The store's details and contact settings. There is only ever one row.
-
     Use SiteSettings.load() to get it. The fields start with the details the
     client has confirmed, so a fresh database already has a working number
     and address.
@@ -50,7 +50,6 @@ class SiteSettings(models.Model):
         max_length=200,
         default="شنبه تا پنجشنبه، ۸ تا ۱۳ و ۱۵ تا ۱۸ (جمعه‌ها تعطیل)",
     )
-
     phone = models.CharField(
         "شماره تماس",
         max_length=25,
@@ -70,7 +69,6 @@ class SiteSettings(models.Model):
         blank=True,
         help_text="پیوندی که روبیکا برای حساب فروشگاه می‌دهد. اگر خالی باشد، دکمه روبیکا نمایش داده نمی‌شود.",
     )
-
     google_maps_url = models.URLField("پیوند نقشه گوگل", blank=True)
     iranian_map_name = models.CharField(
         "نام برنامه نقشه ایرانی",
@@ -79,7 +77,16 @@ class SiteSettings(models.Model):
         help_text="مثلاً نشان یا بلد. روی دکمه نمایش داده می‌شود.",
     )
     iranian_map_url = models.URLField("پیوند نقشه ایرانی", blank=True)
-
+    map_image = WebPImageField(
+        "تصویر نقشه",
+        upload_to="map/",
+        blank=True,
+        max_side=800,
+        quality=80,
+        max_bytes=60_000,
+        thumb_side=None,
+        help_text="تصویر اسکرین‌شات نقشه با پین فروشگاه در مرکز (حداکثر ۶۰ کیلوبایت).",
+    )
     notification_channel = models.CharField(
         "روش اطلاع‌رسانی درخواست‌ها",
         max_length=20,
@@ -87,7 +94,6 @@ class SiteSettings(models.Model):
         default=NotificationChannel.NONE,
         help_text="درخواست‌های مشتریان همیشه در صندوق درخواست‌ها ذخیره می‌شوند.",
     )
-
     show_farm_visit_fee = models.BooleanField(
         "نمایش هزینه بازدید از مزرعه",
         default=False,
@@ -98,7 +104,6 @@ class SiteSettings(models.Model):
         blank=True,
         help_text="فقط وقتی نمایش داده می‌شود که گزینه بالا فعال باشد.",
     )
-
     updated_at = models.DateTimeField("آخرین تغییر", auto_now=True)
 
     class Meta:

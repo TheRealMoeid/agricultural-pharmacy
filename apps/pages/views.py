@@ -1,6 +1,16 @@
 from django.shortcuts import render
 
+from .models import Expert
+
 
 def home(request):
-    # A placeholder until the real home page is built (phase 4).
     return render(request, "pages/home.html")
+
+
+def experts(request):
+    qs = Expert.objects.order_by("order", "pk")
+    return render(request, "pages/experts.html", {"experts": qs})
+
+
+def contact(request):
+    return render(request, "pages/contact.html")
