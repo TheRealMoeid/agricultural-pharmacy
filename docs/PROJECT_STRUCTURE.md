@@ -2,13 +2,11 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-11-04 (phase 3, task 2)
+Last updated: 2026-11-15 (phase 3, task 3)
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, `SiteSettings` with its admin and context processor), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, `apps/pages` with `Expert` and `FaqItem` and their admin, `apps/consultations` with `ConsultationRequest` and its admin inbox, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The only public pages are a placeholder home page, the product list, the product page and the consultation forms, and the layout may be adjusted when each phase is built. When a path is created, mark it as existing here in the same patch.
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, the Jalali conversion, the image pipeline, and `SiteSettings` with its admin, context processor and map image), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, plus the search and the two catalog pages, `apps/pages` with `Expert` and `FaqItem`, their admin, and the home, experts and contact views, `apps/consultations` with `ConsultationRequest`, its admin inbox, the two public forms and the Telegram notifier, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The public pages are a placeholder home page, the product list, the product page, the consultation forms, the experts page and the contact and location page. The layout may be adjusted when each phase is built. **When a path is created, mark it as existing here in the same patch.**
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
-
----
 
 ## 1. Overview
 
@@ -25,13 +23,13 @@ pharmacy-site/
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
 ├─ apps/                         EXISTS (core, catalog, pages, consultations and articles exist in part; staff_panel is PLANNED)
-│  ├─ core/                      EXISTS (helpers, SiteSettings, and the persian_digits and jalali_date filters; ClickEvent PLANNED)
+│  ├─ core/                      EXISTS (helpers, SiteSettings with the map image, and the persian_digits and jalali_date filters; ClickEvent PLANNED)
 │  ├─ catalog/                   EXISTS (reference models, Product, admin, search, the product list and the product page; phase 2's catalog views are complete)
-│  ├─ consultations/             EXISTS (ConsultationRequest, admin inbox, the two public forms and the thank-you page; notifications PLANNED)
-│  ├─ pages/                     EXISTS (Expert, FaqItem and admin; views PLANNED)
+│  ├─ consultations/             EXISTS (ConsultationRequest, admin inbox, the two public forms, the thank-you page and the Telegram notifier)
+│  ├─ pages/                     EXISTS (Expert, FaqItem and admin; home, experts and contact views; the real home page PLANNED)
 │  ├─ articles/                  EXISTS (Article and admin; views PLANNED)
 │  └─ staff_panel/               PLANNED
-├─ templates/                    EXISTS (base.html, partials/call_bar.html, pages/home.html, catalog/product_list.html, catalog/product_detail.html, catalog/product_not_found.html; the rest PLANNED)
+├─ templates/                    EXISTS (base.html, partials/call_bar.html, pages/home.html, pages/experts.html, pages/contact.html, catalog/product_list.html, catalog/product_detail.html, catalog/product_not_found.html, consultations/form.html, consultations/thank_you.html; the rest PLANNED)
 ├─ static/                       EXISTS (css/ and fonts/; js/ and img/ PLANNED)
 ├─ media/                        PLANNED (not in Git)
 ├─ tests/                        PLANNED
@@ -44,7 +42,7 @@ pharmacy-site/
 
 | Path | Purpose |
 |---|---|
-| `README.md` | What the project is, where the documentation is. Later: how to set up the project locally, run it and run the tests. Short. |
+| `README.md` | What the project is, where the documentation is, how to set it up locally, run it and run the tests. Short. |
 | `CHANGELOG.md` | What changed in each merged task. |
 | `.gitignore` | Keeps out virtual environments, `.env`, `media/`, collected static files (`staticfiles/`), the Tailwind program that `scripts/tailwind.py` downloads (`.tools/`), caches, local databases, and `*.patch` files waiting to be applied. |
 | `.gitattributes` | Forces LF line endings on every machine so patches apply cleanly (D24). |
@@ -68,9 +66,9 @@ Project-level Django configuration. No business logic. All of it exists since ph
 
 | Path | Purpose |
 |---|---|
-| `config/settings/base.py` | Settings shared by all environments: installed apps, middleware, templates, static and media, Persian locale, time zone, the configurable admin path. Reads a local `.env` through django-environ (D25). |
-| `config/settings/dev.py` | Local development: debug on, a throwaway secret key, local PostgreSQL by default. Works with no `.env`. |
-| `config/settings/prod.py` | Production: debug off, HTTPS-only cookies, HSTS, and every secret or host setting required from the environment (it refuses to start if one is missing). |
+| `config/settings/base.py` | Settings shared by all environments: installed apps, middleware, templates, static and media, Persian locale, time zone, the configurable admin path, and the two Telegram settings (D42). Reads a local `.env` through django-environ (D25). |
+| `config/settings/dev.py` | Local development: debug on, a throwaway secret key, local PostgreSQL by default. |
+| `config/settings/prod.py` | Production: debug off, HTTPS-only cookies, HSTS, `CLIENT_IP_HEADER` for the form limit, and every secret or host setting required from the environment (it refuses to start if one is missing). |
 | `config/urls.py` | Top-level URL routing. Includes each app's URLs and the non-default admin URL. |
 | `config/__init__.py`, `config/settings/__init__.py` | Empty. They make the folders Python packages. |
 | `config/wsgi.py` | Entry point for Gunicorn. Defaults to the prod settings. |
@@ -83,26 +81,30 @@ Each app follows the usual Django layout. Files that an app does not need are no
 Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.py`, `apps.py`, `migrations/`, and `tests/`.
 
 ### `apps/core/`
+
 Shared things used by the whole site. It is a Django app since task 5 and is listed in `INSTALLED_APPS`.
+
 - `apps.py`: EXISTS. App configuration.
-- `models.py`: `SiteSettings` EXISTS (single row, see `ARCHITECTURE.md`). `ClickEvent` is PLANNED, only if D16 ends up as an own-database counter.
-- `admin.py`: EXISTS. The settings page: one screen, no list, no add, no delete.
-- `migrations/`: EXISTS. `0001_initial.py` creates `SiteSettings`.
+- `models.py`: `SiteSettings` EXISTS (single row, see `ARCHITECTURE.md`), with `map_image` since phase 3, task 3 (D43). `ClickEvent` is PLANNED, only if D16 ends up as an own-database counter.
+- `admin.py`: EXISTS. The settings page: one screen, no list, no add, no delete. The «نقشه» fieldset holds the map image and the two map links.
+- `migrations/`: EXISTS. `0001_initial.py` creates `SiteSettings`; `0002_sitesettings_map_image.py` adds the map image (task 3).
 - `context_processors.py`: EXISTS. Puts the settings into every template as `site`, so the call bar always has the number.
 - `phone.py`: EXISTS. Iranian mobile numbers: `normalize_iran_mobile()` (any typing to 09XXXXXXXXX), `to_international()`, `format_display()` and the form validator.
 - `text.py`: EXISTS. Persian text normalization at three levels: `normalize_letters()` (yeh, kaf, kashida, vowel marks), `normalize_text()` (also whitespace and invisible characters) and `normalize_for_search()` (also ASCII digits, no ZWNJ, alef forms folded into ا, case-folded), plus `normalize_digits()`. Used by search and form validation.
-- `jalali.py`: EXISTS (task 8). Gregorian/Jalali conversion, hand-written (D23, D30), not a third-party package. Since phase 3, task 2, also `format_jalali_datetime()` (moved here from `apps/consultations/admin.py`, D42), the "1405/01/01 15:30" stamp the admin inbox and the Telegram notification both use.
+- `jalali.py`: EXISTS (task 8). Gregorian/Jalali conversion, hand-written (D23, D30), not a third-party package. Since phase 3, task 2, also `format_jalali_datetime()` (moved here from `apps/consultations/admin.py`, D42), the "1405-01-01 15:30" stamp the admin inbox and the Telegram notification both use.
 - `forms.py`: EXISTS (task 8). `JalaliDateField`, a form field that reads/shows Jalali text for a model `DateField`.
 - `images.py`: EXISTS (task 9). `load_image()` (check, decode, rotate), `encode_webp()` (shrink and convert to WebP within a byte budget), `process_image()`, the upload validator and `ImageRejected` (D31).
-- `fields.py`: EXISTS (task 9). `WebPImageField`, an `ImageField` that stores every new upload as a main WebP image plus a thumbnail when the model is saved, and `WebPFieldFile`, whose `thumb_url` templates use for lists.
-- `tests/`: EXISTS. `test_text.py`, `test_phone.py`, `test_jalali.py` and `test_images.py` (no database), `test_site_settings.py`, `test_admin.py`, `test_context_processor.py` and `test_jalali_form_field.py` (these use the database or Django's form machinery).
+- `fields.py`: EXISTS (task 9). `WebPImageField`, an `ImageField` that stores every new upload as a main WebP image plus a thumbnail when the model is saved, and `WebPFieldFile`, whose `thumb_url` templates use for lists. Fields with `thumb_side=None` (expert photos, the map image) store the main file only.
+- `tests/`: EXISTS. `test_text.py`, `test_phone.py`, `test_jalali.py` and `test_images.py` (no database), `test_site_settings.py`, `test_admin.py`, `test_context_processor.py` and `test_jalali_form_field.py` (these use the database or Django's form machinery), and `test_map_image.py` (task 3: the field's numbers, that it is optional, and that the admin shows it).
 - `management/commands/seed_sample_data.py`: EXISTS (task 12, D35). Loads clearly fake sample data for development, marked "[نمونه]", and removes it again with `--clear`. DEBUG only. Tested in `tests/test_seed_sample_data.py`.
 - `tests/test_static_assets.py` and `tests/test_tailwind_script.py`: EXISTS (phase 2, task 1). They check the built CSS (made by the pinned version, up to date when the program is installed, small, nothing from other sites, only templates scanned), the fonts (small WOFF2, every Persian letter people type is in them, license present) and the Tailwind script (platform choice, checksums, a failed download leaves nothing behind).
 - `templatetags/persian.py`: EXISTS. `persian_digits` (task 3; 12 becomes ۱۲, used for the result count on the product list) and `jalali_date` (task 4; a stored Gregorian date to Jalali Persian digits, `۱۴۰۴/۰۱/۰۱`, built on `jalali.py` from task 8). Tested in `tests/test_templatetags.py`.
-- A small view that receives call and message button taps (OPEN, depends on D16).
+- A small view that receives call and message button taps: OPEN, depends on D16.
 
 ### `apps/catalog/`
+
 Products and how people find them. It is a Django app since task 6 and is listed in `INSTALLED_APPS`.
+
 - `apps.py`: EXISTS. App configuration.
 - `models.py`: `ProductType`, `Crop` and `Pest` EXIST, built on two shared abstract bases (`ReferenceItem`, `SearchTag`). `Product` EXISTS since task 7.
 - `admin.py`: EXISTS. The three reference lists have a search box that ignores typing style; `Product` has filters, a dual-list widget for crops and pests, and a plain search box.
@@ -115,7 +117,9 @@ Products and how people find them. It is a Django app since task 6 and is listed
 - `tests/test_product_detail.py`: EXISTS (phase 2, task 4). The Persian slug (the regression `<str:slug>` exists to avoid), the not-found page, every field shown and the ones left out when empty, the date lines shown only when entered, the call-to-ask-the-price button's size, the back link with and without a preserved type, and a query count pinned at exactly 5.
 
 ### `apps/consultations/`
+
 Customer requests and how the store is told about them. It is a Django app since task 11 and is listed in `INSTALLED_APPS`.
+
 - `apps.py`: EXISTS. App configuration.
 - `models.py`: EXISTS. `ConsultationRequest` (D33).
 - `admin.py`: EXISTS. The staff inbox: read-only customer details, status filter, tap-to-call phone, Jalali time, search that ignores digit and letter typing style, and the two actions that switch requests between new and handled.
@@ -128,16 +132,20 @@ Customer requests and how the store is told about them. It is a Django app since
 - Staff inbox views: the admin is the inbox for now; a one-tap page belongs to the staff panel (phase 4).
 
 ### `apps/pages/`
+
 Mostly static content. It is a Django app since task 10 and is listed in `INSTALLED_APPS`.
+
 - `apps.py`: EXISTS. App configuration.
-- `models.py`: EXISTS. `Expert` (photo through `WebPImageField`, no thumbnail, D32) and `FaqItem`.
+- `models.py`: EXISTS. `Expert` (photo through `WebPImageField`, no thumbnail, D32) and `FaqItem`. A blank field is simply not shown on the page, which is how the two expert profiles differ (D43).
 - `admin.py`: EXISTS. Both lists have an editable order column; experts are searchable.
 - `migrations/`: EXISTS. `0001_initial.py` creates both tables.
-- `tests/`: EXISTS. `test_models.py`, `test_admin.py` and `conftest.py` (uploads go to a temporary folder).
-- `views.py` and `urls.py`: EXISTS (phase 2, task 1) as a placeholder `home` view at `/`, only so the base template has a page. The real pages are PLANNED (phase 4): home, experts, contact and location, FAQ.
+- `views.py` and `urls.py`: EXISTS. `home` (phase 2, task 1) is still a placeholder at `/`; `experts` and `contact` (phase 3, task 3, D43) are at `/experts/` and `/contact/`, namespace `pages`. `experts` passes every expert in admin order; `contact` needs no context of its own, the settings come from the context processor. The real home page is PLANNED (phase 4). There is no FAQ view and none is planned (decided 2026-11-03).
+- `tests/`: EXISTS. `test_models.py`, `test_admin.py`, `conftest.py` (uploads go to a temporary folder), and `test_pages_views.py` (task 3: the home page's links, the experts page's order, filled and blank fields, placeholder, empty state and query count, and every show/hide rule on the contact page).
 
 ### `apps/articles/`
+
 Seasonal articles. It is a Django app since task 12 and is listed in `INSTALLED_APPS`.
+
 - `apps.py`: EXISTS. App configuration.
 - `models.py`: EXISTS. `Article` (four seasons, plain-text body, optional cover image through `WebPImageField`, `published()` queryset method, D34).
 - `admin.py`: EXISTS. A tick box in the list publishes an article; Jalali date entry; filters by publication and season.
@@ -146,7 +154,9 @@ Seasonal articles. It is a Django app since task 12 and is listed in `INSTALLED_
 - `views.py` and `urls.py`: PLANNED. List and detail. The list is not linked from navigation until the first article is published (D11).
 
 ### `apps/staff_panel/`
-The mobile page Habibollah uses most.
+
+The mobile page Habibollah uses most. PLANNED (phase 4).
+
 - `views.py` and `urls.py`: the searchable stock list and the toggle action.
 - Login and staff permission required.
 
@@ -156,14 +166,14 @@ Django templates, all in Persian and RTL.
 
 | Path | Purpose |
 |---|---|
-| `base.html` | EXISTS. Page shell: `<html lang="fa" dir="rtl">`, header with the text logo, a link to the product list and a call button (wide screens), footer with address, hours and number, and the call bar. |
-| `partials/` | `call_bar.html` EXISTS: the bar fixed to the bottom of the screen on phones. PLANNED: product card, availability badge, message buttons, form field, messages. |
+| `base.html` | EXISTS. Page shell: `<html lang="fa" dir="rtl">`, header with the text logo, links to the product list, the experts page, the consultation forms and the contact page, a call button (wide screens), footer with address, hours and number, and the call bar. |
+| `partials/` | `call_bar.html` EXISTS: the bar fixed to the bottom of the screen on phones. The message buttons are not a partial, they live in `pages/contact.html` (task 3). PLANNED: form field, messages. |
 | `catalog/` | `product_list.html` (task 3), `product_detail.html` and `product_not_found.html` (task 4) EXIST. |
 | `consultations/` | `form.html` and `thank_you.html` EXIST (phase 3, task 1); neither shows anything about the notification (D42). PLANNED: staff inbox. |
-| `pages/` | `home.html` EXISTS as a placeholder (with a link to the product list). PLANNED: experts, contact, FAQ. |
-| `articles/` | Article list and detail. |
-| `staff_panel/` | The stock page. |
-| `404.html`, `500.html` | Error pages in the same style as the site. |
+| `pages/` | `home.html` EXISTS as a placeholder (links to the products, experts and contact pages). `experts.html` and `contact.html` EXIST (phase 3, task 3, D43). The real home page is PLANNED (phase 4); no FAQ template is planned. |
+| `articles/` | PLANNED. Article list and detail. |
+| `staff_panel/` | PLANNED. The stock page. |
+| `404.html`, `500.html` | PLANNED. Error pages in the same style as the site. |
 
 ## 7. `static/`
 
@@ -172,13 +182,13 @@ Files we ship ourselves. Nothing is loaded from other websites.
 | Path | Purpose |
 |---|---|
 | `static/css/` | EXISTS. `input.css` is the Tailwind input (theme, the two `@font-face` rules, only `templates/` scanned). `site.css` is the built, minified result and **is committed** (D36), so nothing needs to build it on the server. Rebuild with `python scripts/tailwind.py build`. |
-| `static/js/` | The small amount of JavaScript: the stock toggle, button tap counting, and form niceties. |
+| `static/js/` | PLANNED. The small amount of JavaScript: the stock toggle, button tap counting, and form niceties. |
 | `static/fonts/` | EXISTS. `Vazirmatn-Regular.woff2` and `Vazirmatn-Bold.woff2`, cut down by `scripts/subset_fonts.py` (D37), and `OFL.txt`, the font's license, which has to stay with them. |
-| `static/img/` | Logo (text placeholder first, then Moeid's SVG), the static map image, icons, and placeholder product images. |
+| `static/img/` | PLANNED. Logo (text placeholder first, then Moeid's SVG), icons, and placeholder images. The map image is not here: it is uploaded through the admin and lands in `media/map/` (D43). |
 
 ## 8. `media/` (not in Git)
 
-Files uploaded through the admin: product photos (`products/`), expert photos (`experts/`), article images. Kept out of Git and included in the daily backup. Served by Nginx in production.
+Files uploaded through the admin: product photos (`products/`), expert photos (`experts/`), article images, and the store's map screenshot (`map/`, since task 3). Kept out of Git and included in the daily backup. Served by Nginx in production.
 
 ## 9. `tests/`
 
@@ -186,16 +196,16 @@ Most tests live next to their app in `apps/<app>/tests/`. This top-level folder 
 
 | Path | Purpose |
 |---|---|
-| `tests/e2e/` | Playwright smoke tests with a mobile viewport. |
+| `tests/e2e/` | PLANNED. Playwright smoke tests with a mobile viewport. |
 
 ## 10. `docker/`
 
 | Path | Purpose |
 |---|---|
-| `docker/Dockerfile` | Builds the Django image. |
-| `docker/nginx/` | Nginx configuration. |
+| `docker/Dockerfile` | PLANNED. Builds the Django image. |
+| `docker/nginx/` | PLANNED. Nginx configuration. |
 | `compose.yml` | EXISTS, at the repository root. Local development stack: PostgreSQL 17 only (D21, D26), bound to localhost with a health check and a named data volume. Django runs outside it. |
-| `compose.prod.yml` | Production and staging stack. |
+| `compose.prod.yml` | PLANNED. Production and staging stack. |
 
 Hosting is undecided (D4), so production details here wait for that decision.
 
@@ -208,8 +218,8 @@ Small scripts, kept simple. They are Python where they have to run on Windows to
 | `scripts/tailwind.py` | EXISTS (D36). Downloads the pinned Tailwind program into `.tools/` after checking its checksum (`install`), then builds (`build`) or watches (`watch`) the stylesheet. |
 | `scripts/subset_fonts.py` | EXISTS (D37). One-time step that cuts Vazirmatn down to the characters the site uses. Reproduces the committed font files byte for byte. |
 | `scripts/deploy.sh` | PLANNED. Pull, migrate, collect static files, restart. |
-| `scripts/backup.sh` | Daily database dump and media copy to storage off the web server. |
-| `scripts/restore.sh` | Restore from a backup. Tested once before launch. |
+| `scripts/backup.sh` | PLANNED. Daily database dump and media copy to storage off the web server. |
+| `scripts/restore.sh` | PLANNED. Restore from a backup. Tested once before launch. |
 
 ## 12. `docs/`
 
@@ -223,10 +233,10 @@ Written alongside the code, not before it.
 | `docs/DECISIONS.md` | EXISTS. Log of approved decisions (D-numbers) and their outcome. |
 | `docs/AGRICULTURAL_PHARMACY_REQUIREMENTS.md` | EXISTS. Round 1 requirements: the questions and the father's answers, matched. |
 | `docs/REQUIREMENTS_ROUND_3_UPDATE.md` | EXISTS. Round 3 requirements. The newest round wins where they differ. |
-| `docs/DATA_MODEL.md` | Final field-by-field model, once the models exist. |
-| `docs/DEPLOYMENT.md` | Server setup, deploy, rollback, backup and restore. |
-| `docs/ADMIN_GUIDE_FA.md` | Persian guide with screenshots for Habibollah: stock toggle, adding a product, handling requests. |
-| `docs/CONTENT_GUIDE.md` | Field-by-field rules for entering products, and photo tips. |
+| `docs/DATA_MODEL.md` | PLANNED. Final field-by-field model. |
+| `docs/DEPLOYMENT.md` | PLANNED. Server setup, deploy, rollback, backup and restore. |
+| `docs/ADMIN_GUIDE_FA.md` | PLANNED. Persian guide with screenshots for Habibollah: stock toggle, adding a product, handling requests. |
+| `docs/CONTENT_GUIDE.md` | PLANNED. Field-by-field rules for entering products, and photo tips. |
 
 The three project documents (`CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`) were first delivered at the repository root. Moeid moved them into `docs/`, and that is where they live now.
 
@@ -238,7 +248,7 @@ Small refinements made while writing these documents. None changes the agreed sc
 - The `staff` app is named `staff_panel`, so it is not confused with Django's `is_staff` flag.
 - A `core` app was added to hold site settings, Persian text helpers, the Jalali filter and button counting. In the plan these had no home.
 - `CLAUDE.md`, `ARCHITECTURE.md` and `PROJECT_STRUCTURE.md` live in `docs/`, together with `DECISIONS.md` and the requirements documents.
-- The `locale/` folder from the plan is left out until we decide whether Persian strings sit in templates or go through Django's translation system.
+- The `locale/` folder from the plan is left out: Persian strings sit directly in templates and model labels, no gettext (D20).
 
 ## 14. Rules for keeping this file accurate
 

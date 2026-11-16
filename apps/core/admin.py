@@ -11,7 +11,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
         ("اطلاعات فروشگاه", {"fields": ("store_name", "address", "working_hours")}),
         ("راه‌های ارتباطی", {"fields": ("phone", "telegram_username", "rubika_url")}),
-        ("نقشه", {"fields": ("google_maps_url", "iranian_map_name", "iranian_map_url")}),
+        ("نقشه", {"fields": ("map_image", "google_maps_url", "iranian_map_name", "iranian_map_url")}),
         ("درخواست‌ها", {"fields": ("notification_channel",)}),
         ("هزینه بازدید از مزرعه", {"fields": ("show_farm_visit_fee", "farm_visit_fee_text")}),
     )

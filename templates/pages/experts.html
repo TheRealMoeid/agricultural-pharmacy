@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}کارشناسان | {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-brand-800">کارشناسان ما</h1>
+{% if experts %}
+<div class="mt-6 grid gap-6 sm:grid-cols-2">
+  {% for expert in experts %}
+  <div class="rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
+    <div class="flex items-start gap-4">
+      <div class="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-stone-100">
+        {% if expert.photo %}
+        <img src="{{ expert.photo.url }}" alt="{{ expert.name }}" width="96" height="96" loading="lazy" class="h-full w-full object-cover">
+        {% else %}
+        <svg class="h-12 w-12 text-stone-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        {% endif %}
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-stone-900">{{ expert.name }}</h2>
+        {% if expert.degree %}<p class="mt-1 text-sm text-stone-600"><span class="font-bold">مدرک تحصیلی:</span> {{ expert.degree }}</p>{% endif %}
+        {% if expert.role %}<p class="mt-1 text-sm text-stone-600"><span class="font-bold">سمت:</span> {{ expert.role }}</p>{% endif %}
+        {% if expert.experience %}<p class="mt-1 text-sm text-stone-600"><span class="font-bold">سابقه:</span> {{ expert.experience }}</p>{% endif %}
+        {% if expert.specialty %}<p class="mt-1 text-sm text-stone-600"><span class="font-bold">تخصص:</span> {{ expert.specialty }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="mt-4 text-stone-600">در حال حاضر اطلاعات کارشناسان ثبت نشده است. برای مشاوره با ما تماس بگیرید.</p>
+{% endif %}
+<p class="mt-8"><a href="{% url 'consultations:form' %}" class="font-bold text-brand-700 underline">سؤال دارید؟ از کارشناس بپرسید</a></p>
+{% endblock %}
