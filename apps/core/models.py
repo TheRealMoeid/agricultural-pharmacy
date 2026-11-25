@@ -159,3 +159,36 @@ class SiteSettings(models.Model):
     @property
     def farm_visit_fee_visible(self) -> bool:
         return self.show_farm_visit_fee and bool(self.farm_visit_fee_text.strip())
+
+
+class ClickEvent(models.Model):
+    """One tap on a call or message button (D16, resolved as D44).
+
+    Every call/WhatsApp/Telegram/Rubika button on the site points at
+    core:track_click instead of straight at the real destination; that view
+    creates one of these, then redirects on. No personal data is kept: just
+    which button, which page it was tapped from, and when.
+    """
+
+    class Kind(models.TextChoices):
+        CALL = "call", "تماس"
+        WHATSAPP = "whatsapp", "واتساپ"
+        TELEGRAM = "telegram", "تلگرام"
+        RUBIKA = "rubika", "روبیکا"
+
+    kind = models.CharField("نوع", max_length=20, choices=Kind.choices)
+    page_path = models.CharField(
+        "صفحه",
+        max_length=255,
+        blank=True,
+        help_text="نشانی صفحه‌ای که دکمه از آن لمس شده است.",
+    )
+    created_at = models.DateTimeField("زمان", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-pk"]
+        verbose_name = "رویداد تماس"
+        verbose_name_plural = "رویدادهای تماس"
+
+    def __str__(self):
+        return f"{self.get_kind_display()} - {self.page_path or '-'}"

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load clicks %}
 {# A friendly page for a deleted or mistyped product link (D40), not a plain 404: the goal is a sale, so a dead link should still lead to the phone number. #}
 {% block title %}این محصول پیدا نشد | {{ site.store_name }}{% endblock %}
 {% block content %}
@@ -6,7 +7,7 @@
   <h1 class="text-lg font-bold">این محصول در دسترس نیست</h1>
   <p class="mt-2 text-stone-600">ممکن است این محصول حذف شده یا نشانی آن اشتباه باشد. می‌توانید محصولات را مرور کنید یا با داروخانه تماس بگیرید.</p>
   {% if site.tel_url %}
-  <a href="{{ site.tel_url }}" class="mt-4 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+  <a href="{% click_url 'call' %}" class="mt-4 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
     تماس با داروخانه <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
   </a>
   {% endif %}

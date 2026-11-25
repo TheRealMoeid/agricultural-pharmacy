@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load clicks %}
 {# Shown after a request is stored (D41). Reached by a redirect, so refreshing never sends the form twice. #}
 {% block title %}درخواست شما دریافت شد | {{ site.store_name }}{% endblock %}
 {% block content %}
@@ -7,7 +8,7 @@
   <p class="mt-2 text-stone-600">به‌زودی با شما تماس می‌گیریم.</p>
   {% if site.tel_url %}
   <p class="mt-4 text-stone-600">اگر کار فوری دارید، مستقیم تماس بگیرید:</p>
-  <a href="{{ site.tel_url }}" class="mt-2 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+  <a href="{% click_url 'call' %}" class="mt-2 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
     تماس با داروخانه <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
   </a>
   {% endif %}

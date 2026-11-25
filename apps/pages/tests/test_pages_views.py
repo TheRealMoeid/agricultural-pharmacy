@@ -78,7 +78,7 @@ def test_contact_shows_phone_address_hours(client):
 def test_contact_whatsapp_button(client):
     content = client.get(reverse("pages:contact")).content.decode()
     assert "واتساپ" in content
-    assert "wa.me" in content
+    assert 'href="/click/whatsapp/' in content
 
 
 def test_contact_telegram_hidden_without_username(client):
@@ -95,7 +95,7 @@ def test_contact_telegram_shown_with_username(client):
     site.save()
     content = client.get(reverse("pages:contact")).content.decode()
     assert "تلگرام" in content
-    assert "t.me/store_test" in content
+    assert 'href="/click/telegram/' in content
 
 
 def test_contact_rubika_hidden_without_link(client):

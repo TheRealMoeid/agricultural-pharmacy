@@ -1,4 +1,4 @@
-{% load static %}<!doctype html>
+{% load static clicks %}<!doctype html>
 <html lang="fa" dir="rtl" class="h-full">
 <head>
   <meta charset="utf-8">
@@ -22,7 +22,7 @@
         <a href="{% url 'pages:contact' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">تماس با ما</a>
       </div>
       {% if site.tel_url %}
-            <a href="{{ site.tel_url }}" class="hidden min-h-12 items-center gap-2 rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800 md:inline-flex">
+            <a href="{% click_url 'call' %}" class="hidden min-h-12 items-center gap-2 rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800 md:inline-flex">
         تماس بگیرید: <span dir="ltr">{{ site.phone_display }}</span>
       </a>
       {% endif %}
@@ -37,7 +37,7 @@
     <address class="mx-auto max-w-5xl space-y-1 px-4 py-6 text-sm not-italic text-stone-600">
       <p>{{ site.address }}</p>
       <p>{{ site.working_hours }}</p>
-      {% if site.tel_url %}<p>تلفن: <a href="{{ site.tel_url }}" dir="ltr" class="font-bold text-brand-700">{{ site.phone_display }}</a></p>{% endif %}
+      {% if site.tel_url %}<p>تلفن: <a href="{% click_url 'call' %}" dir="ltr" class="font-bold text-brand-700">{{ site.phone_display }}</a></p>{% endif %}
     </address>
   </footer>
 

@@ -26,7 +26,9 @@ ARABIC_KAF = "\u0643"
 PERSIAN_KAF = "\u06a9"
 SCORE = "\u0627\u0633" + PERSIAN_KAF + "\u0648\u0631"  # اسکور
 SCORE_ARABIC_KAF = "\u0627\u0633" + ARABIC_KAF + "\u0648\u0631"
-TEL = 'href="tel:+989112747628"'
+# Call buttons now point at the click-tracking redirect (D16/D44); every one
+# on this page carries the page's own path as ?from=.
+TEL = f'href="/click/call/?from={URL}"'
 
 
 def make(fields, **overrides):

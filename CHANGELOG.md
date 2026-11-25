@@ -4,6 +4,15 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-11-21 — Phase 4, task 1: tap counting
+
+- Resolved D16: a small own-database counter, `ClickEvent` (`apps/core/models.py`). Proposed D44.
+- Every call, WhatsApp, Telegram and Rubika button on the site (header, call bar, footer, the product page's own button, the not-found page, the consultation form's rate-limit notice, the thank-you page, and the contact page) now points at `/click/<kind>/?from=<page>` instead of straight at `tel:`/`wa.me`/`t.me`/the Rubika link. `apps/core/views.py`'s `track_click` logs one `ClickEvent` (kind read from the URL, destination read from `SiteSettings`, never from the request) and redirects with a plain 302 -- no JavaScript, so it works the same on the old, weak-signal phones many visitors use. A kind whose setting is empty is not logged and goes to the home page instead, which should not normally happen since the button itself would not have rendered.
+- The href itself is built by a new template tag, `{% click_url 'call' %}` (`apps/core/templatetags/clicks.py`), which reads the current page's path from the request already in the template context and attaches it as `?from=`, percent-encoded. This is read back by the view and stored on the event as `page_path` -- not the Referer header, which browsers often strip or block.
+- No personal data is kept: `ClickEvent` has only `kind`, `page_path` and `created_at`. A small read-only admin page (`apps/core/admin.py`) lists and filters them; nobody can add or edit one by hand.
+- Updated the existing tests that checked for a literal `tel:`/`wa.me`/`t.me` href on the home page, the product list, the product page, the consultation pages and the contact page, to check the tracked href instead; the actual redirect behaviour (and that an empty setting still goes somewhere, and that no personal data is stored) is covered by the new `apps/core/tests/test_click_tracking.py`.
+- `static/css/site.css` was not touched; this task adds no new classes.
+
 ### 2026-11-15 — Phase 3, task 3: the experts and contact pages
 
 - Added `/experts/` and `/contact/` (`apps/pages/views.py`, `templates/pages/experts.html`, `templates/pages/contact.html`), plus header and home-page links to both. Proposed D43.

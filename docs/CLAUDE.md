@@ -2,7 +2,7 @@
 
 Project reference for the agricultural pharmacy website. Read this first in every new conversation. Update it at the end of every task, in the same patch as the work.
 
-Last updated: 2026-11-15 (phase 3, task 3: the experts page and the contact and location page, with the message buttons and the static map image field; D42 recorded as approved)
+Last updated: 2026-11-21 (phase 4, task 1: tap counting on the call and message buttons; D43 recorded as approved)
 
 Status tags used in this file and in the other docs:
 
@@ -52,8 +52,8 @@ Habibollah is not technical. Anything he has to do in the admin must work on a p
 | 0 | Documentation: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md` | Merged into `main` (now under `docs/`) |
 | 1 | Project skeleton, settings, data model, Django admin | Merged into `main` |
 | 2 | Catalog: product list, product page, filters, search | Merged into `main` |
-| 3 | Consultation flows, notifications, experts page, contact and location page | In progress, see the task list below |
-| 4 | Staff stock page, remaining pages, design polish | Not started |
+| 3 | Consultation flows, notifications, experts page, contact and location page | Merged into `main` |
+| 4 | Tap counting, remaining pages, staff stock page, design polish | In progress, see the task list below |
 | 5 | Tests, performance pass, staging trial with Habibollah | Not started |
 | 6 | Deployment, backups, handover guide | Not started (blocked by D4, hosting) |
 
@@ -96,7 +96,20 @@ Same rules as before: one patch and one branch per task, and each task also upda
 |---|---|---|---|
 | 1 | `phase3/01-consultation-forms` | The ask-an-expert and farm-visit forms at `/consultation/`, honeypot, a submission limit, validation, the thank-you page (D41) | Merged into `main` |
 | 2 | `phase3/02-telegram-notifications` | The notification interface, a fake sender for tests and the Telegram bot sender; the result stored on the request (D42) | Merged into `main` |
-| 3 | `phase3/03-experts-and-contact` | The experts page, the contact and location page with the message buttons (WhatsApp, Telegram, Rubika) and the map links, and the static map image field (D43) | Delivered, waiting for Moeid to merge |
+| 3 | `phase3/03-experts-and-contact` | The experts page, the contact and location page with the message buttons (WhatsApp, Telegram, Rubika) and the map links, and the static map image field (D43) | Merged into `main` |
+
+### Phase 4 tasks (proposed)
+
+Same rules as before: one patch and branch per task, and each task also updates `CLAUDE.md` and `PROJECT_STRUCTURE.md`.
+
+| # | Branch | Content | Status |
+|---|---|---|---|
+| 1 | `phase4/01-tap-counting` | Resolves D16: a small own-database tap counter (`ClickEvent`) and a redirect-through view for the call/WhatsApp/Telegram/Rubika buttons (D44) | Delivered, waiting for Moeid to merge |
+| 2 | `phase4/02-real-home-page` | The real home page, replacing the placeholder | Not started |
+| 3 | `phase4/03-articles-public` | Public articles list and detail, wired into navigation only once something is published (D11) | Not started |
+| 4 | `phase4/04-staff-stock-page` | The custom mobile stock page for Habibollah (D2) | Not started |
+| 5 | `phase4/05-error-pages` | Site-styled 404 and 500 pages | Not started |
+| 6 | `phase4/06-design-polish` | A pass once real content (logo, photos, map screenshot) exists | Not started |
 
 ## 5. Confirmed requirements
 
@@ -137,7 +150,7 @@ IDs come from the approved technical plan.
 | D13 | Dates are stored as Gregorian and displayed in the Jalali calendar. |
 | D14 | Text logo placeholder during development, Moeid's SVG swapped in before launch. |
 | D15 | All four consultation options: call button, ask-an-expert form, farm-visit form, message buttons. |
-| D16 | Measure the site's goal by counting taps on call and message buttons. Mechanism is open, see section 8. |
+| D16 | Measure the site's goal by counting taps on call and message buttons. Resolved in phase 4, task 1, see D44. |
 | D17 | Daily backups of database and media, stored somewhere other than the web server. Restore tested once before launch. |
 | D18 | Django 5.2 LTS on Python 3.13. Move to newer versions (for example the next Django LTS and a newer Python) when they are ready. |
 | D19 | Dependency tooling: plain pip with `requirements/base.txt`, `dev.txt` and `prod.txt`. |
@@ -164,13 +177,14 @@ IDs come from the approved technical plan.
 | D40 | The product page at `/products/<slug>/` (`apps/catalog/views.py`'s `product_detail`, `templates/catalog/product_detail.html`). (1) The URL uses `<str:slug>`, not Django's `<slug:slug>` converter, because `Product.slug` allows Unicode (D27) and the ASCII-only slug converter would 404 on every real product. (2) A missing or mistyped slug does not fall through to Django's generic 404: it renders `templates/catalog/product_not_found.html` (still with status 404) with a Persian message and the call button, so a dead link still leads to a sale. (3) The page shows trade name, generic name, type, availability badge, the main photo (`photo.url`, not the thumbnail) or the same placeholder as the list, usage, dosage and timing (each only if filled in), manufacturer, importer and country of origin, and the product's crops and pests. No price anywhere. (4) Production and expiry dates each show their own line only if that exact field was entered; nothing is inferred or shown as a pair (D7). Dates are formatted in Jalali Persian digits (`۱۴۰۴/۰۱/۰۱`) by a new `jalali_date` template filter in `apps/core/templatetags/persian.py`, reusing `apps/core/jalali.py` from task 8 -- no new date logic. (5) The call-to-ask-the-price button ("تماس برای استعلام قیمت") is the same size and weight as the sticky call bar's button, the single largest call to action on the page. (6) A "بازگشت به محصولات" link goes back to `/products/`, and to `/products/?type=<slug>` when the visitor arrived from a filtered list: the list's cards now link with `?from_type=<slug>` when a type is selected, and the detail view turns a valid `from_type` into that link (an unknown or missing one falls back to the plain list link). (7) `Product.objects.select_related("product_type").prefetch_related("crops", "pests")`, so the query count does not grow with the product's number of crops or pests; a test pins it at exactly 5 queries. CONFIRMED (task 4 merged). Details and costs in `docs/DECISIONS.md`. |
 | D41 | The two public consultation forms at `/consultation/` (`apps/consultations/forms.py`, `views.py`, `ratelimit.py`, `templates/consultations/`). (1) One page, one form at a time: `?kind=question` (the default) or `?kind=farm_visit`, switched by two plain links, no JavaScript. The kind always comes from the address, never from the posted data. (2) Fields: name and phone on both; the crop (optional, chosen from the catalog) on both; the question form requires the message; the farm-visit form requires the village or address and has an optional message. The model's own rules (D33) still apply underneath. (3) Spam protection (D12): a honeypot field people never see (a filled one gets the normal thank-you page and nothing is stored, and does not count against the limit), Iranian mobile validation, and a limit of 5 submissions per visitor per hour. (4) The limit is written in the project, as a counter in Django's cache, not with `django-ratelimit`, because that package's own system check refuses Django's in-memory, file and database caches and wants memcached or Redis, which this site does not have. A visitor is the address in `REMOTE_ADDR`, or, in production behind Nginx, the address in the header named by the `CLIENT_IP_HEADER` setting (default `HTTP_X_REAL_IP`), which Nginx must overwrite and never pass on. Past the limit the visitor gets HTTP 429, keeps what was typed and sees the call button. (5) A valid request is stored and the visitor is redirected to `/consultation/thank-you/` ("درخواست شما دریافت شد، به‌زودی با شما تماس می‌گیریم", with the call button), so refreshing never sends it twice. (6) The farm-visit form says that visits are only in Gonbad-e Kavus county and that the fee depends on distance and access and is told after the call; no fee is shown anywhere, and the switch from D9 stays off. (7) This task stores the request and nothing more: `notification_status` stays "not attempted" until the Telegram adapter (phase 3, task 2) is added. (8) The header gets a "مشاوره" link, and the product page a link to ask an expert about the product. CONFIRMED (task 1 merged). Details and costs in `docs/DECISIONS.md`. |
 | D42 | The Telegram notification adapter (`apps/consultations/notifications.py`). Resolves D3: the store's own Telegram bot, chosen as the cheapest channel. `send_consultation_notification()` formats a Persian message (kind, name, phone, the crop if set, the address or message text or both depending on what is filled in, and the Jalali time the admin inbox already shows) and sends it with one plain HTTPS call to the Bot API (`urllib`, no new dependency). Two settings, `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, read from the environment; with either one empty nothing is attempted and the request is stored as not-attempted with a Persian reason -- never an error. The request is saved first; the notification runs after, wrapped so that any failure of its own (unreachable, a bad answer, Telegram's own refusal, or a bug in the notifier itself) is stored as failed and never costs the customer the thank-you page. The bot token never reaches a log line, an exception shown anywhere, or the reason stored on the request. **Approved (merged 2026-11-08).** Details and costs in `docs/DECISIONS.md`. |
-| D43 | The experts page at `/experts/` and the contact and location page at `/contact/` (`apps/pages/views.py`, `templates/pages/experts.html`, `templates/pages/contact.html`), plus `SiteSettings.map_image`, a `WebPImageField` (800 px, about 60 KB budget, no thumbnail). The experts page shows every expert in admin order; degree, role, experience and specialty each render only when filled in, so the two real profiles need no per-person code. The contact page shows the call button, the WhatsApp/Telegram/Rubika buttons (each hidden while its setting is empty), the address and hours, and the map block (image plus Google Maps and Iranian-app links, each hidden while empty); plain anchors only, nothing loaded from other sites. Header and home page link to both pages. Tap counting (D16) is deliberately not part of this task. **Proposed in phase 3, task 3, counts as approved once merged.** |
+| D43 | The experts page at `/experts/` and the contact and location page at `/contact/` (`apps/pages/views.py`, `templates/pages/experts.html`, `templates/pages/contact.html`), plus `SiteSettings.map_image`, a `WebPImageField` (800 px, about 60 KB budget, no thumbnail). The experts page shows every expert in admin order; degree, role, experience and specialty each render only when filled in, so the two real profiles need no per-person code. The contact page shows the call button, the WhatsApp/Telegram/Rubika buttons (each hidden while its setting is empty), the address and hours, and the map block (image plus Google Maps and Iranian-app links, each hidden while empty); plain anchors only, nothing loaded from other sites. Header and home page link to both pages. Tap counting (D16) was deliberately not part of this task. **Approved (merged 2026-11-19).** |
+| D44 | Resolves D16. A small own-database tap counter, `ClickEvent` (kind, page path, created time -- no personal data), plus a redirect-through view, `core:track_click`, that every call/WhatsApp/Telegram/Rubika button now points at instead of the real destination. One GET: look up the destination from `SiteSettings`, log one `ClickEvent`, redirect with a plain 302 -- no JavaScript needed, which matters for the weak-signal phones many visitors use. The destination is always read from `SiteSettings` server-side, never taken from the request, so this is not an open redirect. A new template tag, `{% click_url 'call' %}` (`apps/core/templatetags/clicks.py`), builds the href and attaches the current page's path as `?from=`, read back by the view -- not the Referer header, which browsers often strip. A small read-only admin page lists the events, filterable by kind. **Proposed in phase 4, task 1, counts as approved once merged.** |
 
 Other agreed technical points: self-hosted Vazirmatn font and no third-party scripts, images converted to WebP on upload, Docker Compose with Nginx, Gunicorn and PostgreSQL, a staging copy for Habibollah's trial, notification adapter with one implementation per channel.
 
 ## 7. Planned features (approved scope, not built)
 
-Public site: the real home page (a placeholder now; phase 4) and the hidden seasonal articles section. Already built: the catalog pages, the sticky call bar, the two consultation forms, the experts page, and the contact and location page with the WhatsApp/Telegram/Rubika buttons and the map links. No FAQ section (decided 2026-11-03).
+Public site: the real home page (a placeholder now; phase 4) and the hidden seasonal articles section. Already built: the catalog pages, the sticky call bar, the two consultation forms, the experts page, the contact and location page with the WhatsApp/Telegram/Rubika buttons and the map links, and tap counting on every one of those buttons. No FAQ section (decided 2026-11-03).
 
 Staff side: mobile stock page, product add and edit, crop/pest/type management, inbox of consultation requests with a "handled" mark.
 
@@ -184,7 +198,7 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 | Usernames | Telegram username and Rubika link for the store. | Moeid created the accounts (2026-11-03); the two values still have to be typed into the site settings. The settings page already has the two fields (Telegram username, Rubika link pasted as given by Rubika, so we don't guess its format), and each button stays hidden while its field is empty. |
 | Tags and list | When the product list and the crop/pest tags will be ready. | Moeid will ask his father to prepare them. Habibollah prepares the product information. |
 | D7 | Which batch's dates to show when two batches are in stock. | Default is the earlier expiry. Needs the client's confirmation. |
-| D16 | How to count button taps: a small counter in our own database, or a self-hosted analytics tool. | Deferred from task 3 (2026-11-15): its own small task, right after the experts and contact pages. |
+| Staff stock page | Plain form (full page reload per toggle) or a bit of vanilla JS/HTMX for a no-reload save. | Raised when planning phase 4, task 4 (staff stock page); needs Moeid's choice before that task starts. |
 | Logo | When Moeid's logo SVG will be ready. | Placeholder until then (D14). |
 | Sorting | Whether the database sorts the real Persian product names the way a Persian reader expects. | The list sorts by trade name in PostgreSQL (D39). Check with the real products once Habibollah's list exists. |
 | Map | The store's exact location, and which Iranian map app to link. | Location comes from the client. The settings page has fields for the Google Maps link, the Iranian app's name and link, and, since task 3, the static map image (`SiteSettings.map_image`). The screenshot itself is still to collect. |
@@ -201,9 +215,9 @@ Search: Persian-aware. It normalizes ی/ي, ک/ك, digits, ZWNJ and the forms of
 
 ## 10. Next steps
 
-1. Moeid applies the phase 3, task 3 files on their own branch, commits them and merges to `main`. Merging approves D43. Before committing he rebuilds `static/css/site.css` with `python scripts/tailwind.py build`. He puts the bot token and chat id in his `.env`, and types the Telegram username and the Rubika link into the site settings.
+1. Moeid applies the phase 4, task 1 files (tap counting) on their own branch, commits them and merges to `main`. Merging approves D44.
 2. He asks his father to prepare the product list and the crop/pest tags.
-3. A small task for D16: count taps on the call and message buttons (mechanism still open).
+3. Decide the staff stock page's save mechanism (plain reload vs. a bit of JS/HTMX) before phase 4, task 4 starts.
 
 ## 11. Where the detail lives
 

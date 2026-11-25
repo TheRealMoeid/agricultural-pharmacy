@@ -5,8 +5,8 @@ kaf) and the half space are written as escapes.
 """
 import datetime
 import re
-
 import pytest
+from urllib.parse import quote, unquote, unquote
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -18,7 +18,6 @@ from .conftest import make_image_bytes
 
 pytestmark = pytest.mark.django_db
 
-TEL = 'href="tel:+989112747628"'
 AVAILABLE = "\u0645\u0648\u062c\u0648\u062f"
 UNAVAILABLE = "\u0641\u0639\u0644\u0627\u064b \u0645\u0648\u062c\u0648\u062f \u0646\u06cc\u0633\u062a"
 PRODUCTION_LABEL = "\u062a\u0627\u0631\u06cc\u062e \u062a\u0648\u0644\u06cc\u062f"  # تاریخ تولید
@@ -33,6 +32,13 @@ def make(fields, **overrides):
 def url(slug):
     return reverse("catalog:product_detail", args=[slug])
 
+def call_href(path):
+    """The tracked call button's href for a page at `path` (D16/D44).
+
+    The template tag quotes the *decoded* request.path, so decode what
+    reverse() gave us first, then quote it once, the same way the tag does.
+    """
+    return f'href="/click/call/?from={quote(unquote(path))}"'
 
 def html_of(client, slug, **params):
     response = client.get(url(slug), params)
@@ -62,13 +68,14 @@ def test_a_persian_slug_is_matched_by_str_not_the_ascii_only_slug_converter(clie
 
 
 def test_a_missing_product_gets_a_friendly_persian_page_not_a_bare_404(client):
+    tel = call_href(url("no-such-product"))
     response = client.get(url("no-such-product"))
     assert response.status_code == 404
     html = response.content.decode()
     assert NOT_FOUND_HEADING in html
-    assert TEL in html
+    assert tel in html
     section = re.search(r"<section.*?</section>", html, re.S).group(0)
-    button = re.search(rf"<a {re.escape(TEL)} class=\"([^\"]*)\"", section)
+    button = re.search(rf"<a {re.escape(tel)} class=\"([^\"]*)\"", section)
     assert button and "hidden" not in button.group(1).split()  # the page's own button is always visible
     assert 'href="/products/"' in section
 
@@ -114,9 +121,10 @@ def test_there_is_no_actual_price_anywhere_on_the_page(client, product_fields):
 
 def test_the_call_to_ask_the_price_button_is_prominent_and_everywhere_else_too(client, product_fields):
     product = make(product_fields)
+    tel = call_href(url(product.slug))
     html = html_of(client, product.slug).content.decode()
-    assert html.count(TEL) == 4  # header, call bar, footer, the page's own button
-    cta = re.search(r'<a href="tel:[^"]*" class="([^"]*)">\s*\u062a\u0645\u0627\u0633 \u0628\u0631\u0627\u06cc \u0627\u0633\u062a\u0639\u0644\u0627\u0645 \u0642\u06cc\u0645\u062a', html)
+    assert html.count(tel) == 4  # header, call bar, footer, the page's own button
+    cta = re.search(r'<a href="/click/call/[^"]*" class="([^"]*)">\s*\u062a\u0645\u0627\u0633 \u0628\u0631\u0627\u06cc \u0627\u0633\u062a\u0639\u0644\u0627\u0645 \u0642\u06cc\u0645\u062a', html)
     assert cta, "no call-to-ask-the-price button found"
     classes = cta.group(1).split()
     assert "text-lg" in classes and "min-h-14" in classes  # same weight as the call bar button

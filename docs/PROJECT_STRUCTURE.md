@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-11-15 (phase 3, task 3)
+Last updated: 2026-11-21 (phase 4, task 1)
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, the Jalali conversion, the image pipeline, and `SiteSettings` with its admin, context processor and map image), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, plus the search and the two catalog pages, `apps/pages` with `Expert` and `FaqItem`, their admin, and the home, experts and contact views, `apps/consultations` with `ConsultationRequest`, its admin inbox, the two public forms and the Telegram notifier, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The public pages are a placeholder home page, the product list, the product page, the consultation forms, the experts page and the contact and location page. The layout may be adjusted when each phase is built. **When a path is created, mark it as existing here in the same patch.**
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, the Jalali conversion, the image pipeline, `SiteSettings` with its admin, context processor and map image, and the `ClickEvent` tap counter with its redirect-through view and template tag), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, plus the search and the two catalog pages, `apps/pages` with `Expert` and `FaqItem`, their admin, and the home, experts and contact views, `apps/consultations` with `ConsultationRequest`, its admin inbox, the two public forms and the Telegram notifier, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The public pages are a placeholder home page, the product list, the product page, the consultation forms, the experts page and the contact and location page. The layout may be adjusted when each phase is built. **When a path is created, mark it as existing here in the same patch.**
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -23,7 +23,7 @@ pharmacy-site/
 ├─ requirements/                 EXISTS (base.txt and dev.txt; prod.txt PLANNED)
 ├─ config/                       EXISTS
 ├─ apps/                         EXISTS (core, catalog, pages, consultations and articles exist in part; staff_panel is PLANNED)
-│  ├─ core/                      EXISTS (helpers, SiteSettings with the map image, and the persian_digits and jalali_date filters; ClickEvent PLANNED)
+│  ├─ core/                      EXISTS (helpers, SiteSettings with the map image, the persian_digits and jalali_date filters, and the ClickEvent tap counter with its own view, urls and template tag)
 │  ├─ catalog/                   EXISTS (reference models, Product, admin, search, the product list and the product page; phase 2's catalog views are complete)
 │  ├─ consultations/             EXISTS (ConsultationRequest, admin inbox, the two public forms, the thank-you page and the Telegram notifier)
 │  ├─ pages/                     EXISTS (Expert, FaqItem and admin; home, experts and contact views; the real home page PLANNED)
@@ -69,7 +69,7 @@ Project-level Django configuration. No business logic. All of it exists since ph
 | `config/settings/base.py` | Settings shared by all environments: installed apps, middleware, templates, static and media, Persian locale, time zone, the configurable admin path, and the two Telegram settings (D42). Reads a local `.env` through django-environ (D25). |
 | `config/settings/dev.py` | Local development: debug on, a throwaway secret key, local PostgreSQL by default. |
 | `config/settings/prod.py` | Production: debug off, HTTPS-only cookies, HSTS, `CLIENT_IP_HEADER` for the form limit, and every secret or host setting required from the environment (it refuses to start if one is missing). |
-| `config/urls.py` | Top-level URL routing. Includes each app's URLs and the non-default admin URL. |
+| `config/urls.py` | Top-level URL routing. Includes each app's URLs, the non-default admin URL, and, since phase 4, task 1, `apps.core.urls` at `/click/` for tap counting (D44). |
 | `config/__init__.py`, `config/settings/__init__.py` | Empty. They make the folders Python packages. |
 | `config/wsgi.py` | Entry point for Gunicorn. Defaults to the prod settings. |
 | `config/asgi.py` | Standard Django file, kept for completeness. |
@@ -85,9 +85,11 @@ Typical files in an app: `models.py`, `views.py`, `urls.py`, `forms.py`, `admin.
 Shared things used by the whole site. It is a Django app since task 5 and is listed in `INSTALLED_APPS`.
 
 - `apps.py`: EXISTS. App configuration.
-- `models.py`: `SiteSettings` EXISTS (single row, see `ARCHITECTURE.md`), with `map_image` since phase 3, task 3 (D43). `ClickEvent` is PLANNED, only if D16 ends up as an own-database counter.
-- `admin.py`: EXISTS. The settings page: one screen, no list, no add, no delete. The «نقشه» fieldset holds the map image and the two map links.
-- `migrations/`: EXISTS. `0001_initial.py` creates `SiteSettings`; `0002_sitesettings_map_image.py` adds the map image (task 3).
+- `models.py`: `SiteSettings` EXISTS (single row, see `ARCHITECTURE.md`), with `map_image` since phase 3, task 3 (D43). `ClickEvent` EXISTS since phase 4, task 1 (D16, resolved as D44): `kind` (call, whatsapp, telegram, rubika), `page_path`, `created_at` -- no personal data.
+- `admin.py`: EXISTS. The settings page: one screen, no list, no add, no delete. The «نقشه» fieldset holds the map image and the two map links. Since phase 4, task 1, also a read-only `ClickEventAdmin`: nobody can add or edit an event, only look and filter by kind.
+- `views.py`: EXISTS (phase 4, task 1, D44). `track_click(request, kind)`: looks up the real destination from `SiteSettings`, logs one `ClickEvent`, and redirects with a plain 302. A kind whose setting is empty goes to the home page instead of logging anything.
+- `urls.py`: EXISTS (phase 4, task 1). Mounts `track_click` at `/click/<kind>/`, included from `config/urls.py` with the `core` namespace.
+- `migrations/`: EXISTS. `0001_initial.py` creates `SiteSettings`; `0002_sitesettings_map_image.py` adds the map image (task 3); `0003_clickevent.py` creates `ClickEvent` (task 1 of phase 4).
 - `context_processors.py`: EXISTS. Puts the settings into every template as `site`, so the call bar always has the number.
 - `phone.py`: EXISTS. Iranian mobile numbers: `normalize_iran_mobile()` (any typing to 09XXXXXXXXX), `to_international()`, `format_display()` and the form validator.
 - `text.py`: EXISTS. Persian text normalization at three levels: `normalize_letters()` (yeh, kaf, kashida, vowel marks), `normalize_text()` (also whitespace and invisible characters) and `normalize_for_search()` (also ASCII digits, no ZWNJ, alef forms folded into ا, case-folded), plus `normalize_digits()`. Used by search and form validation.
@@ -99,7 +101,8 @@ Shared things used by the whole site. It is a Django app since task 5 and is lis
 - `management/commands/seed_sample_data.py`: EXISTS (task 12, D35). Loads clearly fake sample data for development, marked "[نمونه]", and removes it again with `--clear`. DEBUG only. Tested in `tests/test_seed_sample_data.py`.
 - `tests/test_static_assets.py` and `tests/test_tailwind_script.py`: EXISTS (phase 2, task 1). They check the built CSS (made by the pinned version, up to date when the program is installed, small, nothing from other sites, only templates scanned), the fonts (small WOFF2, every Persian letter people type is in them, license present) and the Tailwind script (platform choice, checksums, a failed download leaves nothing behind).
 - `templatetags/persian.py`: EXISTS. `persian_digits` (task 3; 12 becomes ۱۲, used for the result count on the product list) and `jalali_date` (task 4; a stored Gregorian date to Jalali Persian digits, `۱۴۰۴/۰۱/۰۱`, built on `jalali.py` from task 8). Tested in `tests/test_templatetags.py`.
-- A small view that receives call and message button taps: OPEN, depends on D16.
+- `templatetags/clicks.py`: EXISTS (phase 4, task 1, D44). `{% load clicks %}{% click_url 'call' %}`: the href for a tracked button, built from the current request's path.
+- `tests/test_click_tracking.py`: EXISTS (phase 4, task 1). `ClickEvent`, the redirect view for every kind (including an empty setting and an unknown kind), the template tag (including percent-encoding a Persian path), and the read-only admin.
 
 ### `apps/catalog/`
 
@@ -182,7 +185,7 @@ Files we ship ourselves. Nothing is loaded from other websites.
 | Path | Purpose |
 |---|---|
 | `static/css/` | EXISTS. `input.css` is the Tailwind input (theme, the two `@font-face` rules, only `templates/` scanned). `site.css` is the built, minified result and **is committed** (D36), so nothing needs to build it on the server. Rebuild with `python scripts/tailwind.py build`. |
-| `static/js/` | PLANNED. The small amount of JavaScript: the stock toggle, button tap counting, and form niceties. |
+| `static/js/` | PLANNED. The small amount of JavaScript: the stock toggle and form niceties. Button tap counting (D44) needed none: it is a server-side redirect. |
 | `static/fonts/` | EXISTS. `Vazirmatn-Regular.woff2` and `Vazirmatn-Bold.woff2`, cut down by `scripts/subset_fonts.py` (D37), and `OFL.txt`, the font's license, which has to stay with them. |
 | `static/img/` | PLANNED. Logo (text placeholder first, then Moeid's SVG), icons, and placeholder images. The map image is not here: it is uploaded through the admin and lands in `media/map/` (D43). |
 
