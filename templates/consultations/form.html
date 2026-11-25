@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load clicks %}
 {# The two consultation forms (D41). One page; the tabs are plain links, no JavaScript. Normal and bold text only (D37). #}
 {% block title %}{% if kind == Kind.FARM_VISIT %}درخواست بازدید از مزرعه{% else %}پرسش از کارشناس{% endif %} | {{ site.store_name }}{% endblock %}
 {% block content %}
@@ -19,7 +20,7 @@
   <p class="font-bold">درخواست‌های زیادی از این شبکه ارسال شده است.</p>
   <p class="mt-1 text-stone-600">لطفاً کمی بعد دوباره تلاش کنید، یا همین حالا با داروخانه تماس بگیرید.</p>
   {% if site.tel_url %}
-  <a href="{{ site.tel_url }}" class="mt-3 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+  <a href="{% click_url 'call' %}" class="mt-3 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
     تماس با داروخانه <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
   </a>
   {% endif %}

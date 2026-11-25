@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load persian %}
+{% load persian clicks %}
 {# The public product list (D39). Normal and bold text only: those are the two font weights we ship (D37). #}
 {% block title %}محصولات | {{ site.store_name }}{% endblock %}
 {% block content %}
@@ -60,7 +60,7 @@
   <p class="mt-2 text-stone-600">برای اطلاع از محصولات با داروخانه تماس بگیرید.</p>
   {% endif %}
   {% if site.tel_url %}
-  <a href="{{ site.tel_url }}" class="mt-4 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+  <a href="{% click_url 'call' %}" class="mt-4 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
     تماس با داروخانه <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
   </a>
   {% endif %}

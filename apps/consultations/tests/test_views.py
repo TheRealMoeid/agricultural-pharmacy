@@ -1,5 +1,6 @@
 """Tests for the public consultation pages (D41) and their notification (D42)."""
 import re
+from urllib.parse import quote
 
 import pytest
 from django.db import connection
@@ -19,7 +20,10 @@ Kind = ConsultationRequest.Kind
 NotificationStatus = ConsultationRequest.NotificationStatus
 URL = "/consultation/"
 THANKS = "/consultation/thank-you/"
-TEL = 'href="tel:+989112747628"'
+# Call buttons now go through the click-tracking redirect (D16/D44); the
+# form page and the thank-you page are different paths, so each gets its own.
+TEL = f'href="/click/call/?from={quote(URL)}"'
+TEL_THANKS = f'href="/click/call/?from={quote(THANKS)}"'
 NAME = "\u0639\u0644\u06cc \u0631\u0636\u0627\u06cc\u06cc"
 ASK = "\u0628\u0631\u06af\u0647\u0627\u06cc \u06af\u0646\u062f\u0645 \u0632\u0631\u062f \u0634\u062f\u0647"
 VILLAGE = "\u0622\u0642\u200c\u0622\u0628\u0627\u062f"
@@ -142,7 +146,7 @@ def test_the_thank_you_page_says_so_and_keeps_the_call_button(client):
     assert RECEIVED in html
     assert "\u0628\u0647\u200c\u0632\u0648\u062f\u06cc \u0628\u0627 \u0634\u0645\u0627 \u062a\u0645\u0627\u0633 \u0645\u06cc\u200c\u06af\u06cc\u0631\u06cc\u0645" in html  # we will call you back
     section = re.search(r"<section.*?</section>", html, re.S).group(0)
-    button = re.search(rf"<a {re.escape(TEL)} class=\"([^\"]*)\"", section)
+    button = re.search(rf"<a {re.escape(TEL_THANKS)} class=\"([^\"]*)\"", section)
     assert button and "hidden" not in button.group(1).split()
 
 

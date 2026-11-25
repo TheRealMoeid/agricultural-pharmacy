@@ -1,21 +1,22 @@
 {% extends "base.html" %}
+{% load clicks %}
 {% block title %}تماس با ما | {{ site.store_name }}{% endblock %}
 {% block content %}
 <h1 class="text-2xl font-bold text-brand-800">تماس با ما</h1>
 <div class="mt-6 space-y-6">
   {% if site.tel_url %}
-  <a href="{{ site.tel_url }}" class="flex min-h-14 items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 text-lg font-bold text-white hover:bg-brand-700 active:bg-brand-800">تماس بگیرید: <span dir="ltr">{{ site.phone_display }}</span></a>
+  <a href="{% click_url 'call' %}" class="flex min-h-14 items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 text-lg font-bold text-white hover:bg-brand-700 active:bg-brand-800">تماس بگیرید: <span dir="ltr">{{ site.phone_display }}</span></a>
   {% endif %}
   {% if site.whatsapp_url or site.telegram_url or site.rubika_url %}
   <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
     {% if site.whatsapp_url %}
-    <a href="{{ site.whatsapp_url }}" target="_blank" rel="noopener" class="flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 font-bold text-stone-800 hover:bg-stone-50">واتساپ</a>
+    <a href="{% click_url 'whatsapp' %}" target="_blank" rel="noopener" class="flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 font-bold text-stone-800 hover:bg-stone-50">واتساپ</a>
     {% endif %}
     {% if site.telegram_url %}
-    <a href="{{ site.telegram_url }}" target="_blank" rel="noopener" class="flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 font-bold text-stone-800 hover:bg-stone-50">تلگرام</a>
+    <a href="{% click_url 'telegram' %}" target="_blank" rel="noopener" class="flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 font-bold text-stone-800 hover:bg-stone-50">تلگرام</a>
     {% endif %}
     {% if site.rubika_url %}
-    <a href="{{ site.rubika_url }}" target="_blank" rel="noopener" class="flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 font-bold text-stone-800 hover:bg-stone-50">روبیکا</a>
+    <a href="{% click_url 'rubika' %}" target="_blank" rel="noopener" class="flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 font-bold text-stone-800 hover:bg-stone-50">روبیکا</a>
     {% endif %}
   </div>
   {% endif %}

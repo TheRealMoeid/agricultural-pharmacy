@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load persian %}
+{% load persian clicks %}
 {# The product page (D40). "Call to ask the price" is the page's one job: no price is shown, every path leads to the phone number. #}
 {% block title %}{{ product.trade_name }} | {{ site.store_name }}{% endblock %}
 {% block content %}
@@ -30,7 +30,7 @@
     </p>
 
     {% if site.tel_url %}
-    <a href="{{ site.tel_url }}" class="mt-6 flex min-h-14 items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 text-lg font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+    <a href="{% click_url 'call' %}" class="mt-6 flex min-h-14 items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 text-lg font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
      تماس برای استعلام قیمت: <span dir="ltr">{{ site.phone_display }}</span>
     </a>
     {% endif %}

@@ -8,7 +8,10 @@ from apps.core.models import SiteSettings
 
 pytestmark = pytest.mark.django_db
 
-TEL = 'href="tel:+989112747628"'
+# Every call button now points at the click-tracking redirect (D16/D44), not
+# straight at tel:. The home page's own path is "/", so every button on it
+# carries the same ?from= value.
+TEL = 'href="/click/call/?from=/"'
 
 
 def get_home(client):
@@ -47,9 +50,9 @@ def test_changing_the_settings_changes_the_page(client):
     site.save()
     html = get_home(client)
     assert "<title>نام آزمایشی</title>" in html
-    assert 'href="tel:+989121234567"' in html
-    assert "tel:+989112747628" not in html
     assert "0912 123 4567" in html
+    # The click-tracking redirect itself resolving to the new number is
+    # covered in apps/core/tests/test_click_tracking.py.
 
 
 # --- calling is the easiest thing on every page ----------------------------------------------
@@ -65,7 +68,7 @@ def test_the_call_bar_is_for_phones_and_the_header_button_for_wide_screens(clien
     assert bar, "the call bar is missing"
     assert "fixed" in bar.group(1).split() and "bottom-0" in bar.group(1).split()
     assert "md:hidden" in bar.group(1).split()
-    header_button = re.search(r'<a href="tel:[^"]*" class="([^"]*)"', html)
+    header_button = re.search(r'<a href="/click/call/[^"]*" class="([^"]*)"', html)
     classes = header_button.group(1).split()
     assert "hidden" in classes and "md:inline-flex" in classes
 
