@@ -1,9 +1,25 @@
 {% extends "base.html" %}
-{# Placeholder home page, only so the base template has a page to show. The real home page (experts, search, contact) comes in phase 4. #}
+{# The real home page (D45): a one-line pitch and links to the other pages. The header menu is left off here (block nav) because the cards below carry the same links. #}
+{% block nav %}{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold text-brand-800">{{ site.store_name }}</h1>
-<p class="mt-2 text-stone-600">{{ site.address }}</p>
-<p class="mt-4"><a href="{% url 'catalog:product_list' %}" class="font-bold text-brand-700 underline">مشاهده محصولات</a></p>
-<p class="mt-2"><a href="{% url 'pages:experts' %}" class="font-bold text-brand-700 underline">معرفی کارشناسان</a></p>
-<p class="mt-2"><a href="{% url 'pages:contact' %}" class="font-bold text-brand-700 underline">تماس و آدرس</a></p>
+<p class="text-stone-700">فروش سموم و کودهای تقویتی کشاورزی، همراه با مشاوره رایگان کارشناسان، برای کشاورزان و باغداران گنبدکاووس و اطراف.</p>
+
+<section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <a href="{% url 'catalog:product_list' %}" class="flex flex-col gap-1 rounded-lg border border-stone-200 bg-white p-5 hover:border-brand-600 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-800">
+    <span class="font-bold text-stone-900">محصولات</span>
+    <span class="text-sm text-stone-600">سموم و کودهای تقویتی موجود در داروخانه</span>
+  </a>
+  <a href="{% url 'pages:experts' %}" class="flex flex-col gap-1 rounded-lg border border-stone-200 bg-white p-5 hover:border-brand-600 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-800">
+    <span class="font-bold text-stone-900">کارشناسان</span>
+    <span class="text-sm text-stone-600">آشنایی با کارشناسان داروخانه</span>
+  </a>
+  <a href="{% url 'consultations:form' %}" class="flex flex-col gap-1 rounded-lg border border-stone-200 bg-white p-5 hover:border-brand-600 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-800">
+    <span class="font-bold text-stone-900">مشاوره رایگان</span>
+    <span class="text-sm text-stone-600">پرسش از کارشناس یا درخواست بازدید از مزرعه</span>
+  </a>
+  <a href="{% url 'pages:contact' %}" class="flex flex-col gap-1 rounded-lg border border-stone-200 bg-white p-5 hover:border-brand-600 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-800">
+    <span class="font-bold text-stone-900">تماس و آدرس</span>
+    <span class="text-sm text-stone-600">{{ site.address }}</span>
+  </a>
+</section>
 {% endblock %}

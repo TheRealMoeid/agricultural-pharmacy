@@ -4,6 +4,15 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-11-26 — Phase 4, task 2: the real home page
+
+- Replaced the phase 2 placeholder with the real home page (`apps/pages/views.py`'s `home`, `templates/pages/home.html`). No queries of its own. Proposed D45.
+- The page is a one-line Persian pitch and four plain-link cards: products, experts, consultation, contact. A first version had a hero with the store name and a call button, but both are already in the header and the call bar, so it was dropped.
+- The header menu (محصولات، کارشناسان، مشاوره، تماس با ما) is hidden on the home page only: `templates/base.html` now wraps it in `{% block nav %}`, which `home.html` empties. Every other page keeps it.
+- The home page has no `<h1>` now, because the header shows the store name as a link. Making it the site's `<h1>` would give pages with their own heading two, so it is left for a separate change.
+- Articles are not teased yet: the public article pages come in task 3.
+- Tests: `test_home.py` rewritten for the new page (no hero, three tracked call links, menu hidden on the home page and kept elsewhere, no leaked template comment); one `test_product_list.py` test now expects one link to the list on the home page, not two. `site.css` was rebuilt. D44 is recorded as approved (task 1 merged).
+
 ### 2026-11-21 — Phase 4, task 1: tap counting
 
 - Resolved D16: a small own-database counter, `ClickEvent` (`apps/core/models.py`). Proposed D44.

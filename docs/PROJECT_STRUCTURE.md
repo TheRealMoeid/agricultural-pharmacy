@@ -2,9 +2,9 @@
 
 What each file and directory in the repository is for.
 
-Last updated: 2026-11-21 (phase 4, task 1)
+Last updated: 2026-11-25 (phase 4, task 2)
 
-**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, the Jalali conversion, the image pipeline, `SiteSettings` with its admin, context processor and map image, and the `ClickEvent` tap counter with its redirect-through view and template tag), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, plus the search and the two catalog pages, `apps/pages` with `Expert` and `FaqItem`, their admin, and the home, experts and contact views, `apps/consultations` with `ConsultationRequest`, its admin inbox, the two public forms and the Telegram notifier, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The public pages are a placeholder home page, the product list, the product page, the consultation forms, the experts page and the contact and location page. The layout may be adjusted when each phase is built. **When a path is created, mark it as existing here in the same patch.**
+**Current state:** the repository contains `.gitignore`, `.gitattributes`, `README.md`, `CHANGELOG.md`, `.env.example`, `manage.py`, `compose.yml` and `pytest.ini` at the root, the Django skeleton (`config/`, `requirements/`), the `apps/core` app (text and phone helpers, the Jalali conversion, the image pipeline, `SiteSettings` with its admin, context processor and map image, and the `ClickEvent` tap counter with its redirect-through view and template tag), `apps/catalog` with `ProductType`, `Crop`, `Pest` and `Product`, each with admin, plus the search and the two catalog pages, `apps/pages` with `Expert` and `FaqItem`, their admin, and the home, experts and contact views, `apps/consultations` with `ConsultationRequest`, its admin inbox, the two public forms and the Telegram notifier, `apps/articles` with `Article` and its admin, and the documentation in `docs/`: `CLAUDE.md`, `ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `DECISIONS.md` and two requirements documents. Everything else below is the **planned** layout. The public pages are the home page, the product list, the product page, the consultation forms, the experts page and the contact and location page. The layout may be adjusted when each phase is built. **When a path is created, mark it as existing here in the same patch.**
 
 Tags: **EXISTS** (in the repo now), **PLANNED** (approved scope, not created), **OPEN** (depends on an undecided question).
 
@@ -26,7 +26,7 @@ pharmacy-site/
 │  ├─ core/                      EXISTS (helpers, SiteSettings with the map image, the persian_digits and jalali_date filters, and the ClickEvent tap counter with its own view, urls and template tag)
 │  ├─ catalog/                   EXISTS (reference models, Product, admin, search, the product list and the product page; phase 2's catalog views are complete)
 │  ├─ consultations/             EXISTS (ConsultationRequest, admin inbox, the two public forms, the thank-you page and the Telegram notifier)
-│  ├─ pages/                     EXISTS (Expert, FaqItem and admin; home, experts and contact views; the real home page PLANNED)
+│  ├─ pages/                     EXISTS (Expert, FaqItem and admin; home, experts and contact views)
 │  ├─ articles/                  EXISTS (Article and admin; views PLANNED)
 │  └─ staff_panel/               PLANNED
 ├─ templates/                    EXISTS (base.html, partials/call_bar.html, pages/home.html, pages/experts.html, pages/contact.html, catalog/product_list.html, catalog/product_detail.html, catalog/product_not_found.html, consultations/form.html, consultations/thank_you.html; the rest PLANNED)
@@ -142,7 +142,7 @@ Mostly static content. It is a Django app since task 10 and is listed in `INSTAL
 - `models.py`: EXISTS. `Expert` (photo through `WebPImageField`, no thumbnail, D32) and `FaqItem`. A blank field is simply not shown on the page, which is how the two expert profiles differ (D43).
 - `admin.py`: EXISTS. Both lists have an editable order column; experts are searchable.
 - `migrations/`: EXISTS. `0001_initial.py` creates both tables.
-- `views.py` and `urls.py`: EXISTS. `home` (phase 2, task 1) is still a placeholder at `/`; `experts` and `contact` (phase 3, task 3, D43) are at `/experts/` and `/contact/`, namespace `pages`. `experts` passes every expert in admin order; `contact` needs no context of its own, the settings come from the context processor. The real home page is PLANNED (phase 4). There is no FAQ view and none is planned (decided 2026-11-03).
+- `views.py` and `urls.py`: EXISTS. `home` (phase 4, task 2, D45) is the real home page at `/`, replacing the phase 2 placeholder; `experts` and `contact` (phase 3, task 3, D43) are at `/experts/` and `/contact/`, namespace `pages`. `experts` passes every expert in admin order; `home` and `contact` need no context of their own, the settings come from the context processor. There is no FAQ view and none is planned (decided 2026-11-03).
 - `tests/`: EXISTS. `test_models.py`, `test_admin.py`, `conftest.py` (uploads go to a temporary folder), and `test_pages_views.py` (task 3: the home page's links, the experts page's order, filled and blank fields, placeholder, empty state and query count, and every show/hide rule on the contact page).
 
 ### `apps/articles/`
@@ -169,11 +169,11 @@ Django templates, all in Persian and RTL.
 
 | Path | Purpose |
 |---|---|
-| `base.html` | EXISTS. Page shell: `<html lang="fa" dir="rtl">`, header with the text logo, links to the product list, the experts page, the consultation forms and the contact page, a call button (wide screens), footer with address, hours and number, and the call bar. |
+| `base.html` | EXISTS. Page shell (the header menu is a `nav` block that the home page empties): `<html lang="fa" dir="rtl">`, header with the text logo, links to the product list, the experts page, the consultation forms and the contact page, a call button (wide screens), footer with address, hours and number, and the call bar. |
 | `partials/` | `call_bar.html` EXISTS: the bar fixed to the bottom of the screen on phones. The message buttons are not a partial, they live in `pages/contact.html` (task 3). PLANNED: form field, messages. |
 | `catalog/` | `product_list.html` (task 3), `product_detail.html` and `product_not_found.html` (task 4) EXIST. |
 | `consultations/` | `form.html` and `thank_you.html` EXIST (phase 3, task 1); neither shows anything about the notification (D42). PLANNED: staff inbox. |
-| `pages/` | `home.html` EXISTS as a placeholder (links to the products, experts and contact pages). `experts.html` and `contact.html` EXIST (phase 3, task 3, D43). The real home page is PLANNED (phase 4); no FAQ template is planned. |
+| `pages/` | `home.html` EXISTS as the real home page (phase 4, task 2, D45): a one-line pitch and four cards linking to the products, experts, consultation and contact pages. It empties `base.html`'s `nav` block, so the header menu is hidden on this page only. `experts.html` and `contact.html` EXIST (phase 3, task 3, D43). No FAQ template is planned. |
 | `articles/` | PLANNED. Article list and detail. |
 | `staff_panel/` | PLANNED. The stock page. |
 | `404.html`, `500.html` | PLANNED. Error pages in the same style as the site. |
