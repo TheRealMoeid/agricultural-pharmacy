@@ -16,10 +16,13 @@
       <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
         {# Text logo until the SVG is ready (D14). #}
         <a href="{% url 'pages:home' %}" class="text-lg font-bold text-brand-700">{{ site.store_name }}</a>
+        {# The home page overrides this block with nothing: it has its own cards for these links. #}
+        {% block nav %}
         <a href="{% url 'catalog:product_list' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">محصولات</a>
         <a href="{% url 'pages:experts' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">کارشناسان</a>
         <a href="{% url 'consultations:form' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">مشاوره</a>
         <a href="{% url 'pages:contact' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">تماس با ما</a>
+        {% endblock %}
       </div>
       {% if site.tel_url %}
             <a href="{% click_url 'call' %}" class="hidden min-h-12 items-center gap-2 rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800 md:inline-flex">

@@ -107,7 +107,6 @@ def test_there_is_no_price_on_the_page(client, product_fields):
 def test_the_header_and_the_home_page_link_to_the_list(client):
     for page in ("/", URL):
         assert client.get(page).content.decode().count(f'href="{URL}"') >= 1
-    assert client.get("/").content.decode().count(f'href="{URL}"') >= 2
 
 
 # --- cards ---------------------------------------------------------------------------------------
