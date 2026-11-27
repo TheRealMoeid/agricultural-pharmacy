@@ -63,7 +63,8 @@ def test_experts_empty_state(client, db):
 
 def test_experts_query_count(client, experts, django_assert_num_queries):
     SiteSettings.load()  # create the row here, outside the counted block
-    with django_assert_num_queries(2):
+    # the experts, the site settings and the menu's articles check
+    with django_assert_num_queries(3):
         client.get(reverse("pages:experts"))
 
 

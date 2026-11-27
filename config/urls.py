@@ -14,6 +14,7 @@ urlpatterns = [
     path("click/", include("apps.core.urls")),
     path("products/", include("apps.catalog.urls")),
     path("consultation/", include("apps.consultations.urls")),
+    path("articles/", include("apps.articles.urls")),
     path("", include("apps.pages.urls")),
 ]
 

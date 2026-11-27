@@ -59,7 +59,7 @@ def test_the_page_links_to_products_experts_consultation_and_contact(client):
 
 
 def test_the_home_page_has_no_hero_and_no_duplicate_call_button(client):
-    # The call bar, header and footer already carry the number. The home page
+    # The call bar and the header already carry the number. The home page
     # itself must not add a fourth call link (D45, simplified).
     html = get_home(client)
     main = re.search(r"<main[^>]*>(.*?)</main>", html, re.S).group(1)
@@ -68,7 +68,7 @@ def test_the_home_page_has_no_hero_and_no_duplicate_call_button(client):
 
 
 def test_the_call_link_is_in_the_header_the_call_bar_and_the_footer(client):
-    assert get_home(client).count(CALL) == 3
+    assert get_home(client).count(CALL) == 2
 
 
 def test_no_template_comment_leaks_into_the_page(client):

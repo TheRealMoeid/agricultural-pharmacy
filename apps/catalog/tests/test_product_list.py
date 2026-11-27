@@ -81,7 +81,7 @@ def test_calling_stays_easy_on_the_list_page(client, product_fields):
     make(product_fields)
     html = html_of(client)
     assert 'id="call-bar"' in html
-    assert html.count(TEL) == 3  # header, call bar, footer
+    assert html.count(TEL) == 2  # header, call bar
 
 
 def test_the_page_loads_nothing_from_other_websites(client, product_fields):

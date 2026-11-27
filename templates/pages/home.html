@@ -22,4 +22,7 @@
     <span class="text-sm text-stone-600">{{ site.address }}</span>
   </a>
 </section>
+{% if has_articles %}
+<p class="mt-6"><a href="{% url 'articles:article_list' %}" class="font-bold text-brand-700 underline">مقالات فصلی کارشناسان</a></p>
+{% endif %}
 {% endblock %}

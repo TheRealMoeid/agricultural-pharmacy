@@ -4,6 +4,16 @@ What changed in each merged task, newest first.
 
 ## Unreleased
 
+### 2026-11-27 — Phase 4, task 3: the public articles pages
+
+- Added the public articles pages (`apps/articles/views.py`, `urls.py`, `templates/articles/`): the list at `/articles/` and an article at `/articles/<slug>/`. Proposed D46.
+- The list shows published articles newest first, as cards with the thumbnail (when there is a cover), title, season and Jalali date. Season chips appear only when more than one season has articles; `?season=` narrows the list and an unknown season is ignored. One query, no pagination. With nothing published it says so and shows the call button.
+- The article page shows the title, season, date, the full cover when there is one and the plain-text body as paragraphs (a blank line starts a new one; nothing is rendered as HTML). A draft or missing slug gets a friendly Persian page with the call button and HTTP 404, like the product page.
+- The section stays hidden (D11): a lazy `has_articles` context variable (`apps/articles/context_processors.py`, registered in `config/settings/base.py`) decides whether the header menu shows «مقالات» and whether the home page shows a small text link under the cards. It costs one query on pages that show the menu, so four tests that pin query counts went up by one (product page 5 to 6, consultation form 2 to 3, experts page 2 to 3, in two copies).
+- No new Tailwind classes were needed: `static/css/site.css` is unchanged.
+- The footer no longer shows the phone number: the call bar (phones) and the header button (wide screens) already carry it on every page. Only `templates/base.html` changed. The tests that counted three call links per page now count two (the product page, the not-found pages and the article not-found page count one fewer too), and the home page test is renamed.
+- 37 new tests (`apps/articles/tests/test_views.py`). D45 is recorded as approved (task 2 merged).
+
 ### 2026-11-26 — Phase 4, task 2: the real home page
 
 - Replaced the phase 2 placeholder with the real home page (`apps/pages/views.py`'s `home`, `templates/pages/home.html`). No queries of its own. Proposed D45.

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load clicks %}
+{# A friendly page for a draft, a deleted article or a mistyped link (D46), the same idea as the product not-found page (D40). #}
+{% block title %}این مقاله پیدا نشد | {{ site.store_name }}{% endblock %}
+{% block content %}
+<section class="mt-6 rounded-lg border border-stone-200 bg-white p-6 text-center">
+  <h1 class="text-lg font-bold">این مقاله در دسترس نیست</h1>
+  <p class="mt-2 text-stone-600">ممکن است این مقاله حذف شده یا نشانی آن اشتباه باشد. می‌توانید مقالات را مرور کنید یا با داروخانه تماس بگیرید.</p>
+  {% if site.tel_url %}
+  <a href="{% click_url 'call' %}" class="mt-4 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-5 font-bold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+    تماس با داروخانه <span dir="ltr" class="ms-2">{{ site.phone_display }}</span>
+  </a>
+  {% endif %}
+  <p class="mt-4"><a href="{% url 'articles:article_list' %}" class="font-bold text-brand-700 underline">مشاهده مقالات</a></p>
+</section>
+{% endblock %}

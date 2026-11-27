@@ -123,7 +123,7 @@ def test_the_call_to_ask_the_price_button_is_prominent_and_everywhere_else_too(c
     product = make(product_fields)
     tel = call_href(url(product.slug))
     html = html_of(client, product.slug).content.decode()
-    assert html.count(tel) == 4  # header, call bar, footer, the page's own button
+    assert html.count(tel) == 3  # header, call bar, the page's own button
     cta = re.search(r'<a href="/click/call/[^"]*" class="([^"]*)">\s*\u062a\u0645\u0627\u0633 \u0628\u0631\u0627\u06cc \u0627\u0633\u062a\u0639\u0644\u0627\u0645 \u0642\u06cc\u0645\u062a', html)
     assert cta, "no call-to-ask-the-price button found"
     classes = cta.group(1).split()
@@ -250,7 +250,8 @@ def test_the_list_card_links_to_the_detail_page_with_no_from_type_when_nothing_i
 
 def test_the_page_costs_a_fixed_number_of_queries(client, product_fields, crop, pest):
     # product (joined to its type via select_related), crops prefetch, pests
-    # prefetch, the back_type lookup, site settings: exactly 5, pinned rather
+    # prefetch, the back_type lookup, site settings, the menu's articles check
+    # (D46): exactly 6, pinned rather
     # than bounded loosely, so dropping select_related/prefetch_related is
     # actually caught instead of hiding inside a generous ceiling.
     product = make(product_fields)
@@ -259,4 +260,4 @@ def test_the_page_costs_a_fixed_number_of_queries(client, product_fields, crop, 
     client.get(url(product.slug))  # the site settings row is created on the first request
     with CaptureQueriesContext(connection) as queries:
         client.get(url(product.slug))
-    assert len(queries) == 5
+    assert len(queries) == 6

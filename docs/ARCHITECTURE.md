@@ -2,7 +2,7 @@
 
 Architecture of the agricultural pharmacy website. This document describes what was agreed in the technical plan and says clearly which parts are settled, which are planned detail, and which are still open. Where a component is partly built, its section says what exists.
 
-Last updated: 2026-11-04 (phase 3, task 2)
+Last updated: 2026-11-27 (phase 4, task 3; only the articles section and the decision index were brought up to date, the rest still describes phase 3)
 
 Status tags:
 
@@ -119,9 +119,10 @@ Mostly static content. **Built so far (phase 1, task 10):** the `Expert` and `Fa
 - The FAQ page exists only if there is at least one `FaqItem`; without questions from the client it is simply not linked.
 
 ### `articles`
-Seasonal articles by the experts. **Built so far (phase 1, task 12):** the `Article` model and its admin. The views and templates are PLANNED, for phase 4.
+Seasonal articles by the experts. **Built so far (phase 1, task 12, and phase 4, task 3):** the `Article` model and its admin, and the public pages: the list at `/articles/` (season chips, thumbnails, one query) and the article page at `/articles/<str:slug>/` (D46).
 - Model: `Article` with one of four seasons, a plain-text body and an optional cover image (D34).
 - `Article.objects.published()` gives the published articles, newest first. The section is built from the start but hidden from navigation until that returns something (D11).
+- The header menu and the home page show a link only while a lazy `has_articles` context variable (`published().exists()`, `apps/articles/context_processors.py`) is true, which costs one query on pages that show the menu. A draft or missing slug gets a friendly 404 page with the call button (D46).
 - Admin: a tick box in the list publishes an article; the date is typed in Jalali and filled in if left empty when publishing.
 
 ### `staff_panel`
@@ -324,6 +325,10 @@ Many visitors are in villages with weak mobile coverage (Moeid, 2026-10-25), so 
 | D40 | Product page at `/products/<str:slug>/`: friendly Persian not-found page on a missing slug, each date line shown only when that date is entered, call-to-ask-the-price button sized like the call bar, back link preserves the type filter, fixed query count | CONFIRMED |
 | D41 | Consultation forms at `/consultation/`: one form at a time by `?kind=`, honeypot, hand-written 5-per-hour limit per visitor in Django's cache, thank-you page after a redirect, 429 page that keeps what was typed, no fee shown | CONFIRMED |
 | D42 | Telegram notification adapter: a saved request formats a Persian message with kind, name, phone, crop, address/text and Jalali time, sent to the store's own bot; empty settings mean not-attempted, never an error; failures of the notifier itself never reach the customer | PROPOSED in phase 3, task 2, CONFIRMED once merged |
+| D43 | Experts page, contact and location page, static map image | CONFIRMED |
+| D44 | Tap counting: own-database `ClickEvent` and a redirect-through view (resolves D16) | CONFIRMED |
+| D45 | The real home page: one-line pitch and four cards, header menu left off it | CONFIRMED |
+| D46 | Public articles pages: list with season chips, article page, friendly not-found page, menu and home links only once something is published | PROPOSED in phase 4, task 3, CONFIRMED once merged |
 
 ## 15. Out of scope and future ideas
 

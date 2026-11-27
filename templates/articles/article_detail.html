@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load persian %}
+{# One published article (D46). The body is plain text: a blank line starts a new paragraph (D34). #}
+{% block title %}{{ article.title }} | {{ site.store_name }}{% endblock %}
+{% block content %}
+<p class="text-sm">
+  <a href="{% url 'articles:article_list' %}" class="font-bold text-brand-700 hover:underline">&rsaquo; بازگشت به مقالات</a>
+</p>
+
+<article class="mt-4">
+  <h1 class="text-2xl font-bold text-brand-800">{{ article.title }}</h1>
+  <p class="mt-3 flex flex-wrap items-center gap-2 text-sm text-stone-600">
+    <span class="rounded-lg bg-stone-100 px-2 py-1">{{ article.get_season_display }}</span>
+    {% if article.published_date %}<span dir="ltr">{{ article.published_date|jalali_date }}</span>{% endif %}
+  </p>
+
+  {% if article.cover_image %}
+  <div class="mt-4 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg border border-stone-200 bg-stone-100">
+    <img src="{{ article.cover_image.url }}" alt="" width="800" height="600" decoding="async" class="size-full object-contain">
+  </div>
+  {% endif %}
+
+  <div class="mt-2">
+    {% for paragraph in paragraphs %}
+    <p class="mt-4 whitespace-pre-line">{{ paragraph }}</p>
+    {% endfor %}
+  </div>
+</article>
+
+<p class="mt-8"><a href="{% url 'consultations:form' %}" class="font-bold text-brand-700 underline">سؤال دارید؟ از کارشناس بپرسید</a></p>
+{% endblock %}

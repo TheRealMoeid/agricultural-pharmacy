@@ -105,7 +105,7 @@ def test_the_crops_are_offered_in_the_select(client):
 def test_the_page_is_persian_rtl_with_the_call_bar_and_nothing_from_other_sites(client):
     html = client.get(URL).content.decode()
     assert '<html lang="fa" dir="rtl"' in html
-    assert 'id="call-bar"' in html and html.count(TEL) == 3
+    assert 'id="call-bar"' in html and html.count(TEL) == 2  # header and call bar
     assert not re.search(r'(?:src|href|action)=["\']?(?:https?:)?//', html)
     assert not re.search(r"font-(thin|extralight|light|medium|semibold|extrabold|black)", html)
 
@@ -115,7 +115,7 @@ def test_the_form_page_costs_a_fixed_number_of_queries(client):
     client.get(URL)  # the settings row is created on the first request
     with CaptureQueriesContext(connection) as queries:
         client.get(URL)
-    assert len(queries) == 2  # the crops for the select, and the site settings
+    assert len(queries) == 3  # the crops for the select, the site settings, the menu's articles check
 
 
 def test_the_header_and_the_product_page_link_to_the_form(client):

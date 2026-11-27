@@ -21,6 +21,7 @@
         <a href="{% url 'catalog:product_list' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">محصولات</a>
         <a href="{% url 'pages:experts' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">کارشناسان</a>
         <a href="{% url 'consultations:form' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">مشاوره</a>
+        {% if has_articles %}<a href="{% url 'articles:article_list' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">مقالات</a>{% endif %}
         <a href="{% url 'pages:contact' %}" class="py-2 font-bold text-stone-900 hover:text-brand-700">تماس با ما</a>
         {% endblock %}
       </div>
@@ -40,7 +41,6 @@
     <address class="mx-auto max-w-5xl space-y-1 px-4 py-6 text-sm not-italic text-stone-600">
       <p>{{ site.address }}</p>
       <p>{{ site.working_hours }}</p>
-      {% if site.tel_url %}<p>تلفن: <a href="{% click_url 'call' %}" dir="ltr" class="font-bold text-brand-700">{{ site.phone_display }}</a></p>{% endif %}
     </address>
   </footer>
 
